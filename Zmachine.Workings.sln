@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{73EE392D-1766-4583-AA07-120ADBAB5A97}"
 	ProjectSection(SolutionItems) = preProject
 		..\ASCII Character Codes CheatSheet.html = ..\ASCII Character Codes CheatSheet.html
+		..\..\..\Users\PaulLawrence\Downloads\ASCII-Conversion-Chart.pdf = ..\..\..\Users\PaulLawrence\Downloads\ASCII-Conversion-Chart.pdf
 		DM4.pdf = DM4.pdf
 		IBG.pdf = IBG.pdf
 		z-spec11.pdf = z-spec11.pdf
