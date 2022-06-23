@@ -10,10 +10,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{73EE392D-1766-4583-AA07-120ADBAB5A97}"
 	ProjectSection(SolutionItems) = preProject
 		..\ASCII Character Codes CheatSheet.html = ..\ASCII Character Codes CheatSheet.html
-		C:\Users\localAdmin\Downloads\DM4.pdf = C:\Users\localAdmin\Downloads\DM4.pdf
-		C:\Users\localAdmin\Downloads\IBG.pdf = C:\Users\localAdmin\Downloads\IBG.pdf
-		C:\Users\PclAdmin\Downloads\z-spec11.pdf = C:\Users\PclAdmin\Downloads\z-spec11.pdf
-		C:\Users\PclAdmin\Downloads\zmach06e.pdf = C:\Users\PclAdmin\Downloads\zmach06e.pdf
+		DM4.pdf = DM4.pdf
+		IBG.pdf = IBG.pdf
+		z-spec11.pdf = z-spec11.pdf
+		zmach06e.pdf = zmach06e.pdf
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zmachine.V2", "Zmachine.V2\Zmachine.V2.csproj", "{C21B3AF1-8124-4A40-9D81-F072306DAC25}"
