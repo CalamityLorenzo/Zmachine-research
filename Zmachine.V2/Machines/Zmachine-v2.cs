@@ -27,10 +27,14 @@ namespace Zmachine.V2.Machines
 
         public Zmachine_v2(Stream storyData)
         {
-            GameData = storyData;
+            // Here's an assumption...
+            storyData.Position = 0;
+            GameData = new MemoryStream();
+             storyData.CopyTo(GameData);
             GameData.Position = 0;
+
             Memory = new byte[GameData.Length];
-            storyData.Read(Memory, 0, Memory.Length);
+            GameData.Read(Memory, 0, Memory.Length);
 
             // This is for convienice.
             // cos I cannot be bothered to learn all the hex for the position of the header.

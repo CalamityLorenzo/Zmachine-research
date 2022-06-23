@@ -90,16 +90,16 @@ namespace Zmachine.V2
 
             var NameBytes = PropertyHeaderName(memory.Get2ByteValue(endAttributes + 6));
 
-            var objectDetails = new ZmV4Object
-            {
-                StartAddress = $"{(objectTableStartLocation + (ObjectSize * objectId))} : ${(objectTableStartLocation + (ObjectSize * objectId)):X}",
-                Attributes = new BitArray(attributes),
-                Parent = memory.Get2ByteValue(endAttributes),
-                Sibling = memory.Get2ByteValue(endAttributes + 2),
-                Child = memory.Get2ByteValue(endAttributes + 4),
-                PropertiesAddress = $"{memory.Get2ByteValue(endAttributes + 6)} : {memory.Get2ByteValueHex(endAttributes + 6)}",
-                PropertiesName = new ZmPropertyHeader(memory.Get2ByteValue(endAttributes + 6), memory).Name
-            };
+            var objectDetails = new ZmV4Object(
+                StartAddress: $"{(objectTableStartLocation + (ObjectSize * objectId))} : ${(objectTableStartLocation + (ObjectSize * objectId)):X}",
+                Attributes: new BitArray(attributes),
+                Parent: memory.Get2ByteValue(endAttributes),
+                Sibling: memory.Get2ByteValue(endAttributes + 2),
+                Child: memory.Get2ByteValue(endAttributes + 4),
+                PropertiesAddress: $"{memory.Get2ByteValue(endAttributes + 6)} : {memory.Get2ByteValueHex(endAttributes + 6)}",
+                PropertiesName: new ZmPropertyHeader(memory.Get2ByteValue(endAttributes + 6), memory).Name,
+                Properties:null
+            );
 
 
 
@@ -119,7 +119,7 @@ namespace Zmachine.V2
             var complete = false;
             var ctr = 0;
             List<byte> completeMessage = new List<byte>();
-            while(!complete)
+            while (!complete)
             {
                 if (rawZChars[ctr] == 2)
                 {
@@ -135,12 +135,12 @@ namespace Zmachine.V2
                     completeMessage.Add(rawZChars[ctr]);
                     ctr += 1;
                 }
-                if (ctr > rawZChars.Length-1)
+                if (ctr > rawZChars.Length - 1)
                     complete = true;
             }
 
 
-            return  ZmTextDecoder.DecodeZChars(completeMessage.ToArray());
+            return ZmTextDecoder.DecodeZChars(completeMessage.ToArray());
         }
 
     }

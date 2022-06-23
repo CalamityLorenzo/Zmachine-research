@@ -25,7 +25,7 @@ namespace ScratchPath
 
             Console.WriteLine($"==== {filename} ====");
             using var fileStream = File.Open(filename, FileMode.Open);
-            Zmachine_v2 v1 = new(fileStream);
+            Zmachine_v2 v2 = new(fileStream);
             //var word =  textEncoded.ZmDecodeBytes(abbV1);
             //Console.WriteLine(word);
             while (true)
@@ -34,10 +34,10 @@ namespace ScratchPath
                 switch (itm.Key)
                 {
                     case ConsoleKey.Escape: Console.WriteLine("Exiting"); return;
-                    case ConsoleKey.D1: v1.DumpHeader(); break;
-                    case ConsoleKey.D2: v1.DumpDictionary(); break;
+                    case ConsoleKey.D1: v2.DumpHeader(); break;
+                    case ConsoleKey.D2: v2.DumpDictionary(); break;
                     //case ConsoleKey.D2: v1.DumpDynamic(); break;
-                    case ConsoleKey.D3: v1.DumpObjects(); break;
+                    case ConsoleKey.D3: v2.DumpObjects(); break;
                     case ConsoleKey.D4:  break;
                 }
 
