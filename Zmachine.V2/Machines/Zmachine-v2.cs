@@ -39,7 +39,8 @@ namespace Zmachine.V2.Machines
             // This is for convienice.
             // cos I cannot be bothered to learn all the hex for the position of the header.
             InitDetailsObject();
-
+            // move the program counter to the first instruction.
+            ProgramCounter = ProgramCounterInitalValue;
         }
 
         private void InitDetailsObject()

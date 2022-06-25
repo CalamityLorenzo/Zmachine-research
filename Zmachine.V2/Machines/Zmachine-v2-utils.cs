@@ -55,7 +55,7 @@ namespace Zmachine.V2.Machines
             Console.WriteLine($"Flags2:\t\t\t\t $10\t:\t{Memory[16]}");
             Console.WriteLine($"Release Number:\t\t\t $02\t:\t{Memory[2]}\t:\t{Memory[2]}");
             Console.WriteLine($"High Memory Start:\t\t $04\t:\t{Memory.Get2ByteValue(4)}\t:\t{Memory.Get2ByteValueHex(4)}");
-            Console.WriteLine($"Program Counter initial value:\t $06\t:\t{Memory.Get2ByteValue(6)}\t:\t{Memory.Get2ByteValueHex(6)}");
+            Console.WriteLine($"\"main\" | First Instr Execute:\t $06\t:\t{Memory.Get2ByteValue(6)}\t:\t{Memory.Get2ByteValueHex(6)}");
             Console.WriteLine($"Dictionary table:\t\t $08\t:\t{Memory.Get2ByteValue(8)}\t:\t{Memory.Get2ByteValueHex(8)}");
             Console.WriteLine($"Abbreviations table:\t\t $18\t:\t{Memory.Get2ByteValue(24)}\t:\t{Memory.Get2ByteValueHex(24)}");
             Console.WriteLine($"Object table:\t\t\t $0A\t:\t{Memory.Get2ByteValue(10)}\t:\t{Memory.Get2ByteValueHex(10)}");
