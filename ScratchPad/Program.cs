@@ -10,7 +10,7 @@ namespace ScratchPath
 
 
             var newString = ZmTextDecoder.DecodeDictionaryEntry(new byte[]{
-                0x82, 0x74
+                0x34, 0xCE, 0xB0,0x00,0x00,0x00
             });
 
             var newString2 = ZmTextDecoder.DecodeDictionaryEntry(new byte[]{

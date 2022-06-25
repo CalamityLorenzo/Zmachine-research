@@ -48,12 +48,12 @@ namespace Zmachine.V2.Machines
             // V1 Program counter initial value is a byte
             // v6 Packed address over two bytes
             if (version < 6)
-                return programCounterInitalValue >> 8;
+                return programCounterInitalValue;
             else
             {
                 return version switch
                 {
-                   // 4 or 5 => programCounterInitalValue * 4,
+                    // 4 or 5 => programCounterInitalValue * 4,
                     6 or 7 => programCounterInitalValue * 4 + routineOffSet,
                     8 => programCounterInitalValue * 8,
                     _ => throw new ArgumentOutOfRangeException("Version is out of range")
