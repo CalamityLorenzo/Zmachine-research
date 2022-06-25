@@ -30,7 +30,7 @@ namespace Zmachine.V2.Machines
             // Here's an assumption...
             storyData.Position = 0;
             GameData = new MemoryStream();
-             storyData.CopyTo(GameData);
+            storyData.CopyTo(GameData);
             GameData.Position = 0;
 
             Memory = new byte[GameData.Length];
@@ -40,12 +40,24 @@ namespace Zmachine.V2.Machines
             // cos I cannot be bothered to learn all the hex for the position of the header.
             InitDetailsObject();
             // move the program counter to the first instruction.
-            ProgramCounter = ProgramCounterInitalValue;
+            ProgramCounter = SetProgramCounterInitialValue(HeaderDetails.Version, HeaderDetails.ProgramCounterInitalValue);
+        }
+
+        private static int SetProgramCounterInitialValue(int version, int programCounterInitalValue)
+        {
+            // V1 Program counter initial value is a byte
+            // v6 Packed address over two bytes
+            if (version < 6)
+                return programCounterInitalValue >> 8;
+            else
+            {
+                return programCounterInitalValue;
+            }
         }
 
         private void InitDetailsObject()
         {
-            this.HeaderDetails = new ()
+            this.HeaderDetails = new()
             {
                 Version = Memory[0],
                 ProgramCounterInitalValue = Memory.Get2ByteValue(6),
