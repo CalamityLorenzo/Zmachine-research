@@ -41,9 +41,9 @@ namespace Zmachine.V2.Machines
             InitDetailsObject();
             // move the program counter to the first instruction.
             ProgramCounter = SetProgramCounterInitialValue(HeaderDetails.Version, HeaderDetails.ProgramCounterInitalValue);
-        }
+            }
 
-        private static int SetProgramCounterInitialValue(int version, int programCounterInitalValue)
+        private static int SetProgramCounterInitialValue(int version, int programCounterInitalValue, int routineOffSet = 0)
         {
             // V1 Program counter initial value is a byte
             // v6 Packed address over two bytes
@@ -51,15 +51,23 @@ namespace Zmachine.V2.Machines
                 return programCounterInitalValue >> 8;
             else
             {
-                return programCounterInitalValue;
+                return version switch
+                {
+                   // 4 or 5 => programCounterInitalValue * 4,
+                    6 or 7 => programCounterInitalValue * 4 + routineOffSet,
+                    8 => programCounterInitalValue * 8,
+                    _ => throw new ArgumentOutOfRangeException("Version is out of range")
+                };
             }
         }
 
         private void InitDetailsObject()
         {
+
+            var version = Memory[0];
             this.HeaderDetails = new()
             {
-                Version = Memory[0],
+                Version = version,
                 ProgramCounterInitalValue = Memory.Get2ByteValue(6),
                 Flags = Memory[1], // need to break this out.
                 Flags2 = Memory[16],
@@ -76,6 +84,9 @@ namespace Zmachine.V2.Machines
                 LengthOfFile = Memory.Get2ByteValue(26),
                 InterpreterNumber = Memory[30],
                 InterpreterVersion = Memory[31],
+
+                RoutinesOffset = version > 5 ? Memory.Get2ByteValue(40) : ushort.MinValue,
+                StaticStringsOffSet = version > 5 ? Memory.Get2ByteValue(42) : ushort.MinValue,
 
                 DateCompiled = new string(new char[]
                 {
