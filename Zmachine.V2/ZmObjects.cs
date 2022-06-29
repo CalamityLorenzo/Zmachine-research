@@ -88,7 +88,7 @@ namespace Zmachine.V2
             var endAttributes = startAttributes + 6;
             var attributes = memory[startAttributes..endAttributes]; // First 6 bytes are the (48 bits)
 
-            var NameBytes = PropertyHeaderName(memory.Get2ByteValue(endAttributes + 6));
+            //var NameBytes = PropertyHeaderName(memory.Get2ByteValue(endAttributes + 6));
 
             var objectDetails = new ZmV4Object(
                 StartAddress: $"{(objectTableStartLocation + (ObjectSize * objectId))} : ${(objectTableStartLocation + (ObjectSize * objectId)):X}",
