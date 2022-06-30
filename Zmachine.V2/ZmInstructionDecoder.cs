@@ -96,6 +96,7 @@ namespace Zmachine.V2
             //var op1 = memory[startAddress + 1];
             //address += 1;
             //var op2 = memory[startAddress + 2];
+            bool x = false;
 
             switch (decimalInstruction){
                 case 1: 
