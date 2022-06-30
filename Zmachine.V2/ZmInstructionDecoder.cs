@@ -10,8 +10,10 @@ namespace Zmachine.V2
     // And the terrible, terrible way it was originally encoded
     internal partial class ZmInstructionDecoder
     {
-        public void Decode(byte[] memory, int startAddress)
+        private int version;
+        public void Decode(byte[] memory, int startAddress, int version)
         {
+            this.version = version;
             Console.WriteLine($"Starting at {startAddress} : {startAddress.ToString("X")}");
             // Translate first byte to work out which table we are looking at.
 
@@ -89,39 +91,48 @@ namespace Zmachine.V2
         // long 2OP small constant, small Constant
         private int long2OP_CC(byte[] memory, int startAddress)
         {
+            var startAddressInHex = startAddress.ToString("X");
+
             // The opcode fits in the bottom 5/FIVE/NOT FOUR bits
             var decimalInstruction = memory[startAddress] & 31;
             var address = startAddress + 1;
             //// Two Small Constant Operands (1 byte)
-            //var op1 = memory[startAddress + 1];
-            //address += 1;
-            //var op2 = memory[startAddress + 2];
-            bool x = false;
+            var op1 = memory[startAddress += 1];
+            var op2 = memory[startAddress += 1];
 
-            switch (decimalInstruction){
-                case 1: 
-                    je(memory, startAddress);
-                    break;
-                case 2:
-                    jl(memory, startAddress);
-                    break;
-                case 3:
-                    jg(memory, startAddress);
+
+            var id = InstructionDefinitions.Instructions_2OP.Instructions.First(operand => operand.Name == $"2OP:${decimalInstruction}");
+
+            var store = id.Store ? memory[startAddress += 1] : (byte)0;
+            var branch = id.Branch? memory[startAddress += 1] : (byte)0;
+
+
+            var instruction = decimalInstruction switch {
+                1 => je(new[] { op1, op2 }, branch),
+                2 => jl(new[] { op1, op2 }, branch),
+                3 => jg(new[] { op1, op2 }, branch),
+                4=>dec_chk(new[] { op1, op2 }, branch),
+                5=>inc_chk(new[] { op1, op2 }, branch),
+                _ => "";
+            };
+            /*
+             *                 case 2=>jl(memory, startAddress),
+                case 3=>jg(memory, startAddress),
                     break;
                 case 4:
                     dec_chk(memory, startAddress);
-                    break;
+            break;
                 case 5:
                     inc_chk(memory, startAddress);
-                    break;
-                default:
+            break;
+            default:
                     throw new ArgumentOutOfRangeException($"Instruction unknown ${decimalInstruction} ${decimalInstruction.ToString("X")} {Convert.ToString(decimalInstruction, 2)}");
-                    break;
-
-            }
-
+            break;
+            */
+            
             return address;
         }
+
 
     }
 }

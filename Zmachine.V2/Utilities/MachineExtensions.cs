@@ -28,5 +28,25 @@ namespace Zmachine.V2
         {
             return $"{MachineExtensions.Get2ByteValue(@this,idx):X}";
         }
+        /// <summary>
+        /// Takes in a numner and converts into a verion approrpiate address
+        /// </summary>
+        /// <param name="version"></param>
+        /// <param name="address"></param>
+        /// <param name="rOffset"></param>
+        /// <param name="sOffset"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        internal static int GetPackedAddress(this int @this, int version, int rOffset, int sOffset)
+        {
+            return version switch
+            {
+                1 or 2 or 3 => @this * 2,
+                4 or 5 => @this * 4,
+                6 or 7 => @this * 4 + (rOffset > 0 ? rOffset : sOffset),
+                8 => @this * 8,
+                _ => throw new ArgumentOutOfRangeException("Version is out of range")
+            };
+        }
     }
 }

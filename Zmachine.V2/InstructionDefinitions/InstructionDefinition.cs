@@ -23,5 +23,14 @@ namespace Zmachine.V2.InstructionDefinitions
         SixOnly,
     }
 
+    [Flags]
+    internal enum zType
+    {
+        LargeConstant = 0,
+        SmallConstant = 1,
+        Variable =2,
+        Omitted = 3
+    }
+
     internal record InstructionDefinition(bool Store, bool Branch, string OpCode, int DecCode, MinVersion Version, string Name);
 }

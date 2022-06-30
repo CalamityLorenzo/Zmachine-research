@@ -61,18 +61,6 @@ namespace Zmachine.V2.Machines
             }
         }
 
-        private static int GetPackedAddress(int version, int address, int rOffset, int sOffset)
-        {
-            return version switch
-            {
-                1 or 2 or 3 => address*2,
-                4 or 5 => address * 4,
-                6 or 7 => address * 4 + (rOffset>0? rOffset:sOffset),
-                8 => address * 8,
-                _ => throw new ArgumentOutOfRangeException("Version is out of range")
-            };
-        }
-
         private void InitDetailsObject()
         {
 
