@@ -14,7 +14,7 @@ namespace Zmachine.V2
 
         // Increment variable, and branch if now greater than value.
 
-        private string inc_chk(byte[] values, int branch)
+        private string inc_chk(byte[] values, int branch, int rOffset = 0, int sOffset = 0)
         {
             var variable = values[0];
             return $"inc_check ${(variable < 15 ? $"local" : "global")}{variable} {values[1]}->${branch.GetPackedAddress(version, rOffset,sOffset)}";
@@ -23,7 +23,7 @@ namespace Zmachine.V2
 
         //  Decrement variable, and branch if it is now less than the given value.
 
-        private string dec_chk(byte[] values, int branch)
+        private string dec_chk(byte[] values, int branch, int rOffset = 0, int sOffset = 0)
         { 
             var variable = values[0];
             return $"dec_check ${(variable<15?$"local": "global")}{variable} {values[1]}->${branch.GetPackedAddress(version, rOffset,sOffset)}";
@@ -70,7 +70,7 @@ namespace Zmachine.V2
 
         private string put_prop(zType[] types, byte[] memory, int address)
         {
-
+            return "";
         }
     }
 }

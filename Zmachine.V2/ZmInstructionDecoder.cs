@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zmachine.V2.InstructionDefinitions;
 
 namespace Zmachine.V2
 {
@@ -21,7 +22,7 @@ namespace Zmachine.V2
             // Each instruction falls into one of these groups, This is just making it easier to process them.
             // I think.
 
-            _= firstByte switch
+            _ = firstByte switch
             {
                 >= 0 and <= 0x1F => long2OP_CC(memory, startAddress),
                 >= 0x20 and <= 0x3f => long2OP_CV(memory, startAddress),
@@ -56,37 +57,56 @@ namespace Zmachine.V2
 
         private int short0OP(byte[] memory, int startAddress)
         {
-            throw new NotImplementedException();
+            var startAddressInHex = startAddress.ToString("X");
+            var (instruction, operands, currentAddress) = longInstruction(memory, startAddress);
+            return startAddress;
         }
 
         private int short1OP_V(byte[] memory, int startAddress)
         {
-            throw new NotImplementedException();
+            var startAddressInHex = startAddress.ToString("X");
+            var (instruction, operands, currentAddress) = longInstruction(memory, startAddress);
+            return startAddress;
         }
 
         private int short1OP_C(byte[] memory, int startAddress)
         {
-            throw new NotImplementedException();
+            var startAddressInHex = startAddress.ToString("X");
+            var (instruction, operands, currentAddress) = longInstruction(memory, startAddress);
+            return startAddress;
         }
 
         private int short1OP_LC(byte[] memory, int startAddress)
         {
-            throw new NotImplementedException();
+            var startAddressInHex = startAddress.ToString("X");
+            var (instruction, operands, currentAddress) = longInstruction(memory, startAddress);
+            return startAddress;
         }
 
         private int long2OP_VV(byte[] memory, int startAddress)
         {
-            throw new NotImplementedException();
+            var startAddressInHex = startAddress.ToString("X");
+            var (instruction, operands, currentAddress) = longInstruction(memory, startAddress);
+            return startAddress;
         }
 
         private int long2OP_VC(byte[] memory, int startAddress)
         {
-            throw new NotImplementedException();
+            var startAddressInHex = startAddress.ToString("X");
+            var (instruction, operands, currentAddress) = longInstruction(memory, startAddress);
+            return startAddress;
+
         }
+
 
         private int long2OP_CV(byte[] memory, int startAddress)
         {
-            throw new NotImplementedException();
+            var startAddressInHex = startAddress.ToString("X");
+            var (instruction, operands, currentAddress) = longInstruction(memory, startAddress);
+            return startAddress;
+
+            //return startAddress;
+
         }
         // long 2OP small constant, small Constant
         private int long2OP_CC(byte[] memory, int startAddress)
@@ -104,16 +124,17 @@ namespace Zmachine.V2
             var id = InstructionDefinitions.Instructions_2OP.Instructions.First(operand => operand.Name == $"2OP:${decimalInstruction}");
 
             var store = id.Store ? memory[startAddress += 1] : (byte)0;
-            var branch = id.Branch? memory[startAddress += 1] : (byte)0;
+            var branch = id.Branch ? memory[startAddress += 1] : (byte)0;
 
 
-            var instruction = decimalInstruction switch {
+            var instruction = decimalInstruction switch
+            {
                 1 => je(new[] { op1, op2 }, branch),
                 2 => jl(new[] { op1, op2 }, branch),
                 3 => jg(new[] { op1, op2 }, branch),
-                4=>dec_chk(new[] { op1, op2 }, branch),
-                5=>inc_chk(new[] { op1, op2 }, branch),
-                _ => "";
+                4 => dec_chk(new[] { op1, op2 }, branch),
+                5 => inc_chk(new[] { op1, op2 }, branch),
+                _ => ""
             };
             /*
              *                 case 2=>jl(memory, startAddress),
@@ -129,10 +150,48 @@ namespace Zmachine.V2
                     throw new ArgumentOutOfRangeException($"Instruction unknown ${decimalInstruction} ${decimalInstruction.ToString("X")} {Convert.ToString(decimalInstruction, 2)}");
             break;
             */
-            
+
             return address;
         }
 
+        //long      2OP     small constant, variable
+        private (InstructionDefinition instr, byte[] ops, int finalAddress) longInstruction(byte[] memory, int address)
+        {
+
+            var topmostByte = memory[address];
+
+            // The opcode fits in the bottom 5/FIVE/NOT FOUR bits
+            var decimalInstruction = topmostByte & 31;
+            // Opreands are kept in bits 6 & 5
+
+            var operand1Type = (memory[address] >> 6 & 1) == 1 ? zType.Variable : zType.SmallConstant;
+            var operand2Type = (memory[address] >> 5 & 1) == 1 ? zType.Variable : zType.SmallConstant;
+
+            // Small Constnat Operands (1 byte)
+            // Variable Operands (1 byte)
+            var op1 = memory[address += 1];
+            var op2 = memory[address += 1];
+
+            var id = InstructionDefinitions.Instructions_2OP.Instructions.First(operand => operand.Name == $"2OP:${decimalInstruction}");
+
+            return (id, new[] { op1, op2 }, address);
+
+        }
+
+        private (InstructionDefinition instr, byte operand, int finalAddress) shortInstruction(byte[] memory, int address)
+        {
+            var topmostByte = memory[address];
+
+            // The opcode fits in the bottom 4 bits
+            var decimalInstruction = topmostByte & 15;
+
+            var operand1Type = (memory[address] >> 4 & 3) == 1 ? zType.Omitted : zType.SmallConstant;
+
+            var operand = operand1Type == zType.Omitted ? (byte)0 : memory[address += 1];
+
+            var id = InstructionDefinitions.Instructions_2OP.Instructions.First(operand => operand.Name == $"{(operand1Type == zType.Omitted ? "0" : "1")}OP:${decimalInstruction}");
+            return (id, operand, address);
+        }
 
     }
 }
