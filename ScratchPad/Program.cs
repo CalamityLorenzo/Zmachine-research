@@ -51,6 +51,7 @@ namespace ScratchPath
                     case ConsoleKey.D3: v2.DumpObjects(); break;
                     case ConsoleKey.D4:  break;
                     case ConsoleKey.D5: v2.Tick(); break;
+                    case ConsoleKey.D6: v2.Disassemble(); break;
                 }
 
             }

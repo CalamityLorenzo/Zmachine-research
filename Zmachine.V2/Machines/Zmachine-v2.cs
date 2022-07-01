@@ -43,6 +43,12 @@ namespace Zmachine.V2.Machines
             ProgramCounter = SetProgramCounterInitialValue(HeaderDetails.Version, HeaderDetails.ProgramCounterInitalValue);
             }
 
+        public void Disassemble()
+        {
+            var sx = new ZmInstructionDecoder();
+            sx.Decode(this.Memory, 0xD338+1, this.HeaderDetails.Version);
+        }
+
         private static int SetProgramCounterInitialValue(int version, int programCounterInitalValue, int routineOffSet = 0)
         {
             // V1 Program counter initial value is a byte

@@ -27,6 +27,6 @@ namespace Zmachine.V2.InstructionDefinitions
             new InstructionDefinition(Store:true, Branch:false,OpCode:"1OP:142", DecCode:14, Version:MinVersion.All, Name:"load"),
             new InstructionDefinition(Store:true, Branch:false,OpCode:"1OP:143", DecCode:15, Version:MinVersion.OneToFour, Name:"not"),
             new InstructionDefinition(Store:false, Branch:false,OpCode:"1OP:143", DecCode:15, Version:(MinVersion)5, Name:"call_1n"),
-        }
+        };
     }
 }

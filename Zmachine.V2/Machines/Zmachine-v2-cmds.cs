@@ -41,7 +41,7 @@ namespace Zmachine.V2.Machines
         private void call_1n(int address)
         {
             // It's a packed address so those weird rules apply.
-            var routineAddress =  GetPackedAddress(HeaderDetails.Version,  Memory.Get2ByteValue(address + 1), HeaderDetails.RoutinesOffset, HeaderDetails.StaticStringsOffSet);
+            //var routineAddress =  GetPackedAddress(HeaderDetails.Version,  Memory.Get2ByteValue(address + 1), HeaderDetails.RoutinesOffset, HeaderDetails.StaticStringsOffSet);
 
         }
 
