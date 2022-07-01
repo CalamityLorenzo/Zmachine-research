@@ -8,7 +8,7 @@ namespace Zmachine.V2.InstructionDefinitions
 {
     internal class Instructions_Var
     {
-        public List<InstructionDefinition> InstructionDefinitions = new()
+        public static List<InstructionDefinition> Instructions = new()
         {
             new InstructionDefinition(Store: true, Branch: false, OpCode: "VAR:224", DecCode: 0, Version: (MinVersion)1, Name: "call "),
             new InstructionDefinition(Store: false, Branch: false, OpCode: "", DecCode: 0, Version: (MinVersion)4, Name: "call_vs "),

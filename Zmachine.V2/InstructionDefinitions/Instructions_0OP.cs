@@ -8,7 +8,7 @@ namespace Zmachine.V2.InstructionDefinitions
 {
     internal class Instructions_0OP
     {
-        public List<InstructionDefinition> Instructions = new()
+        public static List<InstructionDefinition> Instructions = new()
         {
             new InstructionDefinition(Store:false, Branch:false,OpCode:"0OP:176", DecCode:0, Version:MinVersion.All, Name:"rtrue"),
 new InstructionDefinition(Store:false, Branch:false,OpCode:"0OP:177", DecCode:1, Version:MinVersion.All, Name:"rfalse"),

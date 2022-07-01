@@ -21,6 +21,7 @@ namespace Zmachine.V2.InstructionDefinitions
         FourOrSix,
         FiveOrSix,
         SixOnly,
+        OneToFour,
     }
 
     [Flags]
