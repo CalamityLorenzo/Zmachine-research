@@ -12,7 +12,8 @@ namespace Zmachine.V2.InstructionDefinitions
         public static List<InstructionDefinition> Instructions = new()
         {
             new InstructionDefinition(Store: true, Branch: false, OpCode:"VAR:224", DecCode: 0, Version: One | Three, Name:"call"),
-            new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:224", DecCode: 0, Version:  Four | FiveAndUp , Name:"call_vs"),
+            new InstructionDefinition(Store: true, Branch: false, OpCode:"VAR:224", DecCode: 0, Version:  Four | FiveAndUp , Name:"call_vs"),
+
             new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:225", DecCode: 1, Version: All, Name:"storew"),
             new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:226", DecCode: 2, Version: All, Name:"storeb"),
             new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:227", DecCode: 3, Version: All, Name:"put_prop"),
@@ -46,7 +47,7 @@ namespace Zmachine.V2.InstructionDefinitions
             new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:243", DecCode: 0, Version: Four | Five, Name:"output_stream"),
             new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:243", DecCode: 0, Version: SixAndUp, Name:"output_stream"),
 
-            new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:244", DecCode: 20, Version: ZMachineVersion.Three | Four | FiveAndUp, Name:"input_stream"),
+            new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:244", DecCode: 20, Version: Three | Four | FiveAndUp, Name:"input_stream"),
             new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:245", DecCode: 21, Version: Three, Name:"sound_effect"), // that's the weird one described in 5 yet used in a 3
             new InstructionDefinition(Store: true, Branch: false, OpCode:"VAR:246", DecCode: 22, Version:Four | FiveAndUp, Name:"read_char"),
             new InstructionDefinition(Store: true, Branch: true, OpCode:"VAR:247", DecCode: 23, Version: Four | FiveAndUp, Name:"scan_table"),

@@ -189,7 +189,7 @@ namespace Zmachine.V2
             var allBytes = GetHexAddressRange(instructionStartAddress, address, memory);
 
 
-            return new DecodedInstruction(instruction, operands.SelectMany(a => a.operand).ToArray(), operands.Select(a => a.operandType).ToList(), store, branch, instructionStartAddress.ToString("X"), allBytes);
+            return new DecodedInstruction(instruction, operands.SelectMany(a => a.operand).ToArray(), operands.Select(a => a.operandType).ToList(), store, branch, instructionStartAddress.ToString("X2"), allBytes);
 
         }
 
@@ -249,7 +249,7 @@ namespace Zmachine.V2
 
         }
 
-        private string GetHexAddressRange(int startAddress, int endAddress, byte[] memory) => String.Join(" ", memory.Skip(startAddress).Take(endAddress - startAddress).Select(itm => itm.ToString("X")));
+        private string GetHexAddressRange(int startAddress, int endAddress, byte[] memory) => String.Join(" ", memory.Skip(startAddress).Take((1+endAddress) - startAddress).Select(itm => itm.ToString("X2")));
 
         // 4.2 http://inform-fiction.org/zmachine/standards/z1point1/sect04.html
         private byte[] GetOperandFromType(OperandType operandType, byte[] memory, ref int address) => operandType switch
