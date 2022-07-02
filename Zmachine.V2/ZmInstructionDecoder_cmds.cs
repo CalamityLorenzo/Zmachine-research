@@ -68,7 +68,7 @@ namespace Zmachine.V2
         }
 
 
-        private string put_prop(zType[] types, byte[] memory, int address)
+        private string put_prop(OperandType[] types, byte[] memory, int address)
         {
             return "";
         }

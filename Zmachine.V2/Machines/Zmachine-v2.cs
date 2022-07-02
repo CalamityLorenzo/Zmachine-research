@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zmachine.V2.InstructionDefinitions;
 
 namespace Zmachine.V2.Machines
 {
@@ -45,7 +46,8 @@ namespace Zmachine.V2.Machines
 
         public void Disassemble()
         {
-            var sx = new ZmInstructionDecoder();
+            var instructions = new Instructions(HeaderDetails.Version);
+            var sx = new ZmInstructionDecoder(instructions);
             sx.Decode(this.Memory, 0xD338+1, this.HeaderDetails.Version);
         }
 

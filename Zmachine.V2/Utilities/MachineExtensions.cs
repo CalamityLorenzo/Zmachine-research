@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zmachine.V2.InstructionDefinitions;
 
 namespace Zmachine.V2
 {
@@ -48,5 +49,18 @@ namespace Zmachine.V2
                 _ => throw new ArgumentOutOfRangeException("Version is out of range")
             };
         }
+
+        internal static ZMachineVersion GetZMachineVersion(int version) => version switch
+        {
+            1 => ZMachineVersion.One,
+            2 => ZMachineVersion.Two,
+            3 => ZMachineVersion.Three,
+            4 => ZMachineVersion.Four,
+            5 => ZMachineVersion.Five,
+            6 => ZMachineVersion.Six,
+            7 => ZMachineVersion.Seven,
+            8 => ZMachineVersion.Eight,
+            _ => throw new ArgumentOutOfRangeException("Version number not found")
+        };
     }
 }
