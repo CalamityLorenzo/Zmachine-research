@@ -22,16 +22,16 @@ namespace ScratchPath
             var newString = ZmTextDecoder.DecodeDictionaryEntry(new byte[]{
                 //0x34, 0xCE, 0xB0,0x00,0x00,0x00
                 0x25,
-0xE3,
-0x57,
-0x0f,
-0x1b,
-0x05,
-0x88,
-0xA8,
-0x5E,
-0x02,
-0x2D,
+                0xE3,
+                0x57,
+                0x0f,
+                0x1b,
+                0x05,
+                0x88,
+                0xA8,
+                0x5E,
+                0x02,
+                0x2D,
             });
 
             var newString2 = ZmTextDecoder.DecodeDictionaryEntry(new byte[]{

@@ -26,9 +26,6 @@ namespace Zmachine.V2.InstructionDefinitions
             IEnumerable<InstructionDefinition> VarOp = Instructions_Var.Instructions.Where(a => a.Version.HasFlag(this.version));
             IEnumerable<InstructionDefinition> ExtOp = Instructions_Ext.Instructions.Where(a => a.Version.HasFlag(this.version));
 
-
-
-
             instructions = instructions.
                                 Concat(ZeroOp.Select(a => KeyValuePair.Create(a.OpCode, a))).
                                 Concat(OneOp.Select(a => KeyValuePair.Create(a.OpCode, a))).
@@ -36,13 +33,6 @@ namespace Zmachine.V2.InstructionDefinitions
                                 Concat(VarOp.Select(a => KeyValuePair.Create(a.OpCode, a))).
                                 Concat(ExtOp.Select(a => KeyValuePair.Create(a.OpCode, a))).
                                 ToDictionary(a => a.Key, b => b.Value);
-            // call_1n superceded not from v5 hence the tortured logic here.
-            //instructions = instructions.
-            //instructions.Concat(Instructions_2OP.Instructions.Select(a => KeyValuePair.Create(a.OpCode, a)));
-            //instructions.Concat(Instructions_Var.Instructions.Select(a => KeyValuePair.Create(a.OpCode, a)));
-            //instructions.Concat(Instructions_Ext.Instructions.Where(instr=>version==5? instr.Name!= "EXT:13" && instr.Version== MinVersion.Six
-            //                                                                        : instr.Name != "EXT:13" && instr.Version == MinVersion.FiveOnly).Select(a => KeyValuePair.Create(a.OpCode, a)));
-
 
         }
 
