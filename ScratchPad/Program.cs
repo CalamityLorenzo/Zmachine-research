@@ -5,8 +5,18 @@ namespace ScratchPath
 {
     public static class Program
     {
+        private static void addOne(int number)
+        {
+            number += 1;
+        }
+
+
         public static void Main(string[] args)
         {
+
+            var num = 6;
+            addOne(num);
+            Console.WriteLine(num);
 
 
             var newString = ZmTextDecoder.DecodeDictionaryEntry(new byte[]{

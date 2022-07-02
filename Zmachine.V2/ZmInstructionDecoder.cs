@@ -22,8 +22,9 @@ namespace Zmachine.V2
             // Each instruction falls into one of these groups, This is just making it easier to process them.
             // I think.
             var currentAddress = startAddress;
-            while (currentAddress< memory.Length)
+            while (currentAddress < memory.Length)
             {
+                Console.WriteLine(currentAddress.ToString("X"));
 
                 currentAddress = firstByte switch
                 {
@@ -41,15 +42,15 @@ namespace Zmachine.V2
 
                 };
 
-                currentAddress += 1;
-               
+                firstByte = memory[currentAddress += 1];
+
             }
         }
 
         private int variableVAR(byte[] memory, int startAddress)
         {
             var startAddressInHex = startAddress.ToString("X");
-            var (instruction, operands, operandTypes, currentAddress) = variableInstruction(memory, startAddress);
+            var (instruction, operands, operandTypes, currentAddress, store, branch)  = variableInstruction(memory, ref startAddress);
             return currentAddress;
         }
 
@@ -61,7 +62,7 @@ namespace Zmachine.V2
         private int variable2OP(byte[] memory, int startAddress)
         {
             var startAddressInHex = startAddress.ToString("X");
-            var (instruction, operands, operandTypes,  currentAddress) = variableInstruction(memory, startAddress);
+            var (instruction, operands, operandTypes, currentAddress, store, branch) = variableInstruction(memory, ref startAddress);
             return currentAddress;
         }
 
@@ -69,42 +70,42 @@ namespace Zmachine.V2
         private int short0OP(byte[] memory, int startAddress)
         {
             var startAddressInHex = startAddress.ToString("X");
-            var (instruction, operands, currentAddress) = shortInstruction(memory, startAddress);
+            var (instruction, operands, currentAddress, store, branch) = shortInstruction(memory, ref startAddress);
             return currentAddress;
         }
 
         private int short1OP_V(byte[] memory, int startAddress)
         {
             var startAddressInHex = startAddress.ToString("X");
-            var (instruction, operands, currentAddress) = shortInstruction(memory, startAddress);
+            var (instruction, operands, currentAddress, store, branch)  = shortInstruction(memory, ref startAddress);
             return currentAddress;
         }
 
         private int short1OP_C(byte[] memory, int startAddress)
         {
             var startAddressInHex = startAddress.ToString("X");
-            var (instruction, operands, currentAddress) = shortInstruction(memory, startAddress);
+            var (instruction, operands, currentAddress, store, branch)  = shortInstruction(memory, ref startAddress);
             return currentAddress;
         }
 
         private int short1OP_LC(byte[] memory, int startAddress)
         {
             var startAddressInHex = startAddress.ToString("X");
-            var (instruction, operands, currentAddress) = shortInstruction(memory, startAddress);
+            var (instruction, operands, currentAddress, store, branch)  = shortInstruction(memory, ref startAddress);
             return currentAddress;
         }
 
         private int long2OP_VV(byte[] memory, int startAddress)
         {
             var startAddressInHex = startAddress.ToString("X");
-            var (instruction, operands, currentAddress) = longInstruction(memory, startAddress);
+            var (instruction, operands, currentAddress, store, branch) = longInstruction(memory, ref startAddress);
             return currentAddress;
         }
 
         private int long2OP_VC(byte[] memory, int startAddress)
         {
             var startAddressInHex = startAddress.ToString("X");
-            var (instruction, operands, currentAddress) = longInstruction(memory, startAddress);
+            var (instruction, operands, currentAddress, store, branch) = longInstruction(memory, ref startAddress);
             return currentAddress;
 
         }
@@ -113,7 +114,7 @@ namespace Zmachine.V2
         private int long2OP_CV(byte[] memory, int startAddress)
         {
             var startAddressInHex = startAddress.ToString("X");
-            var (instruction, operands, currentAddress) = longInstruction(memory, startAddress);
+            var (instruction, operands, currentAddress, store, branch) = longInstruction(memory, ref startAddress);
             return currentAddress;
 
             //return startAddress;
@@ -123,19 +124,18 @@ namespace Zmachine.V2
         private int long2OP_CC(byte[] memory, int startAddress)
         {
             var startAddressInHex = startAddress.ToString("X");
-            var (instruction, operands, currentAddress) = longInstruction(memory, startAddress);
+            var (instruction, operands, currentAddress, store, branch) = longInstruction(memory, ref startAddress);
 
-            var store = instruction.Store ? memory[currentAddress += 1] :0;
-            var branch = instruction.Branch ? memory[currentAddress += 2] : 0;
+            //var store = instruction.Store ? memory[currentAddress += 1] : 0;
+            //var branch = instruction.Branch ? memory[currentAddress += 2] : 0;
 
             return currentAddress;
 
         }
 
         //long      2OP     small constant, variable
-        private (InstructionDefinition instr, byte[] ops, int finalAddress) longInstruction(byte[] memory, int address)
+        private (InstructionDefinition instr, byte[] ops, int finalAddress, byte store, byte[] branch) longInstruction(byte[] memory, ref int address)
         {
-
             var topmostByte = memory[address];
 
             // The opcode fits in the bottom 5/FIVE/NOT FOUR bits
@@ -150,39 +150,54 @@ namespace Zmachine.V2
             var op1 = memory[address += 1];
             var op2 = memory[address += 1];
 
-            var id = InstructionDefinitions.Instructions_2OP.Instructions.First(operand => operand.OpCode== $"2OP:{decimalInstruction}");
-
-            return (id, new[] { op1, op2 }, address);
+            var instruction = InstructionDefinitions.Instructions_2OP.Instructions.First(operand => operand.OpCode == $"2OP:{decimalInstruction}");
+            byte store = instruction.Store ? memory[address += 1] : (byte)0;
+            // remember we are not dealing with the offset at all here
+            var branch = GetBranch(memory, ref address, instruction.Branch);
+            return (instruction, new[] { op1, op2 }, address, store, branch);
 
         }
 
-        private (InstructionDefinition instr, byte operand, int finalAddress) shortInstruction(byte[] memory, int address)
+        private (InstructionDefinition instr, byte[] operand, int finalAddress, byte store, byte[] branch) shortInstruction(byte[] memory, ref int address)
         {
             var topmostByte = memory[address];
 
             // The opcode fits in the bottom 4 bits
-            var decimalInstruction = topmostByte & 15;
+            var decimalInstruction = topmostByte;
 
-            var operand1Type = (memory[address] >> 4 & 3) == 1 ? zType.Omitted : zType.SmallConstant;
+            var operand1Type = (zType)(memory[address] >> 4 & 3);
 
-            var operand = operand1Type == zType.Omitted ? (byte)0 : memory[address += 1];
+            byte[] operand = operand1Type switch
+            {
+                zType.LargeConstant => new[] { (memory[address += 1]), (memory[address += 1]) },
+                zType.SmallConstant => new[] { memory[address += 1] },
+                zType.Omitted => new byte[] { 0 },
+                zType.Variable => new[] { memory[address +=  1] }
+            };
 
 
-            var id = operand1Type == zType.Omitted ?
-                                            InstructionDefinitions.Instructions_0OP.Instructions.First(operand => operand.OpCode== $"0OP:{decimalInstruction}") :
-                                            InstructionDefinitions.Instructions_1OP.Instructions.First(operand => operand.OpCode== $"1OP:{decimalInstruction}");
-            return (id, operand, address);
+            var instruction = operand1Type == zType.Omitted ?
+                                            InstructionDefinitions.Instructions_0OP.Instructions.First(operand => operand.OpCode == $"0OP:{decimalInstruction}") :
+                                            InstructionDefinitions.Instructions_1OP.Instructions.First(operand => operand.OpCode == $"1OP:{decimalInstruction}");
+            byte store = instruction.Store ? memory[address += 1] : (byte)0;
+            // remember we are not dealing with the offset at all here
+            var branch = GetBranch(memory, ref address, instruction.Branch);
+
+            return (instruction, operand, address, store, branch);
         }
 
-        private (InstructionDefinition instr, byte[] operands, List<zType> operandTypes, int finalAddress) variableInstruction(byte[] memory, int address)
+        private (InstructionDefinition instr, byte[] operands, List<zType> operandTypes, int finalAddress, byte store, byte[] branch) variableInstruction(byte[] memory, ref int address)
         {
             var topmostByte = memory[address];
             // if bit 5 is 0 then the count is 2OP;
             // else count is VAR.
-            bool is2OP = (topmostByte >> 5 & 1) == 1;
+            bool is2OP = (topmostByte >> 5 & 1) == 0;
             // The opcode number is given in the bottom 5 bits. 
-            var decimalInstruction = topmostByte & 15;
-            var id = InstructionDefinitions.Instructions_Var.Instructions.First(operand => operand.OpCode== $"VAR:{decimalInstruction}");
+            var decimalInstruction = is2OP ? topmostByte & 31 : topmostByte;
+            //var form = is2OP? "2OP": "VAR";
+            var instruction = is2OP
+                                ? InstructionDefinitions.Instructions_2OP.Instructions.First(operand => operand.OpCode == $"2OP:{decimalInstruction}")
+                                : InstructionDefinitions.Instructions_Var.Instructions.First(operand => operand.OpCode == $"VAR:{decimalInstruction}");
 
             var operandTypeByte = memory[address += 1];
 
@@ -213,11 +228,37 @@ namespace Zmachine.V2
                     operandBytes.Add(memory[address += 1]);
                 }
 
+                shift -= 2;
+
             }
 
-            return (id, operandBytes.ToArray(), operandTypes, address);
-            
+            byte store = instruction.Store ? memory[address += 1] : (byte)0;
+            // remember we are not dealing with the offset at all here
+            var branch = GetBranch(memory, ref address, instruction.Branch);
+
+
+            return (instruction, operandBytes.ToArray(), operandTypes, address, store, branch);
+
         }
 
+
+        private byte[] GetBranch(byte[] memory, ref int address, bool hasBranch)
+        {
+
+            if (hasBranch)
+            {
+                byte[] branch;
+                // is it one byte only
+                var branchByte = memory[address += 1];
+                if (branchByte >> 6 == 1) branch = new[] { branchByte };
+                else branch = new[] { branchByte, memory[address += 1] };
+                return branch;
+            }
+            else
+            {
+                return new byte[0];
+            }
+
+        }
     }
 }
