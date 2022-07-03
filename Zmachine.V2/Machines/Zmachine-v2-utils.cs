@@ -33,15 +33,22 @@ namespace Zmachine.V2.Machines
 
             for (var a = 1; a < 4; a++)
             {
-                for (var x = 1; x < 33; ++x)
+                for (var x = 0; x < 32; ++x)
                 {
-                    var zBytes = abbreviations.GetEntry(a, x);
+                    var zChars = abbreviations.GetEntry(a, x);
                     var mem = 0;
-                    var zChars = ZmTextDecoder.GetZChars(zBytes, ref mem);
                     var allData = ZmTextDecoder.DecodeZChars(zChars);
-                    Console.WriteLine(allData);
+                    Console.WriteLine($"{(a*31) + x}\t:" + allData);
                 }
             }
+
+            //for (var x = 0; x < 96; x++)
+            //{
+            //    var startByte = abbreviations[x];
+            //    var chars = ZmTextDecoder.GetZChars(Memory, ref startByte);
+            //    var zStrings = ZmTextDecoder.DecodeZChars(chars);
+            //    Console.WriteLine($"{x}\t:" + zStrings);
+            //}
         }
 
         public void DumpObjects()

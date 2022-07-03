@@ -40,15 +40,15 @@ namespace Zmachine.V2.InstructionDefinitions
             //
             new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:239", DecCode: 0, Version: SixAndUp, Name:"set_cursor"),
             new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:240", DecCode: 16, Version: Four| FiveAndUp, Name:"get_cursor"),
-            new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:241", DecCode: 17, Version:UpToFour, Name:"set_text_style"),
-            new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:242", DecCode: 18, Version: UpToFour, Name:"buffer_mode"),
-            new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:243", DecCode: 19, Version: Three, Name:"output_stream"),
+            new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:241", DecCode: 17, Version:Four | FiveAndUp, Name:"set_text_style"),
+            new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:242", DecCode: 18, Version: Four | FiveAndUp, Name:"buffer_mode"),
+            new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:243", DecCode: 19, Version: Three | Four, Name:"output_stream"),
             //
-            new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:243", DecCode: 0, Version: Four | Five, Name:"output_stream"),
+            new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:243", DecCode: 0, Version: Five, Name:"output_stream"),
             new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:243", DecCode: 0, Version: SixAndUp, Name:"output_stream"),
 
             new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:244", DecCode: 20, Version: Three | Four | FiveAndUp, Name:"input_stream"),
-            new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:245", DecCode: 21, Version: Three, Name:"sound_effect"), // that's the weird one described in 5 yet used in a 3
+            new InstructionDefinition(Store: false, Branch: false, OpCode:"VAR:245", DecCode: 21, Version: Three| Five, Name:"sound_effect"), // that's the weird one described in 5 yet used in a 3
             new InstructionDefinition(Store: true, Branch: false, OpCode:"VAR:246", DecCode: 22, Version:Four | FiveAndUp, Name:"read_char"),
             new InstructionDefinition(Store: true, Branch: true, OpCode:"VAR:247", DecCode: 23, Version: Four | FiveAndUp, Name:"scan_table"),
             new InstructionDefinition(Store: true, Branch: false, OpCode:"VAR:248", DecCode: 24, Version: FiveAndUp, Name:"not"),

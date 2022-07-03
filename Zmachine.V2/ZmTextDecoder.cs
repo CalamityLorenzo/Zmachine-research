@@ -15,6 +15,7 @@
 
             List<Char> allChars = new();
             string DictType = null;
+            Dictionary<byte, char>? oldDictionary = null;
             for (var x = 0; x < singleZChars.Length; x++)
             {
                 if (singleZChars[x] < 4)
@@ -25,6 +26,11 @@
                 else if (singleZChars[x] != 4 && singleZChars[x] != 5)
                 {
                     allChars.Add(decodeDictionary[singleZChars[x]]);
+                    if (oldDictionary != null)
+                    {
+                        decodeDictionary = oldDictionary;
+                        oldDictionary = null;
+                    }
                     DictType = null;
                 }
                 else
@@ -33,17 +39,20 @@
                     {
                         if (x == 0 || singleZChars[x - 1] != 4)
                         {
+                            oldDictionary = decodeDictionary;
                             decodeDictionary = ZCharDictionaries.A1Decode;
-                            DictType = "A1";
                         }
                     }
                     else if (singleZChars[x] == 5)
                     {
-                        if (x == 0 || singleZChars[x - 1] != 5){
+                        if (x == 0 || singleZChars[x - 1] != 5)
+                        {
+                            oldDictionary = decodeDictionary;
                             decodeDictionary = ZCharDictionaries.A2V3Decode;
-                            DictType = "A2";
                         }
                     }
+                    else
+                        allChars[x] = ' ';
                     //else
                     //    allChars[x] = ' ';
                 }
@@ -69,11 +78,11 @@
                 {
                     var entry = abbreviations.GetEntry(getAbbreviation, singleZChars[x]);
                     allChars.AddRange(ZmTextDecoder.DecodeZChars(entry));
-                    // lets just get that sorted
+                    // lets just get that sorted    
                     getAbbreviation = 0;
-                }
 
-                if (singleZChars[x] < 4)
+                } // if we had an abbreviatoin dontt forget to step through, or you will get spurious characters
+                else if (singleZChars[x] < 4)
                 {
                     if (singleZChars[x] == 0)
                         allChars.Add(' ');
@@ -152,6 +161,7 @@
                 AllBytes.AddRange(currentZchars);
                 idx += 2; // Byte address words
             }
+            startAddress = idx - 1;
             return AllBytes.ToArray();
         }
 

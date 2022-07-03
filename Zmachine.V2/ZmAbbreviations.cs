@@ -37,7 +37,7 @@ namespace Zmachine.V2
         {
             get
             {
-                if (abbrevIdx > totalAbbreviations) throw new ArgumentOutOfRangeException("Only 96 dictionary entries avilable.");
+                if (abbrevIdx > totalAbbreviations) throw new ArgumentOutOfRangeException($"Only {totalAbbreviations} abbreviation entries avilable.");
                 var addresssOffset = 2 * abbrevIdx;
                 int rawAddress = this.Memory.Get2ByteValue(this.StartAddress + addresssOffset);
                 return rawAddress * 2;
@@ -46,8 +46,10 @@ namespace Zmachine.V2
 
         public byte[] GetEntry(int table, int entry)
         {
-            var address = ((32 * (table - 1) + entry) * 2 )+ StartAddress;
-            return ZmTextDecoder.GetZChars(this.Memory, ref address);
+            var address = ((32 * (table - 1)) + entry)*2;
+            var basicAddress = (int)this.Memory.Get2ByteValue(address + StartAddress);
+            basicAddress *= 2;
+            return ZmTextDecoder.GetZChars(this.Memory, ref basicAddress);
         }
 
         /// <summary>

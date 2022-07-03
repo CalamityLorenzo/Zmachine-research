@@ -14,16 +14,21 @@ namespace Zmachine.V2
         private ZMachineVersion instructionVersion;
         private int version;
         private Instructions instructions;
+        private ZmAbbreviations abbreviations;
 
         public ZmInstructionDecoder(Instructions instructions)
         {
             this.instructions = instructions;
         }
 
+        public ZmInstructionDecoder(Instructions instructions, ZmAbbreviations abbreviations, int version) : this(instructions)
+        {
+            this.abbreviations = abbreviations;
+            this.instructionVersion = MachineExtensions.GetZMachineVersion(version);
+        }
+
         public void Decode(byte[] memory, int startAddress, int version)
         {
-            this.instructionVersion = MachineExtensions.GetZMachineVersion(version);
-
             Console.WriteLine($"Starting at {startAddress} : {startAddress.ToString("X")}");
             // Translate first byte to work out which table we are looking at.
 
@@ -125,16 +130,18 @@ namespace Zmachine.V2
             // remember we are not dealing with the offset at all here
             var branch = GetBranch(memory, ref address, instruction.Branch);
 
-            var allBytes = GetHexAddressRange(instructionStartAddress, address, memory);
-
+            var stringData = "";
             if (instruction.Name == "print")
             {
                 address += 1;
+                //address == 0xd5f1
+                // we have hit a natural 6 need to 
                 var zChars = ZmTextDecoder.GetZChars(memory, ref address);
-                var zString = ZmTextDecoder.DecodeZChars(zChars);
+                stringData = $"{ZmTextDecoder.DecodeZCharsWithAbbreviations(zChars, abbreviations)}";
             }
+            var allBytes = GetHexAddressRange(instructionStartAddress, address, memory);
 
-            return new DecodedInstruction(instruction, operand, new() { operand1Type }, store, branch, instructionStartAddress.ToString("X"), allBytes);
+            return new DecodedInstruction(instruction, operand, new() { operand1Type }, store, branch, instructionStartAddress.ToString("X"), $"{allBytes} {stringData}");
 
         }
 
@@ -148,7 +155,6 @@ namespace Zmachine.V2
                 if (difference > rangeSize)
                 {
                     difference = difference % rangeSize;
-
                 }
                 return lowestRange + difference;
             }

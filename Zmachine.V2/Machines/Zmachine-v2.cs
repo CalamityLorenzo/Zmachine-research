@@ -46,8 +46,9 @@ namespace Zmachine.V2.Machines
 
         public void Disassemble()
         {
+            var abbreviations = new ZmAbbreviations(HeaderDetails.AbbreviationsTable, this.Memory, this.HeaderDetails.Version);
             var instructions = new Instructions(HeaderDetails.Version);
-            var sx = new ZmInstructionDecoder(instructions);
+            var sx = new ZmInstructionDecoder(instructions, abbreviations, HeaderDetails.Version);
             sx.Decode(this.Memory, 0xD338+1, this.HeaderDetails.Version);
         }
 
