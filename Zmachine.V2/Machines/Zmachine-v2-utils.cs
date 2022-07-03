@@ -11,9 +11,6 @@ namespace Zmachine.V2.Machines
         public void DumpDictionary()
         {
             //var dictionaryStart = Memory[this.HeaderDetails.Dictionary];
-
-            var abbreviations = new ZmAbbreviations(this.HeaderDetails.AbbreviationsTable, this.Memory);
-
             var zDict = new ZmDictionaryTable(this.HeaderDetails.Dictionary, Memory);
 
             Console.WriteLine("=== Entries ===");
@@ -30,9 +27,19 @@ namespace Zmachine.V2.Machines
 
         }
 
+        public void DumpAbbreviations()
+        {
+            var abbreviations = new ZmAbbreviations(this.HeaderDetails.AbbreviationsTable, this.Memory, this.HeaderDetails.Version);
+
+            for(var x = 0; x < abbreviations.Length; ++x)
+            {
+                Console.WriteLine(abbreviations[x]);
+            }
+        }
+
         public void DumpObjects()
         {
-            var abbreviations = new ZmAbbreviations(this.HeaderDetails.AbbreviationsTable, this.Memory);
+            var abbreviations = new ZmAbbreviations(this.HeaderDetails.AbbreviationsTable, this.Memory, this.HeaderDetails.Version);
 
             var zObjs = new ZmObjects(this.HeaderDetails.ObjectTable, this.HeaderDetails.Version, Memory, abbreviations);
             for (int prop = 0; prop < zObjs.PropertyDefaults.Length; prop++)
@@ -41,10 +48,10 @@ namespace Zmachine.V2.Machines
             }
             Console.WriteLine($"Total number of objects\t:\t{zObjs.TotalObjects}");
 
-            Console.WriteLine(zObjs.GetObject(0));
-            Console.WriteLine(zObjs.GetObject(6));
-            Console.WriteLine(zObjs.GetObject(4));
-            Console.WriteLine(zObjs.GetObject(15));
+            //Console.WriteLine(zObjs.GetObject(0));
+            //Console.WriteLine(zObjs.GetObject(6));
+            //Console.WriteLine(zObjs.GetObject(4));
+            //Console.WriteLine(zObjs.GetObject(15));
 
         }
         public void DumpHeader()

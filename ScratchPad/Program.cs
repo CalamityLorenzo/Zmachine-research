@@ -41,11 +41,24 @@ namespace ScratchPath
             //Console.WriteLine(newString);
             //Console.WriteLine(newString2);
 
+            
 
             var filename = "curses.z5";
 
             Console.WriteLine($"==== {filename} ====");
             using var fileStream = File.Open(filename, FileMode.Open);
+            fileStream.Position = 0;
+            
+            
+            var Memory = new byte[fileStream.Length];
+
+            fileStream.Read(Memory, 0, Memory.Length);
+            var address = 54624;
+
+           var zChars = ZmTextDecoder.GetZChars(Memory, ref address);
+            ZmAbbreviations abbr = new ZmAbbreviations(Memory[0x18], Memory, 5);
+            var theString = ZmTextDecoder.DecodeZCharsWithAbbreviations(zChars, abbr);
+
             Zmachine_v2 v2 = new(fileStream);
             //var word =  textEncoded.ZmDecodeBytes(abbV1);
             //Console.WriteLine(word);
@@ -57,11 +70,11 @@ namespace ScratchPath
                     case ConsoleKey.Escape: Console.WriteLine("Exiting"); return;
                     case ConsoleKey.D1: v2.DumpHeader(); break;
                     case ConsoleKey.D2: v2.DumpDictionary(); break;
-                    //case ConsoleKey.D2: v1.DumpDynamic(); break;
                     case ConsoleKey.D3: v2.DumpObjects(); break;
                     case ConsoleKey.D4:  break;
                     case ConsoleKey.D5: v2.Tick(); break;
                     case ConsoleKey.D6: v2.Disassemble(); break;
+                    case ConsoleKey.D7: v2.DumpAbbreviations(); break;
                 }
 
             }

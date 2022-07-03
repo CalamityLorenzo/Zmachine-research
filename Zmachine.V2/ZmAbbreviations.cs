@@ -8,11 +8,21 @@ namespace Zmachine.V2
 {
     public class ZmAbbreviations
     {
-        public ZmAbbreviations(int startAddress, byte[] memory)
+        private readonly int version;
+        private int totalAbbreviations;
+        public int Length { get => totalAbbreviations; }
+        public ZmAbbreviations(int startAddress, byte[] memory, int version)
         {
             this.StartAddress = startAddress;
             this.Memory = memory;
+            this.version = version;
+            if (version < 3)
+                totalAbbreviations = 32;
+            else
+                totalAbbreviations = 96;
         }
+
+
 
         public int StartAddress { get; }
         public byte[] Memory { get; }
@@ -27,11 +37,17 @@ namespace Zmachine.V2
         {
             get
             {
-                if (abbrevIdx > 96) throw new ArgumentOutOfRangeException("Only 96 dictionary entries avilable.");
+                if (abbrevIdx > totalAbbreviations) throw new ArgumentOutOfRangeException("Only 96 dictionary entries avilable.");
                 var addresssOffset = 2 * abbrevIdx;
                 int rawAddress = this.Memory.Get2ByteValue(this.StartAddress + addresssOffset);
                 return rawAddress * 2;
             }
+        }
+
+        public byte[] GetEntry(int table, int entry)
+        {
+            var address = (32 * (table - 1) + entry) * 2;
+            return ZmTextDecoder.GetZChars(this.Memory, ref address);
         }
 
         /// <summary>

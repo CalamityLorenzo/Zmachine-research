@@ -41,6 +41,70 @@
             return new string(allChars);
         }
 
+        public static string DecodeZCharsWithAbbreviations(byte[] singleZChars, ZmAbbreviations abbreviations)
+        {
+            Dictionary<byte, char> decodeDictionary = ZCharDictionaries.A0Decode;
+            //char[] allChars = new char[singleZChars.Length / 2 * 3];
+            List<Char> allChars = new();
+
+            // When we set this to 1->3
+            // on the NEXT loop we fetch the indicated abbreviation from the table 
+            // convert that in zChars and shove it into the allChars list
+            int getAbbreviation = 0;
+            Dictionary<byte, char>? oldDictionary = null;
+            for (var x = 0; x < singleZChars.Length; x++)
+            {
+                if (getAbbreviation > 0)
+                {
+                    var entry = abbreviations.GetEntry(getAbbreviation, singleZChars[x]);
+                    allChars.AddRange(ZmTextDecoder.DecodeZChars(entry));
+                    // lets just get that sorted
+                    getAbbreviation = 0;
+                }
+
+                if (singleZChars[x] < 4)
+                {
+                    if (singleZChars[x] == 0)
+                        allChars[x] = ' ';
+                    else
+                        getAbbreviation = singleZChars[x];
+
+                }
+                else if (singleZChars[x] != 4 && singleZChars[x] != 5)
+                {
+                    allChars.Add(decodeDictionary[singleZChars[x]]);
+                    if (oldDictionary != null)
+                    {
+                        decodeDictionary = oldDictionary;
+                        oldDictionary = null;
+                    }
+                }
+                else
+                {
+                    if (singleZChars[x] == 4)
+                    {
+                        if (x == 0 || singleZChars[x - 1] != 4)
+                        {
+                            oldDictionary = decodeDictionary;
+                            decodeDictionary = ZCharDictionaries.A1Decode;
+                        }
+                    }
+                    else if (singleZChars[x] == 5)
+                    {
+                        if (x == 0 || singleZChars[x - 1] != 5)
+                        {
+                            oldDictionary = decodeDictionary;
+                            decodeDictionary = ZCharDictionaries.A2V3Decode;
+                        }
+                    }
+                    else
+                        allChars[x] = ' ';
+                }
+            }
+
+            return new string(allChars.ToArray());
+        }
+
 
 
         /// <summary>
