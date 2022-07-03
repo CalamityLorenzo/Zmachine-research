@@ -14,32 +14,32 @@ namespace ScratchPath
         public static void Main(string[] args)
         {
 
-            var num = 6;
-            addOne(num);
-            Console.WriteLine(num);
+            //var num = 6;
+            //addOne(num);
+            //Console.WriteLine(num);
 
 
-            var newString = ZmTextDecoder.DecodeDictionaryEntry(new byte[]{
-                //0x34, 0xCE, 0xB0,0x00,0x00,0x00
-                0x25,
-                0xE3,
-                0x57,
-                0x0f,
-                0x1b,
-                0x05,
-                0x88,
-                0xA8,
-                0x5E,
-                0x02,
-                0x2D,
-            });
+            //var newString = ZmTextDecoder.DecodeDictionaryEntry(new byte[]{
+            //    //0x34, 0xCE, 0xB0,0x00,0x00,0x00
+            //    0x25,
+            //    0xE3,
+            //    0x57,
+            //    0x0f,
+            //    0x1b,
+            //    0x05,
+            //    0x88,
+            //    0xA8,
+            //    0x5E,
+            //    0x02,
+            //    0x2D,
+            //});
 
-            var newString2 = ZmTextDecoder.DecodeDictionaryEntry(new byte[]{
-                0xFa, 0x9a
-            });
+            //var newString2 = ZmTextDecoder.DecodeDictionaryEntry(new byte[]{
+            //    0xFa, 0x9a
+            //});
 
-            Console.WriteLine(newString);
-            Console.WriteLine(newString2);
+            //Console.WriteLine(newString);
+            //Console.WriteLine(newString2);
 
 
             var filename = "curses.z5";

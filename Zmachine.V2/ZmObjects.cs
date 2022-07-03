@@ -113,8 +113,8 @@ namespace Zmachine.V2
             var end = propertyAddress + 1 + HeaderLength * 2;
             // the full range of bytes for the name
             byte[] NameBytes = memory[start..end];
-
-            byte[] rawZChars = ZmTextDecoder.GetZChars(NameBytes);
+            int Address = 0;
+            byte[] rawZChars = ZmTextDecoder.GetZChars(NameBytes, ref Address);
             // Find if we have an abbreviation in our midst
             var complete = false;
             var ctr = 0;
@@ -126,7 +126,7 @@ namespace Zmachine.V2
                     var abbreviationIdx = rawZChars[ctr + 1];
                     var abbreviationAddress = abbreviations[abbreviationIdx];
 
-                    var abbreviationChars = ZmTextDecoder.GetZChars(memory, abbreviationAddress);
+                    var abbreviationChars = ZmTextDecoder.GetZChars(memory,ref abbreviationAddress);
                     completeMessage.AddRange(abbreviationChars);
                     ctr += 2;
                 }

@@ -17,8 +17,8 @@ namespace Zmachine.V2
             var end = PropertyAddress + 1 + HeaderLength * 2;
             // the full range of bytes for the name
             byte[] NameBytes = Memory[start..end];
-
-            byte[] zChars = ZmTextDecoder.GetZChars(NameBytes);
+            int addr = 0;
+            byte[] zChars = ZmTextDecoder.GetZChars(NameBytes,ref addr);
             this.Name = ZmTextDecoder.DecodeZChars(zChars);
         }
 

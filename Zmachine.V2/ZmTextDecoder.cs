@@ -16,7 +16,7 @@
             {
                 if (singleZChars[x] < 4)
                 {
-                    if(singleZChars[x] == 0)
+                    if (singleZChars[x] == 0)
                         allChars[x] = ' ';
                 }
                 else if (singleZChars[x] != 4 && singleZChars[x] != 5)
@@ -25,10 +25,14 @@
                 }
                 else
                 {
-                    if (singleZChars[x] == 4 && singleZChars[x - 1] != 4)
-                        decodeDictionary = ZCharDictionaries.A1Decode;
-                    else if (singleZChars[x] == 5 && singleZChars[x - 1] != 5)
-                        decodeDictionary = ZCharDictionaries.A2V3Decode;
+                    if (singleZChars[x] == 4)
+                    {
+                        if (x == 0 || singleZChars[x - 1] != 4) decodeDictionary = ZCharDictionaries.A1Decode;
+                    }
+                    else if (singleZChars[x] == 5)
+                    {
+                        if (x == 0 || singleZChars[x - 1] != 5) decodeDictionary = ZCharDictionaries.A2V3Decode;
+                    }
                     else
                         allChars[x] = ' ';
                 }
@@ -46,7 +50,7 @@
         /// <param name="rawBytes"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static byte[] GetZChars(byte[] rawBytes, int startAddress=0)
+        public static byte[] GetZChars(byte[] rawBytes, ref int startAddress)
         {
 
             if (rawBytes.Length < 2)
@@ -60,10 +64,10 @@
             var isTerminated = false;
             var idx = startAddress;
             // We don't know how large the string is until we hit a terminator value (top bit == 1)
-            while(!isTerminated)
+            while (!isTerminated)
             {
                 // is the top bit a 1, last section of the string.
-                isTerminated  = (rawBytes[idx] >> 7 == 1);
+                isTerminated = (rawBytes[idx] >> 7 == 1);
                 // So three chars are in here.
                 // Get the individual characters out
                 // COnvert two bytes into an Int16 (16 bits 4 bytes) move the top 8 bits to the left 1 byte and 
@@ -102,7 +106,8 @@
         public static string DecodeDictionaryEntry(IEnumerable<byte> bytes)
         {
             var charData = bytes.ToArray();
-            var AllBytes = GetZChars(charData);
+            var memoryAddress = 0;
+            var AllBytes = GetZChars(charData, ref memoryAddress);
             return DecodeZChars(AllBytes);
 
         }

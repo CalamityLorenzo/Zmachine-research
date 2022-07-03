@@ -6,25 +6,6 @@ using System.Threading.Tasks;
 
 namespace Zmachine.V2.InstructionDefinitions
 {
-    internal enum MinVersion
-    {
-        NotFound =0,
-        All=1,
-        Three,
-        Four=4,
-        Five = 5,
-        Six=6,
-        Seven=7,
-        SixOr,
-        ThreeOnly,
-        OneOnly,
-        FiveOnly,
-        FourOnly,
-        FourOrSix,
-        FiveOrSix,
-        SixOnly,
-        OneToFour,
-    }
 
     [Flags]
     internal enum ZMachineVersion
