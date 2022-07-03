@@ -32,7 +32,7 @@ namespace Zmachine.V2
         /// That's the start of the abbreviation word(s).
         /// </summary>
         /// <param name="abbrevIdx"></param>
-        /// <returns></returns>
+        /// <returns></returns>1
         public int this[int abbrevIdx]
         {
             get
@@ -46,7 +46,7 @@ namespace Zmachine.V2
 
         public byte[] GetEntry(int table, int entry)
         {
-            var address = (32 * (table - 1) + entry) * 2;
+            var address = ((32 * (table - 1) + entry) * 2 )+ StartAddress;
             return ZmTextDecoder.GetZChars(this.Memory, ref address);
         }
 

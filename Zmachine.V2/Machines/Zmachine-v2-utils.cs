@@ -31,9 +31,16 @@ namespace Zmachine.V2.Machines
         {
             var abbreviations = new ZmAbbreviations(this.HeaderDetails.AbbreviationsTable, this.Memory, this.HeaderDetails.Version);
 
-            for(var x = 0; x < abbreviations.Length; ++x)
+            for (var a = 1; a < 4; a++)
             {
-                Console.WriteLine(abbreviations[x]);
+                for (var x = 1; x < 33; ++x)
+                {
+                    var zBytes = abbreviations.GetEntry(a, x);
+                    var mem = 0;
+                    var zChars = ZmTextDecoder.GetZChars(zBytes, ref mem);
+                    var allData = ZmTextDecoder.DecodeZChars(zChars);
+                    Console.WriteLine(allData);
+                }
             }
         }
 

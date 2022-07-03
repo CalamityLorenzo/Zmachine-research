@@ -11,34 +11,45 @@
         public static string DecodeZChars(byte[] singleZChars)
         {
             Dictionary<byte, char> decodeDictionary = ZCharDictionaries.A0Decode;
-            char[] allChars = new char[singleZChars.Length / 2 * 3];
+            //char[] allChars = new char[singleZChars.Length / 2 * 3];
+
+            List<Char> allChars = new();
+            string DictType = null;
             for (var x = 0; x < singleZChars.Length; x++)
             {
                 if (singleZChars[x] < 4)
                 {
                     if (singleZChars[x] == 0)
-                        allChars[x] = ' ';
+                        allChars.Add(' ');
                 }
                 else if (singleZChars[x] != 4 && singleZChars[x] != 5)
                 {
-                    allChars[x] = decodeDictionary[singleZChars[x]];
+                    allChars.Add(decodeDictionary[singleZChars[x]]);
+                    DictType = null;
                 }
                 else
                 {
                     if (singleZChars[x] == 4)
                     {
-                        if (x == 0 || singleZChars[x - 1] != 4) decodeDictionary = ZCharDictionaries.A1Decode;
+                        if (x == 0 || singleZChars[x - 1] != 4)
+                        {
+                            decodeDictionary = ZCharDictionaries.A1Decode;
+                            DictType = "A1";
+                        }
                     }
                     else if (singleZChars[x] == 5)
                     {
-                        if (x == 0 || singleZChars[x - 1] != 5) decodeDictionary = ZCharDictionaries.A2V3Decode;
+                        if (x == 0 || singleZChars[x - 1] != 5){
+                            decodeDictionary = ZCharDictionaries.A2V3Decode;
+                            DictType = "A2";
+                        }
                     }
-                    else
-                        allChars[x] = ' ';
+                    //else
+                    //    allChars[x] = ' ';
                 }
             }
 
-            return new string(allChars);
+            return new string(allChars.ToArray());
         }
 
         public static string DecodeZCharsWithAbbreviations(byte[] singleZChars, ZmAbbreviations abbreviations)
@@ -65,9 +76,9 @@
                 if (singleZChars[x] < 4)
                 {
                     if (singleZChars[x] == 0)
-                        allChars[x] = ' ';
+                        allChars.Add(' ');
                     else
-                        getAbbreviation = singleZChars[x];
+                       getAbbreviation = singleZChars[x];
 
                 }
                 else if (singleZChars[x] != 4 && singleZChars[x] != 5)

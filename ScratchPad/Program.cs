@@ -56,7 +56,8 @@ namespace ScratchPath
             var address = 54624;
 
            var zChars = ZmTextDecoder.GetZChars(Memory, ref address);
-            ZmAbbreviations abbr = new ZmAbbreviations(Memory[0x18], Memory, 5);
+            var x = (Memory[0x18] << 8 | Memory[0x19]);
+            ZmAbbreviations abbr = new ZmAbbreviations(x, Memory, 5);
             var theString = ZmTextDecoder.DecodeZCharsWithAbbreviations(zChars, abbr);
 
             Zmachine_v2 v2 = new(fileStream);
