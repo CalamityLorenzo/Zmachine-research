@@ -67,32 +67,63 @@
             //char[] allChars = new char[singleZChars.Length / 2 * 3];
             List<Char> allChars = new();
 
-            // When we set this to 1->3
+            // this can be set from 1->3
             // on the NEXT loop we fetch the indicated abbreviation from the table 
             // convert that in zChars and shove it into the allChars list
+            // (remember to move past the abbreviation byte too)
             int getAbbreviation = 0;
             Dictionary<byte, char>? oldDictionary = null;
+            bool isA2Dictionary = false;
+            byte isZChar = 0;
+            byte ZSCIIChar = 0;
             for (var x = 0; x < singleZChars.Length; x++)
             {
-                if (getAbbreviation > 0)
+                if (isZChar>0)
+                {
+                    if (isZChar == 2)
+                    {
+                        ZSCIIChar = (byte)(singleZChars[x] & 31);
+                        isZChar = 1;
+                    }else if (isZChar == 1)
+                    {
+                        var result = ((byte)ZSCIIChar << 5) | ((byte)(singleZChars[x] & 31));
+                        allChars.Add((char)result);
+                        isZChar = 0;
+                    }
+
+                }else if (getAbbreviation > 0)
                 {
                     var entry = abbreviations.GetEntry(getAbbreviation, singleZChars[x]);
                     allChars.AddRange(ZmTextDecoder.DecodeZChars(entry));
                     // lets just get that sorted    
                     getAbbreviation = 0;
 
-                } // if we had an abbreviatoin dontt forget to step through, or you will get spurious characters
+                } // if we had an abbreviation dontt forget to step through, or you will get spurious characters
                 else if (singleZChars[x] < 4)
                 {
                     if (singleZChars[x] == 0)
                         allChars.Add(' ');
                     else
-                       getAbbreviation = singleZChars[x];
+                        getAbbreviation = singleZChars[x];
 
                 }
                 else if (singleZChars[x] != 4 && singleZChars[x] != 5)
                 {
-                    allChars.Add(decodeDictionary[singleZChars[x]]);
+                    if (!isA2Dictionary)
+                        // Normal case.
+                        allChars.Add(decodeDictionary[singleZChars[x]]);
+                    else
+                    {
+                        if (singleZChars[x] == 6)
+                        {
+                            isZChar = 2;
+                        }
+                        else
+                        {
+                            allChars.Add(decodeDictionary[singleZChars[x]]);
+                        }
+                        isA2Dictionary = false;
+                    }
                     if (oldDictionary != null)
                     {
                         decodeDictionary = oldDictionary;
@@ -115,6 +146,7 @@
                         {
                             oldDictionary = decodeDictionary;
                             decodeDictionary = ZCharDictionaries.A2V3Decode;
+                            isA2Dictionary = true;
                         }
                     }
                     else

@@ -25,6 +25,7 @@ namespace Zmachine.V2
         {
             this.abbreviations = abbreviations;
             this.instructionVersion = MachineExtensions.GetZMachineVersion(version);
+            this.version = version;
         }
 
         public void Decode(byte[] memory, int startAddress, int version)
