@@ -38,12 +38,12 @@ namespace Zmachine.V2
             // I think.
             var currentAddress = startAddress;
             List<DecodedInstruction> instructs = new List<DecodedInstruction>();
+            // Current address in hex.
             var hexAddress = "";
             try
             {
                 while (currentAddress < memory.Length)
                 {
-                    //Console.WriteLine(currentAddress.ToString("X"))
                     hexAddress = currentAddress.ToString("X");
                     var instruction = firstByte switch
                     {

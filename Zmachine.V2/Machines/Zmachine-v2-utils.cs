@@ -62,6 +62,7 @@ namespace Zmachine.V2.Machines
             }
             Console.WriteLine($"Total number of objects\t:\t{zObjs.TotalObjects}");
 
+            Console.WriteLine(zObjs.GetObject(37));
             //Console.WriteLine(zObjs.GetObject(0));
             //Console.WriteLine(zObjs.GetObject(6));
             //Console.WriteLine(zObjs.GetObject(4));

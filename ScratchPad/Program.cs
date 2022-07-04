@@ -53,7 +53,7 @@ namespace ScratchPath
             var Memory = new byte[fileStream.Length];
 
             fileStream.Read(Memory, 0, Memory.Length);
-            var address = 0xd5f1;
+            var address = 0x22AC;
 
            var zChars = ZmTextDecoder.GetZChars(Memory, ref address);
             var x = (Memory[0x18] << 8 | Memory[0x19]);
