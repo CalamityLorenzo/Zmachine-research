@@ -28,6 +28,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZMachine.Library.V1", "ZMac
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZMachine.V4", "ZMachine.V4\ZMachine.V4.csproj", "{418D4F84-04C9-4521-B41A-970D219739F9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZMachineTools", "ZMachineTools\ZMachineTools.csproj", "{2437E795-B800-45E0-B36C-A622B12ED846}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OLD", "OLD", "{C47B4E5C-5578-4C1F-B8F1-364F7481AC2A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,11 +62,18 @@ Global
 		{418D4F84-04C9-4521-B41A-970D219739F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{418D4F84-04C9-4521-B41A-970D219739F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{418D4F84-04C9-4521-B41A-970D219739F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2437E795-B800-45E0-B36C-A622B12ED846}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2437E795-B800-45E0-B36C-A622B12ED846}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2437E795-B800-45E0-B36C-A622B12ED846}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2437E795-B800-45E0-B36C-A622B12ED846}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{E0BF048B-0DB6-4677-A1F7-7AA35173C7D4} = {C47B4E5C-5578-4C1F-B8F1-364F7481AC2A}
+		{C21B3AF1-8124-4A40-9D81-F072306DAC25} = {C47B4E5C-5578-4C1F-B8F1-364F7481AC2A}
+		{7C22ADAF-53C6-4685-A571-865348FF5FF5} = {C47B4E5C-5578-4C1F-B8F1-364F7481AC2A}
 		{B7F60677-8B03-4EEB-A9B8-46531261D84A} = {571C2F25-E543-40F1-9B9D-6460BAD42572}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
