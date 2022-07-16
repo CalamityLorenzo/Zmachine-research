@@ -1,14 +1,22 @@
-﻿namespace Zmachine.V2
+﻿using ZMachine.Library.V1.Utilities;
+
+namespace ZMachine.Library.V1
 {
-    internal class ZmDictionaryTable 
+    public class DictionaryTable
     {
-        public string[] Entries { get; }
+        internal byte[][] Entries { get; }
         // this type is clearly wrong, but thats what it's v1.
         public char[] WordSeparators { get; }
         public byte WordEntryLength { get; }
-        public int TotalNumberOfEntries;
+        public int Length;
 
-        public ZmDictionaryTable(int startAddress, byte[] Memory)
+        /// <summary>
+        /// Builds the list of dictionary table bytes
+        /// no text at all at this point.
+        /// </summary>
+        /// <param name="startAddress"></param>
+        /// <param name="Memory"></param>
+        public DictionaryTable(int startAddress, byte[] Memory)
         {
             var separatorCount = Memory[startAddress];
 
@@ -21,29 +29,31 @@
             }
 
             this.WordEntryLength = Memory[startAddress + 1 + separatorCount];
-            this.TotalNumberOfEntries = Memory.Get2ByteValue(startAddress + separatorCount + 1 + 1);
+            this.Length = Memory.Get2ByteValue(startAddress + separatorCount + 1 + 1);
 
-            this.Entries = new string[TotalNumberOfEntries];
+            this.Entries = new byte[Length][];
             // now to populate the dictionary!
             // each entry
             int dictionaryEntryAddress = startAddress + separatorCount + 1 + 1 + 2;
 
-            for (var x = 0; x < TotalNumberOfEntries; x++)
+            for (var x = 0; x < Length; x++)
             {
                 // Move the memory counter along 1 dictionary word length
                 // each entry is a certain length of bytes (WordEntryLength)
                 // get those bytes baby!
-                byte[] Entry = new byte[WordEntryLength];
+                var Entry = new byte[WordEntryLength];
                 for (var i = 0; i < WordEntryLength; i++)
                 {
                     Entry[i] = Memory[dictionaryEntryAddress + i];
                 }
-                Entries[x] = $"{(dictionaryEntryAddress):X} : " + " " + String.Join(' ', Entry) + " " + ZmTextDecoder.DecodeDictionaryEntry(Entry);
-                // MOve to the next. or even past the end
+
+                Entries[x] = Entry;
+                //// MOve to the next. or even past the end
                 dictionaryEntryAddress += (WordEntryLength);
             };
 
         }
 
+        public byte[] this[int entry] => this.Entries[entry];
     }
 }

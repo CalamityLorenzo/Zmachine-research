@@ -7,4 +7,8 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ZMachine.Library.V1\ZMachine.Library.V1.csproj" />
+  </ItemGroup>
+
 </Project>

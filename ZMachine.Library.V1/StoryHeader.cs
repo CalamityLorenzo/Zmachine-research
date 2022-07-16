@@ -3,7 +3,6 @@ namespace ZMachine.Library.V1
 {
     using System.Collections;
     using ZMachine.Library.V1.Utilities;
-
     // Default v1 header
     public record StoryHeader(int Version,
                            BitArray Flags1,
@@ -16,6 +15,26 @@ namespace ZMachine.Library.V1
                            BitArray Flags2,
                            int RevisionNumber)
     {
+        public int AbbreviationTable { get; }
+        public int LengthOfFile { get; }
+        public int ChecksumOfFile { get; }
+        public int InterpreterNumber { get; }
+        public int InterpreterVersion { get; }
+        public int ScreenHeightLines { get; }
+        public int ScreenWidthCharacters { get; }
+        public int ScreenWidthUnits { get; }
+        public int ScreenHeightUnits { get; }
+        public int FontWidthUnits { get; }
+        public int FontHeightUnits { get; }
+        public int DefaultBackground { get; }
+        public int DefaultForeground { get; }
+        public int TerminatingCharsTable { get; }
+        public int AlphabetTable { get; }
+        public int HeaderExtensionTable { get; }
+        public int RoutinesOffset { get; }
+        public int StaticStringsOffset { get; }
+        public int Stream3PixelsWidth { get; }
+
         // v2 Header
         public StoryHeader(int Version,
                         BitArray Flags1,
@@ -27,7 +46,10 @@ namespace ZMachine.Library.V1
                         int BaseOfStaticMemory,
                         BitArray Flags2,
                         int AbbreviationTable,
-                        int RevisionNumber) : this(Version, Flags1, HighMemoryStart, ProgramCounterInitalValue, DictionaryTable, ObjectTable, GlobalVariables, BaseOfStaticMemory, Flags2, RevisionNumber) { }
+                        int RevisionNumber) : this(Version, Flags1, HighMemoryStart, ProgramCounterInitalValue, DictionaryTable, ObjectTable, GlobalVariables, BaseOfStaticMemory, Flags2, RevisionNumber)
+        {
+            this.AbbreviationTable = AbbreviationTable;
+        }
         // v3 Header
         public StoryHeader(int Version,
                         BitArray Flags1,
@@ -41,7 +63,11 @@ namespace ZMachine.Library.V1
                         int LengthOfFile,
                         int ChecksumOfFile,
                         int AbbreviationTable,
-                        int RevisionNumber) : this(Version, Flags1, HighMemoryStart, ProgramCounterInitalValue, DictionaryTable, ObjectTable, GlobalVariables, BaseOfStaticMemory, Flags2, AbbreviationTable, RevisionNumber) { }
+                        int RevisionNumber) : this(Version, Flags1, HighMemoryStart, ProgramCounterInitalValue, DictionaryTable, ObjectTable, GlobalVariables, BaseOfStaticMemory, Flags2, AbbreviationTable, RevisionNumber)
+        {
+            this.LengthOfFile = LengthOfFile;
+            this.ChecksumOfFile = ChecksumOfFile;
+        }
         // v4
         public StoryHeader(int Version,
                 BitArray Flags1,
@@ -59,7 +85,13 @@ namespace ZMachine.Library.V1
                 int ScreenHeightLines,
                 int ScreenWidthCharacters,
                 int AbbreviationTable,
-                int RevisionNumber) : this(Version, Flags1, HighMemoryStart, ProgramCounterInitalValue, DictionaryTable, ObjectTable, GlobalVariables, BaseOfStaticMemory, Flags2, LengthOfFile, ChecksumOfFile, AbbreviationTable, RevisionNumber) { }
+                int RevisionNumber) : this(Version, Flags1, HighMemoryStart, ProgramCounterInitalValue, DictionaryTable, ObjectTable, GlobalVariables, BaseOfStaticMemory, Flags2, LengthOfFile, ChecksumOfFile, AbbreviationTable, RevisionNumber)
+        {
+            this.InterpreterNumber = InterpreterNumber;
+            this.InterpreterVersion = InterpreterVersion;
+            this.ScreenHeightLines = ScreenHeightLines;
+            this.ScreenWidthCharacters = ScreenWidthCharacters;
+        }
         // v5
         public StoryHeader(int Version,
                 BitArray Flags1,
@@ -86,7 +118,18 @@ namespace ZMachine.Library.V1
                 int AbbreviationTable,
                 int RevisionNumber,
                 int AlphabetTable,
-                int HeaderExtensionTable) : this(Version, Flags1, HighMemoryStart, ProgramCounterInitalValue, DictionaryTable, ObjectTable, GlobalVariables, BaseOfStaticMemory, Flags2, LengthOfFile, ChecksumOfFile, InterpreterNumber, InterpreterVersion, ScreenHeightLines, ScreenWidthCharacters, AbbreviationTable, RevisionNumber) { }
+                int HeaderExtensionTable) : this(Version, Flags1, HighMemoryStart, ProgramCounterInitalValue, DictionaryTable, ObjectTable, GlobalVariables, BaseOfStaticMemory, Flags2, LengthOfFile, ChecksumOfFile, InterpreterNumber, InterpreterVersion, ScreenHeightLines, ScreenWidthCharacters, AbbreviationTable, RevisionNumber)
+        {
+            this.ScreenWidthUnits = ScreenWidthUnits;
+            this.ScreenHeightUnits = ScreenHeightUnits;
+            this.FontWidthUnits = FontWidthUnits;
+            this.FontHeightUnits = FontHeightUnits;
+            this.DefaultBackground = DefaultBackground;
+            this.DefaultForeground = DefaultForeground;
+            this.TerminatingCharsTable = TerminatingCharsTable;
+            this.AlphabetTable = AlphabetTable;
+            this.HeaderExtensionTable = HeaderExtensionTable;
+        }
         //v6 
         public StoryHeader(int Version,
                 BitArray Flags1,
@@ -117,7 +160,11 @@ namespace ZMachine.Library.V1
                 int RevisionNumber,
                 int AlphabetTable,
                 int HeaderExtensionTable) : this(Version, Flags1, HighMemoryStart, ProgramCounterInitalValue, DictionaryTable, ObjectTable, GlobalVariables, BaseOfStaticMemory, Flags2, LengthOfFile, ChecksumOfFile, InterpreterNumber, InterpreterVersion, ScreenHeightLines, ScreenWidthCharacters, ScreenWidthUnits, ScreenHeightUnits, FontWidthUnits, FontHeightUnits, DefaultBackground, DefaultForeground, TerminatingCharsTable, AbbreviationTable, RevisionNumber, AlphabetTable, HeaderExtensionTable)
-        { }
+        {
+            this.RoutinesOffset = RoutinesOffset;
+            this.StaticStringsOffset = StaticStringsOffset;
+            this.Stream3PixelsWidth = Stream3PixelsWidth;
+        }
 
         public static StoryHeader CreateHeader(Span<byte> Memory)
         {
