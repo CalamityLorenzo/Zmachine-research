@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,8 +19,8 @@ namespace Zmachine.V2
         public int ObjectTable { get; set; }
         public int GlobalObjects { get; set; }
         public int StaticStart { get; set; }
-        public int Flags { get; set; }
-        public int Flags2 { get; set; }
+        public BitArray Flags { get; set; }
+        public BitArray Flags2 { get; set; }
         public int AbbreviationsTable { get; set; }
         public int LengthOfFile { get; set; }
         public string DateCompiled { get; set; }

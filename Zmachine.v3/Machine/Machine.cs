@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zmachine.V3.Instructions;
 
-namespace Zmachine.V2.Machines
+namespace Zmachine.V3.Machines
 {
 
     [Flags]
@@ -27,7 +28,6 @@ namespace Zmachine.V2.Machines
         FiveAndUp = Five | Six | Seven | Eight,
         SixAndUp = Six | Seven | Eight,
         All = One | Two | Three | Four | Five | Six | Seven | Eight
-
     }
 
 
@@ -37,7 +37,10 @@ namespace Zmachine.V2.Machines
         int ProgramCounter = 1;
         // the data
         public Stream GameData { get; }
-        public MachineHeader HeaderDetails { get; set; }
+        public StoryHeader StoryHeader { get; set; }
+        internal MachineVersion FeaturesVersion { get; }
+
+        internal Dictionary<string, MachineInstruction> Instructions;
 
         // the complete machine memory divided into 3
         // dynamic, static high. They each have various purposes.
@@ -59,21 +62,14 @@ namespace Zmachine.V2.Machines
             GameData.Position = 0;
 
             Memory = new byte[GameData.Length];
+            // Nom, nom nom game data.
             GameData.Read(Memory, 0, Memory.Length);
-
-            // This is for convienice.
-            // cos I cannot be bothered to learn all the hex for the position of the header.
-            InitialiseHeader();
+            this.StoryHeader = StoryHeader.CreateHeader(Memory);
+            this.FeaturesVersion = MachineExtensions.GetFeatureVersion(StoryHeader.Version);
             // move the program counter to the first instruction.
-            ProgramCounter = SetProgramCounterInitialValue(HeaderDetails.Version, HeaderDetails.ProgramCounterInitalValue);
-            }
-
-        public void Disassemble()
-        {
-            var abbreviations = new ZmAbbreviations(HeaderDetails.AbbreviationsTable, this.Memory, this.HeaderDetails.Version);
-            var instructions = new Instructions(HeaderDetails.Version);
-            var sx = new ZmInstructionDecoder(instructions, abbreviations, HeaderDetails.Version);
-            sx.Decode(this.Memory, 0xD338+1, this.HeaderDetails.Version);
+            ProgramCounter = SetProgramCounterInitialValue(StoryHeader.Version, StoryHeader.ProgramCounterInitalValue);
+            // Load the correct set of instructions 
+            this.Instructions = MachineExtensions.GetVersionInstructions(FeaturesVersion);
         }
 
         private static int SetProgramCounterInitialValue(int version, int programCounterInitalValue, int routineOffSet = 0)
@@ -92,45 +88,6 @@ namespace Zmachine.V2.Machines
                     _ => throw new ArgumentOutOfRangeException("Version is out of range")
                 };
             }
-        }
-
-        private void InitialiseHeader()
-        {
-
-            var version = Memory[0];
-            this.HeaderDetails = new()
-            {
-                Version = version,
-                ProgramCounterInitalValue = Memory.Get2ByteValue(6),
-                Flags = Memory[1], // need to break this out.
-                Flags2 = Memory[16],
-                ReleaseNumber = $"{Memory[2]}:{Memory[3]}",
-
-                HighMemStart = Memory.Get2ByteValue(4),
-                StaticStart = Memory.Get2ByteValue(0xE),
-
-                Dictionary = Memory.Get2ByteValue(8),
-                ObjectTable = Memory.Get2ByteValue(10),
-                GlobalObjects = Memory.Get2ByteValue(12),
-                AbbreviationsTable = Memory.Get2ByteValue(24),
-
-                LengthOfFile = Memory.Get2ByteValue(26),
-                InterpreterNumber = Memory[30],
-                InterpreterVersion = Memory[31],
-
-                RoutinesOffset = version > 5 ? Memory.Get2ByteValue(40) : ushort.MinValue,
-                StaticStringsOffSet = version > 5 ? Memory.Get2ByteValue(42) : ushort.MinValue,
-
-                DateCompiled = new string(new char[]
-                {
-                    (char)Memory[0x12],
-                    (char)Memory[0x13],
-                    (char)Memory[0x14],
-                    (char)Memory[0x15],
-                    (char)Memory[0x16],
-                    (char)Memory[0x17]
-                })
-            };
         }
     }
 }

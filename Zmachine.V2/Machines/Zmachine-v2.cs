@@ -78,8 +78,8 @@ namespace Zmachine.V2.Machines
             {
                 Version = version,
                 ProgramCounterInitalValue = Memory.Get2ByteValue(6),
-                Flags = Memory[1], // need to break this out.
-                Flags2 = Memory[16],
+                Flags = new (Memory[1]), // need to break this out.
+                Flags2 = new (Memory[16]),
                 ReleaseNumber = $"{Memory[2]}:{Memory[3]}",
 
                 HighMemStart = Memory.Get2ByteValue(4),

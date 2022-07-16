@@ -1,4 +1,5 @@
-﻿using Zmachine.V2;
+﻿using global::System;
+using Zmachine.V2;
 using Zmachine.V2.Machines;
 
 namespace ScratchPath

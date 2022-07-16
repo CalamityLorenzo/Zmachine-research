@@ -1,4 +1,4 @@
-﻿namespace Zmachine.V2.InstructionDefinitions
+﻿namespace Zmachine.V3.Instructions
 {
     internal record InstructionOperands(
         OperandType operandType,

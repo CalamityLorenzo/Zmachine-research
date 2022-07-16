@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Zmachine.V2
+﻿namespace Zmachine.V3
 {
     static class ZCharDictionaries
     {
@@ -65,9 +59,6 @@ namespace Zmachine.V2
             { '(', 30 },
             { ')', 31 },
         };
-
-
-
 
         public static Dictionary<char, int> A0Encode = new()
         {
