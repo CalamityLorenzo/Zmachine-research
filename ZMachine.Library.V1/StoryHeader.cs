@@ -1,8 +1,9 @@
-﻿using System.Collections;
-using Zmachine.V3;
-
-namespace Zmachine.V3
+﻿
+namespace ZMachine.Library.V1
 {
+    using System.Collections;
+    using ZMachine.Library.V1.Utilities;
+
     // Default v1 header
     public record StoryHeader(int Version,
                            BitArray Flags1,
@@ -121,7 +122,7 @@ namespace Zmachine.V3
         public static StoryHeader CreateHeader(Span<byte> Memory)
         {
             var version = Memory[0];
-            var featuresVersion = MachineExtensions.GetFeatureVersion(version);
+            var featuresVersion = LibraryUtilities.GetFeatureVersion(version);
 
             return version switch
             {
