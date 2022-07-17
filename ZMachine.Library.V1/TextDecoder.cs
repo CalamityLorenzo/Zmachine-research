@@ -6,17 +6,45 @@ using System.Threading.Tasks;
 
 namespace ZMachine.Library.V1
 {
+
+
     public class TextDecoder
     {
+        private enum ShiftDirection
+        {
+            Unknown = 0,
+            Up,
+            Down,
+
+        }
+
         private readonly int version;
         private readonly byte[] memory;
         private readonly AbbreviationsTable abbreviations;
-
+        private readonly Dictionary<string, Dictionary<byte, char>> VersionDictionaries;
         public TextDecoder(int Version, byte[] Memory, AbbreviationsTable Abbreviations)
         {
             version = Version;
             memory = Memory;
             abbreviations = Abbreviations;
+
+            // TODO: Custom dictionaruies kept in the story file.
+            if (version > 1)
+                VersionDictionaries = new()
+                {
+                    {"A0", ZCharDictionaries.A0Decode },
+                    {"A1", ZCharDictionaries.A1Decode },
+                    {"A2", ZCharDictionaries.A2V3Decode }
+                };
+            else
+            {
+                VersionDictionaries = new()
+                {
+                    {"A0", ZCharDictionaries.A0Decode },
+                    {"A1", ZCharDictionaries.A1Decode },
+                    {"A2", ZCharDictionaries.A2V1Decode }
+                };
+            }
         }
 
         /// <summary>
@@ -27,58 +55,113 @@ namespace ZMachine.Library.V1
         /// <returns></returns>
         public string DecodeZChars(byte[] singleZChars)
         {
-            Dictionary<byte, char> decodeDictionary = ZCharDictionaries.A0Decode;
-            //char[] allChars = new char[singleZChars.Length / 2 * 3];
+            if (version > 3)
+                return DecodeZCharsV3Upwards(singleZChars);
+            else
+                return DecodeZCharsV2Downwards(singleZChars);
+        }
 
+        private string DecodeZCharsV2Downwards(byte[] singleZChars)
+        {
             List<Char> allChars = new();
-            string DictType = null;
-            Dictionary<byte, char>? oldDictionary = null;
-            for (var x = 0; x < singleZChars.Length; x++)
+
+            var currentDictionary = new KeyValuePair<string, Dictionary<byte, char>>("A0", VersionDictionaries["A0"]);
+            var oldDictionaryKey = "A0";
+            // Simple Shift means '2' or '3' eg next char only is going to be SHIFTed
+            var shiftLock = false;
+            bool getAbbreviation = true;
+            int decodeZSCII = 0;
+            byte ZSCIIChar = 0;
+            for (var x = 0; x < singleZChars.Length; ++x)
             {
-                if (singleZChars[x] < 4)
+                var currentChar = singleZChars[x];
+                // Sneaking a little loop into athe current loop.
+                if (decodeZSCII > 0)
                 {
-                    if (singleZChars[x] == 0)
-                        allChars.Add(' ');
-                }
-                else if (singleZChars[x] != 4 && singleZChars[x] != 5)
-                {
-                    allChars.Add(decodeDictionary[singleZChars[x]]);
-                    if (oldDictionary != null)
+                    if (decodeZSCII == 2)
                     {
-                        decodeDictionary = oldDictionary;
-                        oldDictionary = null;
+                        ZSCIIChar = (byte)(singleZChars[x] & 31);
+                        decodeZSCII = 1;
                     }
-                    DictType = null;
-                }
-                else
-                {
-                    if (singleZChars[x] == 4)
+                    else if (decodeZSCII == 1)
                     {
-                        if (x == 0 || singleZChars[x - 1] != 4)
+                        var result = ((byte)ZSCIIChar << 5) | ((byte)(singleZChars[x] & 31));
+                        // exceptions for the zchars in v1.
+                        if (result == 0)
                         {
-                            oldDictionary = decodeDictionary;
-                            decodeDictionary = ZCharDictionaries.A1Decode;
+                            allChars.Add(' ');
                         }
-                    }
-                    else if (singleZChars[x] == 5)
-                    {
-                        if (x == 0 || singleZChars[x - 1] != 5)
+                        else if (result == 1 && version == 1)
                         {
-                            oldDictionary = decodeDictionary;
-                            decodeDictionary = ZCharDictionaries.A2V3Decode;
+                            allChars.Add('\n');
                         }
+                        else
+                        {
+                            allChars.Add((char)result);
+                        }
+
+                        decodeZSCII = 0;
                     }
-                    else
-                        allChars[x] = ' ';
-                    //else
-                    //    allChars[x] = ' ';
+                }
+                else if (getAbbreviation)
+                {
+                    var entryAddress = this.abbreviations.GetEntryAddress(1, currentChar);
+                    allChars.AddRange(this.DecodeAbbreviationEntry(entryAddress));
+                    getAbbreviation = false;
+                }
+                else // actual character code work
+                {
+                    if (currentChar == 1)
+                    {
+                        getAbbreviation = true;
+                    }
+                    else if (currentChar == 2 || currentChar == 3 || currentChar == 4 || currentChar == 5)
+                    {
+                        var newDictionaryKey = ShiftDictionary(currentChar % 2 == 0 ? ShiftDirection.Up : ShiftDirection.Down, currentDictionary.Key);
+                        oldDictionaryKey = currentDictionary.Key;
+                        currentDictionary = new KeyValuePair<string, Dictionary<byte, char>>(newDictionaryKey, VersionDictionaries[newDictionaryKey]);
+                        if (currentChar > 3) shiftLock = true;
+                    }
+                    else if (currentChar == 6) // ZChar
+                    {
+                        decodeZSCII = 2;
+                    }
+
                 }
             }
 
             return new string(allChars.ToArray());
         }
 
-        public string DecodeZCharsWithAbbreviations(byte[] singleZChars)
+        /// <summary>
+        /// Choosing dictionaries is a little risky in v1 and v2.
+        /// </summary>
+        /// <param name="shift"></param>
+        /// <param name="currentDictionaryKey"></param>
+        /// <returns></returns>
+        private string ShiftDictionary(ShiftDirection shift, string currentDictionaryKey)
+        {
+            if (shift == ShiftDirection.Up)
+            {
+                return currentDictionaryKey switch
+                {
+                    "A0" => "A1",
+                    "A1" => "A2",
+                    "A2" => "A1",
+                };
+            }
+            else
+            {
+                return currentDictionaryKey switch
+                {
+                    "A0" => "A2",
+                    "A1" => "A0",
+                    "A2" => "A1",
+                };
+            }
+        }
+
+        public string DecodeZCharsV3Upwards(byte[] singleZChars)
         {
             Dictionary<byte, char> decodeDictionary = ZCharDictionaries.A0Decode;
             //char[] allChars = new char[singleZChars.Length / 2 * 3];

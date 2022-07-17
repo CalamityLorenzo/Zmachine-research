@@ -32,6 +32,7 @@ namespace ZMachineTools
             }
             this.FeaturesVersion = LibraryUtilities.GetFeatureVersion(StoryHeader.Version);
             this.DictionaryTable = new DictionaryTable(StoryHeader.DictionaryTable, Memory);
+            this.AbbreviationTable = new AbbreviationsTable(StoryHeader.AbbreviationTable, Memory, StoryHeader.Version);
         }
 
         public void Dictionary()
