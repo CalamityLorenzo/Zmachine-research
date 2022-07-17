@@ -17,9 +17,6 @@ namespace ZMachine.Library.V1
             else
                 totalAbbreviations = 96;
         }
-
-
-
         public int StartAddress { get; }
         public byte[] Memory { get; }
         /// <summary>
@@ -28,7 +25,7 @@ namespace ZMachine.Library.V1
         /// That's the start of the abbreviation word(s).
         /// </summary>
         /// <param name="abbrevIdx"></param>
-        /// <returns></returns>1
+        /// <returns></returns>
         public int this[int abbrevIdx]
         {
             get
@@ -39,6 +36,13 @@ namespace ZMachine.Library.V1
                 return rawAddress * 2;
             }
         }
+        /// <summary>
+        /// Returns the memory address pointed at by the contents of the Abbreviation table entry.
+        /// The Memory address is a Word Address and thus must have it's value multipled by 2. 
+        /// That's the start of the abbreviation word(s).
+        /// </summary>
+        /// <param name="abbrevIdx"></param>
+        /// <returns></returns>
 
         public int GetEntryAddress(int table, int entry)
         {
