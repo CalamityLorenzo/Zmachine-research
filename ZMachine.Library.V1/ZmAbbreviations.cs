@@ -42,10 +42,10 @@ namespace ZMachine.Library.V1
 
         public int GetEntryAddress(int table, int entry)
         {
-            var address = ((32 * (table - 1)) + entry) * 2;
-            var basicAddress = (int)this.Memory.Get2ByteValue(address + StartAddress);
-            basicAddress *= 2;
-            return basicAddress;
+            var address = ((32 * (table - 1)) + entry)*2;
+            var basicAddress = (int)this.Memory.Get2ByteValue(StartAddress+ address);
+
+            return basicAddress * 2;
         }
     }
 }

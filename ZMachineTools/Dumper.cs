@@ -58,8 +58,12 @@ namespace ZMachineTools
             {
                 var abbreviationAddress = this.AbbreviationTable[x];
                 // Do the thing with the text;
-                Console.WriteLine(this.TextDecoder.DecodeAbbreviationEntry(abbreviationAddress));
+                Console.WriteLine($"{x}\t:\t'{this.TextDecoder.DecodeAbbreviationEntry(abbreviationAddress)}'");
             }
+
+
+            var b = this.TextDecoder.DecodeAbbreviationEntry(this.AbbreviationTable[69]);
+            var c = this.TextDecoder.DecodeAbbreviationEntry(this.AbbreviationTable.GetEntryAddress(3, 5));
 
             /*
              *             for (var y = 1; y < 4; ++y)
@@ -152,6 +156,13 @@ namespace ZMachineTools
                 Console.WriteLine($"Username:\t\t\t\t $12\t:\t{this.StoryHeader.Username}");
                 Console.WriteLine($"Invform version:\t\t\t $12\t:\t{this.StoryHeader.InformVersion}");
             }
+        }
+
+        public string DecodeText(byte[] text)
+        {
+            var startAddress = 0;
+            var chars = this.TextDecoder.GetZChars(text, ref startAddress);
+            return this.TextDecoder.DecodeZChars(chars);
         }
     }
 }

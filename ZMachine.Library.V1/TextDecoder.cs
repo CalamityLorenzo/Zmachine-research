@@ -163,7 +163,8 @@ namespace ZMachine.Library.V1
 
         public string DecodeZCharsV3Upwards(byte[] singleZChars)
         {
-            Dictionary<byte, char> decodeDictionary = ZCharDictionaries.A0Decode;
+            var currentDictionary = KeyValuePair.Create("A0", this.VersionDictionaries["A0"]);
+
             //char[] allChars = new char[singleZChars.Length / 2 * 3];
             // The string to be built
             List<Char> allChars = new();
@@ -173,12 +174,11 @@ namespace ZMachine.Library.V1
             // convert that in zChars and shove it into the allChars list
             // (remember to move past the abbreviation byte too)
             int getAbbreviation = 0;
-            Dictionary<byte, char>? oldDictionary = null;
-            bool isA2Dictionary = false;
             byte isZChar = 0;
             byte ZSCIIChar = 0;
             for (var x = 0; x < singleZChars.Length; x++)
             {
+                var currentChar = singleZChars[x];
                 if (isZChar > 0)
                 {
                     if (isZChar == 2)
@@ -196,8 +196,9 @@ namespace ZMachine.Library.V1
                 }
                 else if (getAbbreviation > 0)
                 {
-                    var entryAddress = abbreviations.GetEntryAddress(getAbbreviation, singleZChars[x]);
-                    allChars.AddRange(this.DecodeAbbreviationEntry(entryAddress));
+                    var entryAddress = abbreviations.GetEntryAddress(getAbbreviation, currentChar);
+                    var abbreviation = this.DecodeAbbreviationEntry(entryAddress);
+                    allChars.AddRange(abbreviation);
                     // lets just get that sorted    
                     getAbbreviation = 0;
 
@@ -206,31 +207,19 @@ namespace ZMachine.Library.V1
                 {
                     if (singleZChars[x] == 0)
                         allChars.Add(' ');
-                    else
+                    else // 1-3 == Abbreviation table lookup.
                         getAbbreviation = singleZChars[x];
                 }
-                else if (singleZChars[x] == 4)
+                else if (singleZChars[x] == 4 || singleZChars[x] == 5)
                 {
-                    if (x == 0 || singleZChars[x - 1] != 4)
-                    {
-                        oldDictionary = decodeDictionary;
-                        decodeDictionary = ZCharDictionaries.A1Decode;
-                    }
-                }
-                else if (singleZChars[x] == 5)
-                {
-                    if (x == 0 || singleZChars[x - 1] != 5)
-                    {
-                        oldDictionary = decodeDictionary;
-                        decodeDictionary = ZCharDictionaries.A2V3Decode;
-                        isA2Dictionary = true;
-                    }
+                    var key = singleZChars[x] == 4 ? "A1" : "A2";
+                    currentDictionary = KeyValuePair.Create(key, this.VersionDictionaries[key]);
                 }
                 else
-                {
-                    if (!isA2Dictionary)
+                { // We are writing the actual content here!
+                    if (currentDictionary.Key != "A2")
                         // Normal case.
-                        allChars.Add(decodeDictionary[singleZChars[x]]);
+                        allChars.Add(currentDictionary.Value[singleZChars[x]]);
                     else
                     {   // 10 byte extended characters
                         if (singleZChars[x] == 6)
@@ -239,16 +228,13 @@ namespace ZMachine.Library.V1
                         }
                         else
                         {
-                            allChars.Add(decodeDictionary[singleZChars[x]]);
+                            allChars.Add(currentDictionary.Value[singleZChars[x]]);
                         }
-                        isA2Dictionary = false;
                     }
-                    // If we switched dictionaries,
-                    // switch backagain.
-                    if (oldDictionary != null)
+
+                    if (currentDictionary.Key != "A0")
                     {
-                        decodeDictionary = oldDictionary;
-                        oldDictionary = null;
+                        currentDictionary = KeyValuePair.Create("A0", this.VersionDictionaries["A0"]);
                     }
                 }
             }

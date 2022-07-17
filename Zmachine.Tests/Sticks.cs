@@ -48,5 +48,24 @@ namespace Zmachine.Tests
             zmachineTools.Dictionary();
             Assert.Pass("Passed!");
         }
+
+        [Test(Description = "String tests")]
+        public void DecodeText()
+        {
+            var filename = "Curses\\curses.z5";
+
+            Console.WriteLine($"==== {filename} ====");
+            using var fileStream = File.Open(filename, FileMode.Open);
+            fileStream.Position = 0x22AC;
+
+            var stringBuffer = new byte[20];
+            fileStream.Read(stringBuffer, 0, 20);
+
+            var zmachineTools = new Tools(fileStream);
+            var message = zmachineTools.DecodeText(stringBuffer);
+            Console.WriteLine(message);
+            Console.WriteLine("History of the Meldrews (vol. II)");
+            Assert.IsTrue("History of the Meldrews (vol. II)" == message);
+        }
     }
 }
