@@ -12,6 +12,9 @@ namespace ZMachineTools
         private DictionaryTable DictionaryTable;
 
         public AbbreviationsTable AbbreviationTable { get; private set; }
+
+        private TextDecoder TextDecoder;
+
         public HeaderExtensionTable HeaderExtensions { get; }
 
         public Tools(Stream storyData)
@@ -33,6 +36,7 @@ namespace ZMachineTools
             this.FeaturesVersion = LibraryUtilities.GetFeatureVersion(StoryHeader.Version);
             this.DictionaryTable = new DictionaryTable(StoryHeader.DictionaryTable, Memory);
             this.AbbreviationTable = new AbbreviationsTable(StoryHeader.AbbreviationTable, Memory, StoryHeader.Version);
+            this.TextDecoder = new TextDecoder(Memory, AbbreviationTable, StoryHeader.Version);
         }
 
         public void Dictionary()
@@ -49,13 +53,25 @@ namespace ZMachineTools
 
         public void Abbreviations()
         {
-            this.AbbreviationTable = new AbbreviationsTable(this.StoryHeader.AbbreviationTable, Memory, this.StoryHeader.Version);
-
             for (var x = 0; x < AbbreviationTable.Length; ++x)
             {
-                var abbreviationsBytes = this.AbbreviationTable[x];
+                var abbreviationAddress = this.AbbreviationTable[x];
                 // Do the thing with the text;
+                Console.WriteLine(this.TextDecoder.DecodeAbbreviationEntry(abbreviationAddress));
             }
+
+            /*
+             *             for (var y = 1; y < 4; ++y)
+            {
+                for (var x = 1; x < 33; ++x)
+                {
+                    //var abbreviationAddress = this.AbbreviationTable[x];
+                    var abbreviationAddress = this.AbbreviationTable.GetEntryAddress(y, x);
+                    // Do the thing with the text;
+                    Console.WriteLine(this.TextDecoder.DecodeAbbreviationEntry(abbreviationAddress));
+                }
+            }*/
+
         }
 
         public void Objects()

@@ -22,7 +22,7 @@ namespace ZMachine.Library.V1
         private readonly byte[] memory;
         private readonly AbbreviationsTable abbreviations;
         private readonly Dictionary<string, Dictionary<byte, char>> VersionDictionaries;
-        public TextDecoder(int Version, byte[] Memory, AbbreviationsTable Abbreviations)
+        public TextDecoder(byte[] Memory, AbbreviationsTable Abbreviations, int Version)
         {
             version = Version;
             memory = Memory;
