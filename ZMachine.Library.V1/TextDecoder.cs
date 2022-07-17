@@ -271,7 +271,7 @@ namespace ZMachine.Library.V1
                 isTerminated = (rawBytes[idx] >> 7 == 1);
                 // So three chars are in here.
                 // Get the individual characters out
-                // COnvert two bytes into an Int16 (16 bits 4 bytes) move the top 8 bits to the left 1 byte and 
+                // Convert two bytes into an Int16 (16 bits 4 bytes) move the top 8 bits to the left 1 byte and 
                 ushort zWord = (ushort)((rawBytes[idx] << 8) | rawBytes[idx + 1]);
                 byte[] currentZchars = GetZCharBytesFromWord(zWord);
                 // Decode the characters
@@ -314,7 +314,6 @@ namespace ZMachine.Library.V1
             var memoryAddress = 0;
             var AllBytes = GetZChars(charData, ref memoryAddress);
             return DecodeZChars(AllBytes);
-
         }
 
         public string DecodeAbbreviationEntry(int startAddress)
