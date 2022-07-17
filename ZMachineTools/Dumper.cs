@@ -48,6 +48,7 @@ namespace ZMachineTools
                 // All the bytes
                 var dictionaryBytes = this.DictionaryTable[x];
                 // get the text
+                Console.WriteLine(this.TextDecoder.DecodeDictionaryEntry(dictionaryBytes));
             }
         }
 

@@ -208,10 +208,25 @@ namespace ZMachine.Library.V1
                         allChars.Add(' ');
                     else
                         getAbbreviation = singleZChars[x];
-
                 }
-                // Where we actually write the text.
-                else if (singleZChars[x] != 4 && singleZChars[x] != 5)
+                else if (singleZChars[x] == 4)
+                {
+                    if (x == 0 || singleZChars[x - 1] != 4)
+                    {
+                        oldDictionary = decodeDictionary;
+                        decodeDictionary = ZCharDictionaries.A1Decode;
+                    }
+                }
+                else if (singleZChars[x] == 5)
+                {
+                    if (x == 0 || singleZChars[x - 1] != 5)
+                    {
+                        oldDictionary = decodeDictionary;
+                        decodeDictionary = ZCharDictionaries.A2V3Decode;
+                        isA2Dictionary = true;
+                    }
+                }
+                else
                 {
                     if (!isA2Dictionary)
                         // Normal case.
@@ -236,29 +251,8 @@ namespace ZMachine.Library.V1
                         oldDictionary = null;
                     }
                 }
-                else
-                {
-                    if (singleZChars[x] == 4)
-                    {
-                        if (x == 0 || singleZChars[x - 1] != 4)
-                        {
-                            oldDictionary = decodeDictionary;
-                            decodeDictionary = ZCharDictionaries.A1Decode;
-                        }
-                    }
-                    else if (singleZChars[x] == 5)
-                    {
-                        if (x == 0 || singleZChars[x - 1] != 5)
-                        {
-                            oldDictionary = decodeDictionary;
-                            decodeDictionary = ZCharDictionaries.A2V3Decode;
-                            isA2Dictionary = true;
-                        }
-                    }
-                    else
-                        allChars[x] = ' ';
-                }
             }
+
 
             return new string(allChars.ToArray());
         }

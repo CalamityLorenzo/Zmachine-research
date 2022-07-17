@@ -35,5 +35,18 @@ namespace Zmachine.Tests
             zmachineTools.Abbreviations();
             Assert.Pass("Passed!");
         }
+
+        [Test(Description = "Display all the Dictionary Entries")]
+        public void DictionaryTable()
+        {
+            var filename = "Curses\\curses.z5";
+
+            Console.WriteLine($"==== {filename} ====");
+            using var fileStream = File.Open(filename, FileMode.Open);
+            fileStream.Position = 0;
+            var zmachineTools = new Tools(fileStream);
+            zmachineTools.Dictionary();
+            Assert.Pass("Passed!");
+        }
     }
 }
