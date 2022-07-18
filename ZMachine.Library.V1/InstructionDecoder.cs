@@ -74,9 +74,6 @@ namespace Zmachine.V2
 
         }
 
-
-
-
         //long      2OP     small constant, variable
         private DecodedInstruction longInstruction(byte[] memory, ref int address)
         {
@@ -120,7 +117,7 @@ namespace Zmachine.V2
 
 
             // The opcode fits in the bottom 4 bits
-            var decimalInstruction = instructionModulo(topmostByte, operand1Type != OperandType.Omitted ? 128 : 176, 16);
+            var decimalInstruction = InstructionModulo(topmostByte, operand1Type != OperandType.Omitted ? 128 : 176, 16);
             var instruction = operand1Type == OperandType.Omitted ?
                                             instructions[$"0OP:{decimalInstruction}"] :
                                             instructions[$"1OP:{decimalInstruction}"];
@@ -142,22 +139,6 @@ namespace Zmachine.V2
 
             return new DecodedInstruction(instruction, new[] { new InstructionOperands(operand: operand, operandType: operand1Type) }, store, branch, instructionStartAddress.ToString("X"), $"{allBytes} {stringData}");
 
-        }
-
-        // the range Size seemsto be 1more than than actual range
-        // is this cos of thezero?
-        int instructionModulo(int instructionByte, int lowestRange, int rangeSize)
-        {
-            if (instructionByte > lowestRange + rangeSize)
-            {
-                var difference = instructionByte - lowestRange;
-                if (difference > rangeSize)
-                {
-                    difference = difference % rangeSize;
-                }
-                return lowestRange + difference;
-            }
-            return instructionByte;
         }
 
         private DecodedInstruction extendedInstruction(byte[] memory, ref int address)
@@ -289,6 +270,23 @@ namespace Zmachine.V2
             OperandType.Omitted => new byte[] { 0 },
             OperandType.Variable => new[] { memory[address += 1] }
         };
+
+        // the range Size seemsto be 1more than than actual range
+        // is this cos of thezero?
+        int InstructionModulo(int instructionByte, int lowestRange, int rangeSize)
+        {
+            if (instructionByte > lowestRange + rangeSize)
+            {
+                var difference = instructionByte - lowestRange;
+                if (difference > rangeSize)
+                {
+                    difference = difference % rangeSize;
+                }
+                return lowestRange + difference;
+            }
+            return instructionByte;
+        }
+
 
     }
 }
