@@ -10,7 +10,7 @@ namespace ZMachine.Library.V1.Objects
          ushort Sibling,
          ushort Child,
          string PropertiesAddress,
-         ObjectPropertyTable Properties
+         ObjectPropertyTable PropertyTable
         );
     public record ObjectPropertyTable(ushort length, byte[] shortNameBytres, ObjectProperty[] Properties );
 

@@ -83,8 +83,8 @@ namespace ZMachineTools
         {
             Console.WriteLine($"Total Objects : {this.ObjectTable.TotalObjects}");
             Console.WriteLine($"Object Size : {this.ObjectTable.ObjectSize}");
-            for (var x = 0; x < this.ObjectTable.PropertyDefaults.Length; ++x)
-                Console.WriteLine($"{x + 1}\t : {this.ObjectTable.PropertyDefaults[x]} : {this.ObjectTable.PropertyDefaults[x]:X}");
+            // for (var x = 0; x < this.ObjectTable.PropertyDefaults.Length; ++x)
+             //   Console.WriteLine($"{x + 1}\t : {this.ObjectTable.PropertyDefaults[x]} : {this.ObjectTable.PropertyDefaults[x]:X}");
 
 
 
@@ -92,8 +92,12 @@ namespace ZMachineTools
             for (var x = 1; x < this.ObjectTable.TotalObjects; ++x)
             {
                 var obj = this.ObjectTable.GetObject((ushort)x);
-                var zChars = this.TextDecoder.GetZChars(obj.Properties.shortNameBytres);
+                var zChars = this.TextDecoder.GetZChars(obj.PropertyTable.shortNameBytres);
                 Console.WriteLine(this.TextDecoder.DecodeZChars(zChars));
+                for(var y=0;y< obj.PropertyTable.Properties.Length; ++y)
+                {
+                    Console.WriteLine(obj.PropertyTable.Properties[x]);
+                }
             }
         }
 

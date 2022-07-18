@@ -77,13 +77,9 @@ namespace ZMachine.Library.V1.Objects
         {
 
             if (objectId > TotalObjects) throw new ArgumentOutOfRangeException("object id is nonsense.");
-
-            var results = new byte[TotalObjects];
             var startAttributes = objectTableStartLocation + ObjectSize * objectId;
             var startPaSibCh = startAttributes + 6;
-            var attributes = memory[startAttributes..startPaSibCh]; // First 6 bytes are the (48 bits)
-
-            //var NameBytes = PropertyHeaderName(memory.Get2ByteValue(endAttributes + 6));
+            var attributes = memory[startAttributes..startPaSibCh]; // First 6 bytes are the attributes (48/32 bits)
 
 
             // Get the object properties list.
@@ -137,7 +133,7 @@ namespace ZMachine.Library.V1.Objects
                 Sibling: memory.Get2ByteValue(startPaSibCh + 2),
                 Child: memory.Get2ByteValue(startPaSibCh + 4),
                 PropertiesAddress: $"{memory.Get2ByteValue(startPaSibCh + 6)} : {memory.Get2ByteValueHex(startPaSibCh + 6)}",
-                Properties: objectPropertyTable
+                PropertyTable: objectPropertyTable
               );
             return objectDetails;
         }
