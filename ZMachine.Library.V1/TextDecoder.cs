@@ -15,7 +15,6 @@ namespace ZMachine.Library.V1
             Unknown = 0,
             Up,
             Down,
-
         }
 
         private readonly int version;
@@ -133,35 +132,7 @@ namespace ZMachine.Library.V1
             return new string(allChars.ToArray());
         }
 
-        /// <summary>
-        /// Choosing dictionaries is a little risky in v1 and v2.
-        /// </summary>
-        /// <param name="shift"></param>
-        /// <param name="currentDictionaryKey"></param>
-        /// <returns></returns>
-        private string ShiftDictionary(ShiftDirection shift, string currentDictionaryKey)
-        {
-            if (shift == ShiftDirection.Up)
-            {
-                return currentDictionaryKey switch
-                {
-                    "A0" => "A1",
-                    "A1" => "A2",
-                    "A2" => "A1",
-                };
-            }
-            else
-            {
-                return currentDictionaryKey switch
-                {
-                    "A0" => "A2",
-                    "A1" => "A0",
-                    "A2" => "A1",
-                };
-            }
-        }
-
-        public string DecodeZCharsV3Upwards(byte[] singleZChars)
+        private string DecodeZCharsV3Upwards(byte[] singleZChars)
         {
             var currentDictionary = KeyValuePair.Create("A0", this.VersionDictionaries["A0"]);
 
@@ -241,6 +212,34 @@ namespace ZMachine.Library.V1
 
 
             return new string(allChars.ToArray());
+        }
+
+        /// <summary>
+        /// Choosing dictionaries is a little risky in v1 and v2.
+        /// </summary>
+        /// <param name="shift"></param>
+        /// <param name="currentDictionaryKey"></param>
+        /// <returns></returns>
+        private string ShiftDictionary(ShiftDirection shift, string currentDictionaryKey)
+        {
+            if (shift == ShiftDirection.Up)
+            {
+                return currentDictionaryKey switch
+                {
+                    "A0" => "A1",
+                    "A1" => "A2",
+                    "A2" => "A1",
+                };
+            }
+            else
+            {
+                return currentDictionaryKey switch
+                {
+                    "A0" => "A2",
+                    "A1" => "A0",
+                    "A2" => "A1",
+                };
+            }
         }
 
 

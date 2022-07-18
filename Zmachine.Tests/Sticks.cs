@@ -3,7 +3,7 @@ using ZMachineTools;
 namespace Zmachine.Tests
 {
     
-    public class Tests
+    public class BasicTests
     {
         [SetUp]
         public void Setup()
