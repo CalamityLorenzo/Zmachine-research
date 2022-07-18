@@ -67,5 +67,20 @@ namespace Zmachine.Tests
             Console.WriteLine("History of the Meldrews (vol. II)");
             Assert.IsTrue("History of the Meldrews (vol. II)" == message);
         }
+
+        [Test(Description = "Object Table")]
+        public void ObjectTable()
+        {
+            var filename = "Curses\\curses.z5";
+
+            Console.WriteLine($"==== {filename} ====");
+            using var fileStream = File.Open(filename, FileMode.Open);
+            fileStream.Position = 0;
+
+            var zmachineTools = new Tools(fileStream);
+            zmachineTools.Objects();
+
+            Assert.IsTrue(true);
+        }
     }
 }

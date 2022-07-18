@@ -1,4 +1,5 @@
 ﻿using ZMachine.Library.V1;
+using ZMachine.Library.V1.Objects;
 using ZMachine.Library.V1.Utilities;
 
 namespace ZMachineTools
@@ -11,11 +12,12 @@ namespace ZMachineTools
         private FeaturesVersion FeaturesVersion;
         private DictionaryTable DictionaryTable;
 
-        public AbbreviationsTable AbbreviationTable { get; private set; }
+        public AbbreviationsTable AbbreviationTable;
 
         private TextDecoder TextDecoder;
+        private ObjectTable ObjectTable;
 
-        public HeaderExtensionTable HeaderExtensions { get; }
+        public HeaderExtensionTable HeaderExtensions;
 
         public Tools(Stream storyData)
         {
@@ -37,6 +39,7 @@ namespace ZMachineTools
             this.DictionaryTable = new DictionaryTable(StoryHeader.DictionaryTable, Memory);
             this.AbbreviationTable = new AbbreviationsTable(StoryHeader.AbbreviationTable, Memory, StoryHeader.Version);
             this.TextDecoder = new TextDecoder(Memory, AbbreviationTable, StoryHeader.Version);
+            this.ObjectTable = new ObjectTable(this.StoryHeader.ObjectTable, this.StoryHeader.Version, Memory);
         }
 
         public void Dictionary()
@@ -78,7 +81,20 @@ namespace ZMachineTools
 
         public void Objects()
         {
+            Console.WriteLine($"Total Objects : {this.ObjectTable.TotalObjects}");
+            Console.WriteLine($"Object Size : {this.ObjectTable.ObjectSize}");
+            for (var x = 0; x < this.ObjectTable.PropertyDefaults.Length; ++x)
+                Console.WriteLine($"{x + 1}\t : {this.ObjectTable.PropertyDefaults[x]} : {this.ObjectTable.PropertyDefaults[x]:X}");
 
+
+
+            // Lets get all the objects
+            for (var x = 1; x < this.ObjectTable.TotalObjects; ++x)
+            {
+                var obj = this.ObjectTable.GetObject((ushort)x);
+                var zChars = this.TextDecoder.GetZChars(obj.Properties.shortNameBytres);
+                Console.WriteLine(this.TextDecoder.DecodeZChars(zChars));
+            }
         }
 
         /// <summary>

@@ -242,6 +242,11 @@ namespace ZMachine.Library.V1
             }
         }
 
+        public byte[] GetZChars(byte[] rawBytes)
+        {
+            var start = 0;
+            return GetZChars(rawBytes, ref start);
+        }
 
         /// <summary>
         /// Returns an array of bytes in the ZChar format.
