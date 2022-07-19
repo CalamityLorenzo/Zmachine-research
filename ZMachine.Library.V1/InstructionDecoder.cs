@@ -55,7 +55,6 @@ namespace ZMachine.Library.V1
 
                 };
 
-                Console.WriteLine($"${instruction.startAddress} : {instruction.instruction.Name} {instruction.hexBytes}");
                 return instruction;
 
             }
@@ -299,7 +298,8 @@ namespace ZMachine.Library.V1
                 isTerminated = (rawBytes[idx] >> 7 == 1);
                 // Decode the characters
                 var nxtIdx = idx + 1;
-                AllBytes.AddRange(rawBytes[idx..nxtIdx]);
+                AllBytes.Add(rawBytes[idx]);
+                AllBytes.Add(rawBytes[nxtIdx]);
 
                 if (!isTerminated)
                     idx += 2; // Byte address words

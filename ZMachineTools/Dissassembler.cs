@@ -50,14 +50,14 @@ namespace ZMachineTools
 
         public void Disassemble()
         {
+            // Start at the entry point
             var setStartingPoint = LibraryUtilities.SetProgramCounterInitialValue(StoryHeader.Version, this.StoryHeader.ProgramCounterInitalValue, this.StoryHeader.RoutinesOffset);
 
             var callName = "";
             // Lets get to the starting point of thje app.
             // v6 has a main, earlier has a jump off point
-            int mainRountineAddress = 0;
-
-            while (mainRountineAddress == 0)
+            int mainRoutineAddress = 0;
+            while (mainRoutineAddress == 0)
             {
                 var instruction = InstructionDecoder.Decode(this.Memory, setStartingPoint);
                 callName = instruction.instruction.Name;
@@ -65,22 +65,39 @@ namespace ZMachineTools
                 {
                     var operand = instruction.operands[0].operand;
                     // Routime start is a packed adddress and of course, version dependen.
-                    mainRountineAddress = (operand[0] << 8 | operand[1]).GetPackedAddress(StoryHeader.Version, 0, 0);
+                    mainRoutineAddress = (operand[0] << 8 | operand[1]).GetPackedAddress(StoryHeader.Version, 0, 0);
                 }
 
             }
-            var startAddress = mainRountineAddress.ToString("X4");
-            var arguments = Memory[mainRountineAddress];
+
+            Dictionary<int, RoutineInfo> Routines = new Dictionary<int, RoutineInfo> { { mainRoutineAddress, new RoutineInfo(mainRoutineAddress, 0,0, false) } };
+
+            ProcessRoutine(mainRoutineAddress, Routines);
+            // This is the first method and entry point
+
+        }
+
+        private void ProcessRoutine(int routineAddress,  Dictionary<int, RoutineInfo> Routines)
+        {
+            var startAddress = routineAddress;
+            var arguments = Memory[routineAddress];
+            var lengthR = $"arguments = {arguments}".Length;
+            Console.WriteLine("*".PadLeft(lengthR, '*'));
+            var startAddressHex = routineAddress.ToString("X4");
+            Console.WriteLine($"Address = {startAddressHex}");
+            Console.WriteLine($"arguments = {arguments}");
+            Console.WriteLine("*".PadLeft(lengthR, '*'));
+
             if (arguments < 15)
             {
-                Console.WriteLine(startAddress);
+                Console.WriteLine(startAddressHex);
                 var callStack = new List<int>();
                 while (true)
                 {
                     try
                     {
-                        var currentInstr = InstructionDecoder.Decode(this.Memory, mainRountineAddress += 1);
-                        mainRountineAddress += currentInstr.endAddress - currentInstr.startAddress;
+                        var currentInstr = InstructionDecoder.Decode(this.Memory, routineAddress += 1);
+                        routineAddress += currentInstr.endAddress - currentInstr.startAddress;
                         switch (currentInstr.instruction.Name)
                         {
                             case "call": // only present in v3
@@ -91,31 +108,40 @@ namespace ZMachineTools
                                 {
                                     // First operand is always the routine.
                                     var operands = currentInstr.operands[0];
-                                    callStack.Add((operands.operand[0] << 8 | operands.operand[1]).GetPackedAddress(this.StoryHeader.Version, 0, 0));
+                                    var packedAddress = (operands.operand[0] << 8 | operands.operand[1]).GetPackedAddress(this.StoryHeader.Version, 0, 0);
+                                    if (!Routines.ContainsKey(packedAddress))
+                                        Routines[packedAddress] = new RoutineInfo(packedAddress, 0,0, false);
                                     break;
                                 }
                             case "print":
                                 {
                                     var bytes = TextDecoder.GetZChars(currentInstr.operands[0].operand);
                                     var stringData = $"{TextDecoder.DecodeZChars(bytes)}";
-                                    Console.WriteLine(stringData);
+                                //    Console.WriteLine($"\"{stringData.Replace("\r", "^")}\"");
                                     break;
                                 }
-
                         }
+
+                       // Console.WriteLine($"${currentInstr.startAddress:X} : {currentInstr.instruction.Name} {currentInstr.hexBytes}");
+
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex.Message);
+                        var oldRoutine = Routines[startAddress];
+                        Routines[startAddress] = oldRoutine with { addressError = routineAddress, arguments= arguments, isParsed=true };
+
+                        var nextRoutine = Routines.FirstOrDefault(a => a.Value.isParsed == false);
+                        if (nextRoutine.Equals(default(KeyValuePair<int, RoutineInfo>))==false)
+                        {
+                            ProcessRoutine(nextRoutine.Value.addressStart, Routines);
+                        }
                         break;
                     }
 
                 }
             }
 
-
-
-            // This is the first method and entry point
 
         }
     }
