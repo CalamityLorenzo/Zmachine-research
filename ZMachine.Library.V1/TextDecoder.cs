@@ -255,7 +255,7 @@ namespace ZMachine.Library.V1
         /// <param name="rawBytes"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public byte[] GetZChars(byte[] rawBytes, ref int startAddress)
+        public static byte[] GetZChars(byte[] rawBytes, ref int startAddress)
         {
 
             if (rawBytes.Length < 2)

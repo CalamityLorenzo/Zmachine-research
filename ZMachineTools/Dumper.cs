@@ -178,7 +178,7 @@ namespace ZMachineTools
         public string DecodeText(byte[] text)
         {
             var startAddress = 0;
-            var chars = this.TextDecoder.GetZChars(text, ref startAddress);
+            var chars = TextDecoder.GetZChars(text, ref startAddress);
             return this.TextDecoder.DecodeZChars(chars);
         }
     }

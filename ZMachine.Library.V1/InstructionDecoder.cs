@@ -3,68 +3,61 @@ using ZMachine.Library.V1.Instructions;
 using ZMachine.Library.V1.Objects;
 using ZMachine.Library.V1.Utilities;
 
-namespace Zmachine.V2
+namespace ZMachine.Library.V1
 {
     // Decoding instructions from the source.
     // And the terrible, terrible way it was originally encoded
-    internal partial class InstructionDecoder
+    public partial class InstructionDecoder
     {
-        private AbbreviationsTable abbreviations;
-        private ObjectTable objects;
-        private TextDecoder textDecoder;
-        private FeaturesVersion instructionVersion;
         private int version;
         private Dictionary<string, MachineInstruction> instructions;
 
-
-
-        public InstructionDecoder(Dictionary<string, MachineInstruction> instructions, AbbreviationsTable abbreviations, ObjectTable objects, TextDecoder textDecoder, int version)
+        public InstructionDecoder(Dictionary<string, MachineInstruction> instructions, int version)
         {
-            this.abbreviations = abbreviations;
             this.instructions = instructions;
-            this.objects = objects;
-            this.textDecoder = textDecoder;
-            this.instructionVersion = LibraryUtilities.GetFeatureVersion(version);
             this.version = version;
         }
 
-        public void Decode(byte[] memory, int startAddress, int version)
-        {
-            Console.WriteLine($"Starting at {startAddress} : {startAddress.ToString("X")}");
-            // Translate first byte to work out which table we are looking at.
 
+
+        /// <summary>
+        /// Reads the next instruction.
+        /// </summary>
+        /// <param name="memory">Bag of memory</param>
+        /// <param name="startAddress">The startingaddress</param>
+        /// <returns>Decoded Instruction with operands.</returns>
+        //
+        public DecodedInstruction Decode(byte[] memory, int startAddress)
+        {
+            //Console.WriteLine($"Starting at {startAddress} : {startAddress.ToString("X")}");
+
+            // Translate first byte to work out which table we are looking at.
             var firstByte = memory[startAddress];
-            // Each instruction falls into one of these groups, This is just making it easier to process them.
-            // I think.
             var currentAddress = startAddress;
-            List<DecodedInstruction> instructs = new List<DecodedInstruction>();
             // Current address in hex.
             var hexAddress = "";
             try
             {
-                while (currentAddress < memory.Length)
+                hexAddress = $"{currentAddress:X4}";
+                var instruction = firstByte switch
                 {
-                    hexAddress = currentAddress.ToString("X");
-                    var instruction = firstByte switch
-                    {
-                        >= 0 and <= 0x1F => longInstruction(memory, ref currentAddress),
-                        >= 0x20 and <= 0x3f => longInstruction(memory, ref currentAddress),
-                        >= 0x40 and <= 0x5f => longInstruction(memory, ref currentAddress),
-                        >= 0x60 and <= 0x7f => longInstruction(memory, ref currentAddress),
-                        >= 0x80 and <= 0x8f => shortInstruction(memory, ref currentAddress),
-                        >= 0x90 and <= 0x9f => shortInstruction(memory, ref currentAddress),
-                        >= 0xa0 and <= 0xaf => shortInstruction(memory, ref currentAddress),
-                        >= 0xb0 and < 0xbe or 0xBf => shortInstruction(memory, ref currentAddress),
-                        0xBE => this.version == 5 ? extendedInstruction(memory, ref currentAddress) : longInstruction(memory, ref currentAddress),
-                        >= 0xc0 and <= 0xdf => variableInstruction(memory, ref currentAddress),
-                        >= 0xe0 and <= 0xff => variableInstruction(memory, ref currentAddress),
+                    >= 0 and <= 0x1F => longInstruction(memory, ref currentAddress),
+                    >= 0x20 and <= 0x3f => longInstruction(memory, ref currentAddress),
+                    >= 0x40 and <= 0x5f => longInstruction(memory, ref currentAddress),
+                    >= 0x60 and <= 0x7f => longInstruction(memory, ref currentAddress),
+                    >= 0x80 and <= 0x8f => shortInstruction(memory, ref currentAddress),
+                    >= 0x90 and <= 0x9f => shortInstruction(memory, ref currentAddress),
+                    >= 0xa0 and <= 0xaf => shortInstruction(memory, ref currentAddress),
+                    >= 0xb0 and < 0xbe or 0xBf => shortInstruction(memory, ref currentAddress),
+                    0xBE => this.version == 5 ? extendedInstruction(memory, ref currentAddress) : longInstruction(memory, ref currentAddress),
+                    >= 0xc0 and <= 0xdf => variableInstruction(memory, ref currentAddress),
+                    >= 0xe0 and <= 0xff => variableInstruction(memory, ref currentAddress),
 
-                    };
-                    instructs.Add(instruction);
-                    Console.WriteLine($"${instruction.startAddress} : {instruction.instruction.Name} {instruction.hexBytes}");
-                    firstByte = memory[currentAddress += 1];
+                };
 
-                }
+                Console.WriteLine($"${instruction.startAddress} : {instruction.instruction.Name} {instruction.hexBytes}");
+                return instruction;
+
             }
             catch (Exception ex)
             {
@@ -100,7 +93,7 @@ namespace Zmachine.V2
             var branch = GetBranch(memory, ref address, instruction.Branch);
 
             var allBytes = GetHexAddressRange(instructionStartAddress, address, memory);
-            return new DecodedInstruction(instruction, operandInfo, store, branch, instructionStartAddress.ToString("X"), allBytes);
+            return new DecodedInstruction(instruction, operandInfo, store, branch, instructionStartAddress, address, allBytes);
 
 
         }
@@ -126,18 +119,18 @@ namespace Zmachine.V2
             // remember we are not dealing with the offset at all here
             var branch = GetBranch(memory, ref address, instruction.Branch);
 
-            var stringData = "";
             if (instruction.Name == "print")
             {
                 address += 1;
                 //address == 0xd5f1
                 // we have hit a natural 6 need to 
-                var zChars = this.textDecoder.GetZChars(memory, ref address);
-                stringData = $"{this.textDecoder.DecodeZChars(zChars)}";
+                var zChars = this.LiteralStringBytes(memory, ref address);
+                operand = zChars;
             }
+
             var allBytes = GetHexAddressRange(instructionStartAddress, address, memory);
 
-            return new DecodedInstruction(instruction, new[] { new InstructionOperands(operand: operand, operandType: operand1Type) }, store, branch, instructionStartAddress.ToString("X"), $"{allBytes} {stringData}");
+            return new DecodedInstruction(instruction, new[] { new InstructionOperands(operand: operand, operandType: operand1Type) }, store, branch, instructionStartAddress, address, $"{allBytes}");
 
         }
 
@@ -170,7 +163,7 @@ namespace Zmachine.V2
             // remember we are not dealing with the offset at all here
             var branch = GetBranch(memory, ref address, instruction.Branch);
             var allBytes = GetHexAddressRange(instructionStartAddress, address, memory);
-            return new DecodedInstruction(instruction, operands.ToArray() , store, branch, instructionStartAddress.ToString("X"), allBytes);
+            return new DecodedInstruction(instruction, operands.ToArray(), store, branch , instructionStartAddress, address, allBytes);
 
         }
 
@@ -199,8 +192,7 @@ namespace Zmachine.V2
 
             var allBytes = GetHexAddressRange(instructionStartAddress, address, memory);
 
-
-            return new DecodedInstruction(instruction, operands.ToArray(), store, branch, instructionStartAddress.ToString("X2"), allBytes);
+            return new DecodedInstruction(instruction, operands.ToArray(), store, branch, instructionStartAddress, address, allBytes);
 
         }
 
@@ -287,6 +279,36 @@ namespace Zmachine.V2
             return instructionByte;
         }
 
+        private byte[] LiteralStringBytes(byte[] rawBytes, ref int startAddress)
+        {
 
+            if (rawBytes.Length < 2)
+            {
+                throw new Exception("Two bytes minimum");
+            }
+            // Zchars come in 2 byte zwords (16 bit), for their encoding
+            // 1bit 5BitChar 5BitChar 5BitChar 
+            // The completed word/sentance etc
+            List<byte> AllBytes = new List<byte>();
+            var isTerminated = false;
+            var idx = startAddress;
+            // We don't know how large the string is until we hit a terminator value (top bit == 1)
+            while (!isTerminated)
+            {
+                // is the top bit a 1, last section of the string.
+                isTerminated = (rawBytes[idx] >> 7 == 1);
+                // Decode the characters
+                var nxtIdx = idx + 1;
+                AllBytes.AddRange(rawBytes[idx..nxtIdx]);
+
+                if (!isTerminated)
+                    idx += 2; // Byte address words
+                else
+                    idx += 1; // Move to the end of the current byte address
+            }
+            //startAddress = idx - 1;
+            startAddress = idx;
+            return AllBytes.ToArray();
+        }
     }
 }

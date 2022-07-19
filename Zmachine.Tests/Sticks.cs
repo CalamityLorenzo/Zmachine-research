@@ -82,5 +82,21 @@ namespace Zmachine.Tests
 
             Assert.IsTrue(true);
         }
+
+
+        [Test(Description = "Disassemble")]
+        public void BasicDisassemble()
+        {
+            var filename = "Curses\\curses.z5";
+
+            Console.WriteLine($"==== {filename} ====");
+            using var fileStream = File.Open(filename, FileMode.Open);
+            fileStream.Position = 0;
+
+            var zmachineTools = new Dissassembler(fileStream);
+            zmachineTools.Disassemble();
+
+            Assert.IsTrue(true);
+        }
     }
 }
