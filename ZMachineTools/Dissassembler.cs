@@ -70,14 +70,41 @@ namespace ZMachineTools
 
             }
 
-            Dictionary<int, RoutineInfo> Routines = new Dictionary<int, RoutineInfo> { { mainRoutineAddress, new RoutineInfo(mainRoutineAddress, 0,0, false) } };
-
-            ProcessRoutine(mainRoutineAddress, Routines);
-            // This is the first method and entry point
+            Dictionary<int, RoutineInfo> Routines = new Dictionary<int, RoutineInfo> { { mainRoutineAddress, new RoutineInfo(mainRoutineAddress, 0, 0, false) } };
+            // Collect all the routines we can muster
+            CollectionRoutines(mainRoutineAddress, Routines);
+            //Now order them.
+            var allLayouts = ProcessRoutines(Routines.OrderBy(a => a.Key)
+                           .Select(a => a.Value).ToList());
 
         }
 
-        private void ProcessRoutine(int routineAddress,  Dictionary<int, RoutineInfo> Routines)
+        private List<RoutineLayout> ProcessRoutines(List<RoutineInfo> routineInfos)
+        {
+            // Okay we should have onw a complete stack of rountines, and their sizes.
+            // so we can process each one in turn, and stick the data in an updated record.
+            List<RoutineLayout> layouts = new List<RoutineLayout>();
+            foreach (var routine in routineInfos)
+            {
+                var address = routine.addressStart;
+                List<string> instructions = new();
+                while (address < routine.addressError)
+                {
+                    var instruction = InstructionDecoder.Decode(this.Memory, address);
+                    instructions.Add($"${instruction.startAddress:X} : {instruction.instruction.Name} {instruction.hexBytes}");
+                }
+                layouts.Add(new RoutineLayout(
+
+                    addressStart: routine.addressStart,
+                    addressError: routine.addressError,
+                    arguments: routine.arguments,
+                    disassembly: instructions
+                ));
+            }
+            return layouts;
+        }
+
+        private void CollectionRoutines(int routineAddress, Dictionary<int, RoutineInfo> Routines)
         {
             var startAddress = routineAddress;
             var arguments = Memory[routineAddress];
@@ -88,10 +115,11 @@ namespace ZMachineTools
             Console.WriteLine($"arguments = {arguments}");
             Console.WriteLine("*".PadLeft(lengthR, '*'));
 
-            if (arguments < 15)
+            if (arguments < 16)
             {
                 Console.WriteLine(startAddressHex);
                 var callStack = new List<int>();
+                // Gotta fail sometime!
                 while (true)
                 {
                     try
@@ -110,31 +138,36 @@ namespace ZMachineTools
                                     var operands = currentInstr.operands[0];
                                     var packedAddress = (operands.operand[0] << 8 | operands.operand[1]).GetPackedAddress(this.StoryHeader.Version, 0, 0);
                                     if (!Routines.ContainsKey(packedAddress))
-                                        Routines[packedAddress] = new RoutineInfo(packedAddress, 0,0, false);
+                                        Routines[packedAddress] = new RoutineInfo(packedAddress, 0, 0, false);
                                     break;
                                 }
-                            case "print":
-                                {
-                                    var bytes = TextDecoder.GetZChars(currentInstr.operands[0].operand);
-                                    var stringData = $"{TextDecoder.DecodeZChars(bytes)}";
-                                //    Console.WriteLine($"\"{stringData.Replace("\r", "^")}\"");
-                                    break;
-                                }
+                                //case "print":
+                                //    {
+                                //        var bytes = TextDecoder.GetZChars(currentInstr.operands[0].operand);
+                                //        var stringData = $"{TextDecoder.DecodeZChars(bytes)}";
+                                //        Console.WriteLine($"\"{stringData.Replace("\r", "^")}\"");
+                                //        break;
+                                //    }
                         }
 
-                       // Console.WriteLine($"${currentInstr.startAddress:X} : {currentInstr.instruction.Name} {currentInstr.hexBytes}");
+                        Console.WriteLine($"${currentInstr.startAddress:X} : {currentInstr.instruction.Name} {currentInstr.hexBytes}");
 
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex.Message);
                         var oldRoutine = Routines[startAddress];
-                        Routines[startAddress] = oldRoutine with { addressError = routineAddress, arguments= arguments, isParsed=true };
-
-                        var nextRoutine = Routines.FirstOrDefault(a => a.Value.isParsed == false);
-                        if (nextRoutine.Equals(default(KeyValuePair<int, RoutineInfo>))==false)
+                        Routines[startAddress] = oldRoutine with
                         {
-                            ProcessRoutine(nextRoutine.Value.addressStart, Routines);
+                            addressError = routineAddress,
+                            arguments = arguments,
+                            isParsed = true
+                        };
+                        var nextRoutine = Routines.FirstOrDefault(a => a.Value.isParsed == false);
+                        // Find the next routine.
+                        if (nextRoutine.Equals(default(KeyValuePair<int, RoutineInfo>)) == false)
+                        {
+                            CollectionRoutines(nextRoutine.Value.addressStart, Routines);
                         }
                         break;
                     }
