@@ -27,7 +27,7 @@ namespace ZMachine.Library.V1
         /// <param name="startAddress">The startingaddress</param>
         /// <returns>Decoded Instruction with operands.</returns>
         //
-        public DecodedInstruction Decode(byte[] memory, int startAddress)
+        public DecodedInstruction Decode(byte[] memory, ref int startAddress)
         {
             //Console.WriteLine($"Starting at {startAddress} : {startAddress.ToString("X")}");
 
@@ -54,7 +54,7 @@ namespace ZMachine.Library.V1
                     >= 0xe0 and <= 0xff => variableInstruction(memory, ref currentAddress),
 
                 };
-
+                startAddress = currentAddress;
                 return instruction;
 
             }

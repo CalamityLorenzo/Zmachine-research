@@ -59,7 +59,7 @@ namespace ZMachineTools
             int mainRoutineAddress = 0;
             while (mainRoutineAddress == 0)
             {
-                var instruction = InstructionDecoder.Decode(this.Memory, setStartingPoint);
+                var instruction = InstructionDecoder.Decode(this.Memory, ref setStartingPoint);
                 callName = instruction.instruction.Name;
                 if (callName.StartsWith("call"))
                 {
@@ -72,7 +72,7 @@ namespace ZMachineTools
 
             Dictionary<int, RoutineInfo> Routines = new Dictionary<int, RoutineInfo> { { mainRoutineAddress, new RoutineInfo(mainRoutineAddress, 0, 0, false) } };
             // Collect all the routines we can muster
-            CollectionRoutines(mainRoutineAddress, Routines);
+            CollectRoutineInfo(mainRoutineAddress, Routines);
             //Now order them.
             var allLayouts = ProcessRoutines(Routines.OrderBy(a => a.Key)
                            .Select(a => a.Value).ToList());
@@ -90,8 +90,14 @@ namespace ZMachineTools
                 List<string> instructions = new();
                 while (address < routine.addressError)
                 {
-                    var instruction = InstructionDecoder.Decode(this.Memory, address);
-                    instructions.Add($"${instruction.startAddress:X} : {instruction.instruction.Name} {instruction.hexBytes}");
+                    try
+                    {
+                        var instruction = InstructionDecoder.Decode(this.Memory, ref address);
+                        instructions.Add($"${instruction.startAddress:X} : {instruction.instruction.Name} {instruction.hexBytes}");
+                    }
+                    catch (Exception ex){
+                        ;
+                    }
                 }
                 layouts.Add(new RoutineLayout(
 
@@ -100,11 +106,12 @@ namespace ZMachineTools
                     arguments: routine.arguments,
                     disassembly: instructions
                 ));
+                
             }
             return layouts;
         }
 
-        private void CollectionRoutines(int routineAddress, Dictionary<int, RoutineInfo> Routines)
+        private void CollectRoutineInfo(int routineAddress, Dictionary<int, RoutineInfo> Routines)
         {
             var startAddress = routineAddress;
             var arguments = Memory[routineAddress];
@@ -124,8 +131,9 @@ namespace ZMachineTools
                 {
                     try
                     {
-                        var currentInstr = InstructionDecoder.Decode(this.Memory, routineAddress += 1);
-                        routineAddress += currentInstr.endAddress - currentInstr.startAddress;
+                        routineAddress += 1;
+                        var currentInstr = InstructionDecoder.Decode(this.Memory, ref routineAddress);
+                        //routineAddress += currentInstr.endAddress - currentInstr.startAddress;
                         switch (currentInstr.instruction.Name)
                         {
                             case "call": // only present in v3
@@ -167,7 +175,7 @@ namespace ZMachineTools
                         // Find the next routine.
                         if (nextRoutine.Equals(default(KeyValuePair<int, RoutineInfo>)) == false)
                         {
-                            CollectionRoutines(nextRoutine.Value.addressStart, Routines);
+                            CollectRoutineInfo(nextRoutine.Value.addressStart, Routines);
                         }
                         break;
                     }
