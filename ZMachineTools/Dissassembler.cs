@@ -70,7 +70,7 @@ namespace ZMachineTools
 
             }
 
-            Dictionary<int, RoutineInfo> Routines = new Dictionary<int, RoutineInfo> { { mainRoutineAddress, new RoutineInfo(mainRoutineAddress, 0, 0, false) } };
+            Dictionary<int, RoutineInfo> Routines = new Dictionary<int, RoutineInfo> { { mainRoutineAddress, new RoutineInfo(mainRoutineAddress, 0, 0,0, false) } };
             // Collect all the routines we can muster
             CollectRoutineInfo(mainRoutineAddress, Routines);
             //Now order them.
@@ -86,14 +86,16 @@ namespace ZMachineTools
             List<RoutineLayout> layouts = new List<RoutineLayout>();
             foreach (var routine in routineInfos)
             {
-                var address = routine.addressStart;
+                // Skip the arguments bit
+                var address = routine.addressStart+1;
                 List<string> instructions = new();
-                while (address < routine.addressError)
+                while (address < routine.lastInstruction)
                 {
                     try
                     {
                         var instruction = InstructionDecoder.Decode(this.Memory, ref address);
                         instructions.Add($"${instruction.startAddress:X} : {instruction.instruction.Name} {instruction.hexBytes}");
+                        address += 1;
                     }
                     catch (Exception ex){
                         ;
@@ -102,7 +104,7 @@ namespace ZMachineTools
                 layouts.Add(new RoutineLayout(
 
                     addressStart: routine.addressStart,
-                    addressError: routine.addressError,
+                    lastInstruction: routine.addressError,
                     arguments: routine.arguments,
                     disassembly: instructions
                 ));
@@ -126,6 +128,7 @@ namespace ZMachineTools
             {
                 Console.WriteLine(startAddressHex);
                 var callStack = new List<int>();
+                var lastAddress = 0; // After an instruction has been parsed, where the pointer is at.
                 // Gotta fail sometime!
                 while (true)
                 {
@@ -146,7 +149,7 @@ namespace ZMachineTools
                                     var operands = currentInstr.operands[0];
                                     var packedAddress = (operands.operand[0] << 8 | operands.operand[1]).GetPackedAddress(this.StoryHeader.Version, 0, 0);
                                     if (!Routines.ContainsKey(packedAddress))
-                                        Routines[packedAddress] = new RoutineInfo(packedAddress, 0, 0, false);
+                                        Routines[packedAddress] = new RoutineInfo(packedAddress, 0, 0,0, false);
                                     break;
                                 }
                                 //case "print":
@@ -158,6 +161,7 @@ namespace ZMachineTools
                                 //    }
                         }
 
+                        lastAddress = routineAddress;
                         Console.WriteLine($"${currentInstr.startAddress:X} : {currentInstr.instruction.Name} {currentInstr.hexBytes}");
 
                     }
@@ -167,7 +171,9 @@ namespace ZMachineTools
                         var oldRoutine = Routines[startAddress];
                         Routines[startAddress] = oldRoutine with
                         {
+                            addressStart = startAddress,
                             addressError = routineAddress,
+                            lastInstruction= lastAddress,
                             arguments = arguments,
                             isParsed = true
                         };
