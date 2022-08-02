@@ -90,10 +90,8 @@ namespace ZMachineTools
                     }
                 case "add":
                     {
-                        var opCodel = currentInstr.operands[0].operand[0] <<8 | ;
-                        var opCoder = currentInstr.operands[1].operand;
-
-
+                        var opCodel = currentInstr.operands[0].operand[0] << 8 | currentInstr.operands[0].operand[1];
+                        var opCoder = currentInstr.operands[1].operand[0] << 8 | currentInstr.operands[1].operand[1];
                         Console.WriteLine();
                         break;
                     }
