@@ -14,7 +14,7 @@ namespace ZMachineTools
 
         public AbbreviationsTable AbbreviationTable;
 
-        private TextDecoder TextDecoder;
+        private TextProcessor TextDecoder;
         private ObjectTable ObjectTable;
 
         public HeaderExtensionTable HeaderExtensions;
@@ -38,7 +38,7 @@ namespace ZMachineTools
             this.FeaturesVersion = LibraryUtilities.GetFeatureVersion(StoryHeader.Version);
             this.DictionaryTable = new DictionaryTable(StoryHeader.DictionaryTable, Memory);
             this.AbbreviationTable = new AbbreviationsTable(StoryHeader.AbbreviationTable, Memory, StoryHeader.Version);
-            this.TextDecoder = new TextDecoder(Memory, AbbreviationTable, StoryHeader.Version);
+            this.TextDecoder = new TextProcessor(Memory, AbbreviationTable, StoryHeader.Version);
             this.ObjectTable = new ObjectTable(this.StoryHeader.ObjectTable, this.StoryHeader.Version, Memory);
         }
 
@@ -83,21 +83,17 @@ namespace ZMachineTools
         {
             Console.WriteLine($"Total Objects : {this.ObjectTable.TotalObjects}");
             Console.WriteLine($"Object Size : {this.ObjectTable.ObjectSize}");
-            // for (var x = 0; x < this.ObjectTable.PropertyDefaults.Length; ++x)
-             //   Console.WriteLine($"{x + 1}\t : {this.ObjectTable.PropertyDefaults[x]} : {this.ObjectTable.PropertyDefaults[x]:X}");
-
-
 
             // Lets get all the objects
-            for (var x = 1; x < this.ObjectTable.TotalObjects; ++x)
+            for (var x = 1; x <= this.ObjectTable.TotalObjects; ++x)
             {
                 var obj = this.ObjectTable.GetObject((ushort)x);
                 var zChars = this.TextDecoder.GetZChars(obj.PropertyTable.shortNameBytres);
-                Console.WriteLine(this.TextDecoder.DecodeZChars(zChars));
-                for(var y=0;y< obj.PropertyTable.Properties.Length; ++y)
-                {
-                    Console.WriteLine(obj.PropertyTable.Properties[x]);
-                }
+                Console.WriteLine($"{x} {this.TextDecoder.DecodeZChars(zChars)}");
+                Console.WriteLine($"Parent:{obj.Parent}");               //for(var y=0;y< obj.PropertyTable.Properties.Length; ++y)
+                //{
+                //    Console.WriteLine(obj.PropertyTable.Properties[y]);
+                //}
             }
         }
 
@@ -178,8 +174,25 @@ namespace ZMachineTools
         public string DecodeText(byte[] text)
         {
             var startAddress = 0;
-            var chars = TextDecoder.GetZChars(text, ref startAddress);
+            var chars = TextProcessor.GetZChars(text, ref startAddress);
             return this.TextDecoder.DecodeZChars(chars);
+        }
+
+        public string DecodeZChars(byte[] zchars)
+        {
+            return this.TextDecoder.DecodeZChars(zchars);
+        }
+
+        public byte[] EncodeText(string text)
+        {
+            var bytes = this.TextDecoder.EncodeUtf8ZChars(text);
+            return bytes;
+        }
+
+        public byte[] EncodeWords(byte[] zchars)
+        {
+            var bytes = this.TextDecoder.EncodeZcharsToWords(zchars);
+            return bytes;
         }
     }
 }

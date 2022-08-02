@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace ZMachine.Library.V1
 {
-
-
-    public class TextDecoder
+    public class TextProcessor
     {
+        // Which way we are moving betwen dictionaries
         private enum ShiftDirection
         {
             Unknown = 0,
@@ -20,8 +19,10 @@ namespace ZMachine.Library.V1
         private readonly int version;
         private readonly byte[] memory;
         private readonly AbbreviationsTable abbreviations;
-        private readonly Dictionary<string, Dictionary<byte, char>> VersionDictionaries;
-        public TextDecoder(byte[] Memory, AbbreviationsTable Abbreviations, int Version)
+        private readonly Dictionary<string, Dictionary<byte, char>> DecodeDictionaries;
+        private readonly Dictionary<string, Dictionary<char, byte>> EncodeDictionaries;
+
+        public TextProcessor(byte[] Memory, AbbreviationsTable Abbreviations, int Version)
         {
             version = Version;
             memory = Memory;
@@ -29,26 +30,39 @@ namespace ZMachine.Library.V1
 
             // TODO: Custom dictionaruies kept in the story file.
             if (version > 1)
-                VersionDictionaries = new()
+            {
+                DecodeDictionaries = new()
                 {
                     {"A0", ZCharDictionaries.A0Decode },
                     {"A1", ZCharDictionaries.A1Decode },
                     {"A2", ZCharDictionaries.A2V3Decode }
                 };
+                EncodeDictionaries = new()
+                {
+                    {"A0", ZCharDictionaries.A0Encode },
+                    {"A1", ZCharDictionaries.A1Encode},
+                    {"A2", ZCharDictionaries.A2V3Encode},
+                };
+            }
             else
             {
-                VersionDictionaries = new()
+                DecodeDictionaries = new()
                 {
                     {"A0", ZCharDictionaries.A0Decode },
                     {"A1", ZCharDictionaries.A1Decode },
                     {"A2", ZCharDictionaries.A2V1Decode }
                 };
+                EncodeDictionaries = new()
+                {
+                    {"A0", ZCharDictionaries.A0Encode },
+                    {"A1", ZCharDictionaries.A1Encode},
+                    {"A2", ZCharDictionaries.A2V1Encode},
+                };
             }
         }
 
         /// <summary>
-        /// THis method assumes the singleZChars is completed (including abbreviations)
-        /// must be interpolated before calling this method.
+        /// Discrimator for what ever version we are using.
         /// </summary>
         /// <param name="singleZChars"></param>
         /// <returns></returns>
@@ -63,8 +77,7 @@ namespace ZMachine.Library.V1
         private string DecodeZCharsV2Downwards(byte[] singleZChars)
         {
             List<Char> allChars = new();
-
-            var currentDictionary = new KeyValuePair<string, Dictionary<byte, char>>("A0", VersionDictionaries["A0"]);
+            var currentDictionary = new KeyValuePair<string, Dictionary<byte, char>>("A0", DecodeDictionaries["A0"]);
             var oldDictionaryKey = "A0";
             // Simple Shift means '2' or '3' eg next char only is going to be SHIFTed
             var shiftLock = false;
@@ -79,12 +92,12 @@ namespace ZMachine.Library.V1
                 {
                     if (decodeZSCII == 2)
                     {
-                        ZSCIIChar = (byte)(singleZChars[x] & 31);
+                        ZSCIIChar = (byte)(currentChar & 31);
                         decodeZSCII = 1;
                     }
                     else if (decodeZSCII == 1)
                     {
-                        var result = ((byte)ZSCIIChar << 5) | ((byte)(singleZChars[x] & 31));
+                        var result = ((byte)ZSCIIChar << 5) | ((byte)(currentChar & 31));
                         // exceptions for the zchars in v1.
                         if (result == 0)
                         {
@@ -116,9 +129,9 @@ namespace ZMachine.Library.V1
                     }
                     else if (currentChar == 2 || currentChar == 3 || currentChar == 4 || currentChar == 5)
                     {
-                        var newDictionaryKey = ShiftDictionary(currentChar % 2 == 0 ? ShiftDirection.Up : ShiftDirection.Down, currentDictionary.Key);
+                        var newDictionaryKey = ShiftCharDictionary(currentChar % 2 == 0 ? ShiftDirection.Up : ShiftDirection.Down, currentDictionary.Key);
                         oldDictionaryKey = currentDictionary.Key;
-                        currentDictionary = new KeyValuePair<string, Dictionary<byte, char>>(newDictionaryKey, VersionDictionaries[newDictionaryKey]);
+                        currentDictionary = new KeyValuePair<string, Dictionary<byte, char>>(newDictionaryKey, DecodeDictionaries[newDictionaryKey]);
                         if (currentChar > 3) shiftLock = true;
                     }
                     else if (currentChar == 6) // ZChar
@@ -134,9 +147,8 @@ namespace ZMachine.Library.V1
 
         private string DecodeZCharsV3Upwards(byte[] singleZChars)
         {
-            var currentDictionary = KeyValuePair.Create("A0", this.VersionDictionaries["A0"]);
+            var currentDictionary = KeyValuePair.Create("A0", this.DecodeDictionaries["A0"]);
 
-            //char[] allChars = new char[singleZChars.Length / 2 * 3];
             // The string to be built
             List<Char> allChars = new();
 
@@ -145,23 +157,32 @@ namespace ZMachine.Library.V1
             // convert that in zChars and shove it into the allChars list
             // (remember to move past the abbreviation byte too)
             int getAbbreviation = 0;
-            byte isZChar = 0;
+            // Zhcars are the 10 byte characters (2x5).
+            // if we select  '6' this is set to 2.
+            // and the loop progresses counting down isZchar and decoded the characters
+            byte isZsciiChar = 0;
             byte ZSCIIChar = 0;
+            // TO DO : Change this to a while loop.
+            // it will make it esaier to read :
+            // eg abreviations are handled in the same loop iteration
+            // isZChar counter can be removed.
             for (var x = 0; x < singleZChars.Length; x++)
             {
                 var currentChar = singleZChars[x];
-                if (isZChar > 0)
+                if (isZsciiChar > 0)
                 {
-                    if (isZChar == 2)
+                    if (isZsciiChar == 2)
                     {
-                        ZSCIIChar = (byte)(singleZChars[x] & 31);
-                        isZChar = 1;
+                        ZSCIIChar = (byte)(currentChar & 31);
+                        isZsciiChar = 1;
                     }
-                    else if (isZChar == 1)
+                    else if (isZsciiChar == 1)
                     {
-                        var result = ((byte)ZSCIIChar << 5) | ((byte)(singleZChars[x] & 31));
+                        var result = ((byte)ZSCIIChar << 5) | ((byte)(currentChar & 31));
                         allChars.Add((char)result);
-                        isZChar = 0;
+                        isZsciiChar = 0;
+                        // Don't forget to reset the the fucking dictionary
+                        currentDictionary = KeyValuePair.Create("A0", this.DecodeDictionaries["A0"]);
                     }
 
                 }
@@ -174,42 +195,38 @@ namespace ZMachine.Library.V1
                     getAbbreviation = 0;
 
                 } // if we had an abbreviation dontt forget to step through, or you will get spurious characters
-                else if (singleZChars[x] < 4)
-                {
-                    if (singleZChars[x] == 0)
-                        allChars.Add(' ');
-                    else // 1-3 == Abbreviation table lookup.
-                        getAbbreviation = singleZChars[x];
-                }
-                else if (singleZChars[x] == 4 || singleZChars[x] == 5)
-                {
-                    var key = singleZChars[x] == 4 ? "A1" : "A2";
-                    currentDictionary = KeyValuePair.Create(key, this.VersionDictionaries[key]);
-                }
                 else
-                { // We are writing the actual content here!
-                    if (currentDictionary.Key != "A2")
-                        // Normal case.
-                        allChars.Add(currentDictionary.Value[singleZChars[x]]);
-                    else
-                    {   // 10 byte extended characters
-                        if (singleZChars[x] == 6)
-                        {
-                            isZChar = 2;
-                        }
-                        else
-                        {
-                            allChars.Add(currentDictionary.Value[singleZChars[x]]);
-                        }
-                    }
-
-                    if (currentDictionary.Key != "A0")
+                {
+                    if (currentChar == 0)
+                        allChars.Add(' ');
+                    else if (currentChar < 4)
+                        getAbbreviation = currentChar;
+                    else if (currentChar == 4 || currentChar == 5)
                     {
-                        currentDictionary = KeyValuePair.Create("A0", this.VersionDictionaries["A0"]);
+                        var key = currentChar == 4 ? "A1" : "A2";
+                        currentDictionary = KeyValuePair.Create(key, this.DecodeDictionaries[key]);
+                    }
+                    else if (currentChar == 6 && currentDictionary.Key == "A2")
+                    {
+                        isZsciiChar = 2;
+                    }
+                    else
+                    { // We are writing the actual content here!
+                        if (currentDictionary.Key != "A2")
+                            // Normal case.
+                            allChars.Add(currentDictionary.Value[currentChar]);
+                        else
+                        {   // 10 byte extended characters
+                            allChars.Add(currentDictionary.Value[currentChar]);
+                        }
+
+                        if (currentDictionary.Key != "A0")
+                        {
+                            currentDictionary = KeyValuePair.Create("A0", this.DecodeDictionaries["A0"]);
+                        }
                     }
                 }
             }
-
 
             return new string(allChars.ToArray());
         }
@@ -218,30 +235,61 @@ namespace ZMachine.Library.V1
         /// Choosing dictionaries is a little risky in v1 and v2.
         /// </summary>
         /// <param name="shift"></param>
-        /// <param name="currentDictionaryKey"></param>
+        /// <param name="currentKey"></param>
         /// <returns></returns>
-        private string ShiftDictionary(ShiftDirection shift, string currentDictionaryKey)
+        private string ShiftCharDictionary(ShiftDirection shift, string currentKey)
         {
             if (shift == ShiftDirection.Up)
             {
-                return currentDictionaryKey switch
+                return currentKey switch
                 {
                     "A0" => "A1",
                     "A1" => "A2",
                     "A2" => "A1",
+                    _ => throw new ArgumentOutOfRangeException("Up dictionary not found."),
                 };
             }
             else
             {
-                return currentDictionaryKey switch
+                return currentKey switch
                 {
                     "A0" => "A2",
                     "A1" => "A0",
                     "A2" => "A1",
+                    _ => throw new ArgumentOutOfRangeException("Down dictionary not found."),
                 };
             }
         }
 
+        public byte[] EncodeZcharsToWords(byte[] zChars)
+        {
+            // each 2 byte word contains 3 charactres.
+            // if the amount of chars is not divisible by3 
+            // add the remainder as padding (5's)
+            var mod3 = zChars.Length % 3;
+            if (mod3 == 1)
+                zChars = zChars.Concat(new byte[] { 5, 5 }).ToArray();
+            if (mod3 == 2)
+                zChars = zChars.Concat(new byte[] { 5 }).ToArray();
+
+            List<byte> zWords = new();
+            // now take that stack of bytes and turn 3 chars into 2 bytes....
+            for (var x = 0; x < zChars.Length; x += 3)
+            {
+                var top = zChars[x];
+                var middle = x + 1 < zChars.Length ? zChars[x + 1] : 5;
+                var bottom = x + 2 < zChars.Length ? zChars[x + 2] : 5;
+                var zWord = (ushort)((top & 0x1f) << 10 | (middle & 0x1f) << 5 | (bottom & 0x1f));
+                if (x + 3 >= zChars.Length)
+                    zWord = (ushort)(zWord | 0x8000); // set the top bit to show we are terminating the string.
+                zWords.Add((byte)(zWord>>8));
+                zWords.Add((byte)(zWord & 255 ));
+            }
+
+            return zWords.ToArray();
+        }
+
+        // Helper so you dont have to always pass a ref address
         public byte[] GetZChars(byte[] rawBytes)
         {
             var start = 0;
@@ -257,7 +305,6 @@ namespace ZMachine.Library.V1
         /// <exception cref="Exception"></exception>
         public static byte[] GetZChars(byte[] rawBytes, ref int startAddress)
         {
-
             if (rawBytes.Length < 2)
             {
                 throw new Exception("Two bytes minimum");
@@ -319,11 +366,82 @@ namespace ZMachine.Library.V1
             var AllBytes = GetZChars(charData, ref memoryAddress);
             return DecodeZChars(AllBytes);
         }
-
+        /// <summary>
+        /// Returns a complete abbreviation.
+        /// </summary>
+        /// <param name="startAddress"></param>
+        /// <returns></returns>
         public string DecodeAbbreviationEntry(int startAddress)
         {
             var AllBytes = GetZChars(memory, ref startAddress);
             return DecodeZChars(AllBytes);
+        }
+
+        /// <summary>
+        /// Encode a native string into a zmachine series of zchars
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public byte[] EncodeUtf8ZChars(string text)
+        {
+            List<byte> zChars = new(2); // This represents the 2 byte word of 1 control bit and three chars.
+            var allChars = text.GetEnumerator();
+            // Encode into the system dictionaries.
+            // This is missing a lot nuance regarding unicode.
+            while (allChars.MoveNext())
+            {
+                // Run through our list of chars and map them to the entries in the dictionaries (A0->A2)
+                // we also insert the contol characters.
+                var currentChar = allChars.Current;
+                if (EncodeDictionaries["A0"].ContainsKey(currentChar))
+                {
+                    zChars.Add(EncodeDictionaries["A0"][currentChar]);
+                }
+                else if (EncodeDictionaries["A1"].ContainsKey(currentChar))
+                {
+                    zChars.Add(4);// the next char is in A1
+                    zChars.Add(EncodeDictionaries["A1"][currentChar]);
+                }
+                else if (EncodeDictionaries["A2"].ContainsKey(currentChar))
+                {
+                    zChars.Add(5);// the next char is in A2
+                    zChars.Add(EncodeDictionaries["A2"][currentChar]);
+                }
+                // If we don't have a match then we hopefully have a direct ZSCII match instead.
+                else if ((byte)currentChar == 32)
+                {
+                    zChars.Add(0);
+                }
+                else
+                {
+                    // ZSCII incoming ten bit drama!
+                    zChars.Add(5);
+                    zChars.Add(6);
+                    var bottom = currentChar & 0x1f;
+                    var top = currentChar >> 5 & 0x1f;
+                    zChars.Add((byte)top);
+                    zChars.Add((byte)bottom);
+                }
+            }
+
+
+            return zChars.ToArray();
+        }
+
+        public void Dothings(List<byte> zChars)
+        {
+            List<byte> zWords = new List<byte>();
+            // now take that stack of bytes and turn 3 chars into 2 bytes....
+            for (var x = 0; x < zChars.Count; x += 3)
+            {
+                var top = zChars[x];
+                var middle = x + 1 < zChars.Count ? zChars[x + 1] : 5;
+                var bottom = x + 2 < zChars.Count ? zChars[x + 2] : 5;
+                var zWord = (ushort)(top & 0x1f | middle & 0x1f | bottom & 0x1f);
+                if (x + 3 > zChars.Count)
+                    zWord = (ushort)(zWord | 0x800); // set the top bit to show we are terminating the string.
+                zWords.AddRange(GetZCharBytesFromWord(zWord));
+            }
         }
     }
 }

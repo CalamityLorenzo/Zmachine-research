@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ZMachine.Library.V1;
+﻿using ZMachine.Library.V1;
 using ZMachine.Library.V1.Objects;
 using ZMachine.Library.V1.Utilities;
 
@@ -18,7 +13,7 @@ namespace ZMachineTools
         private FeaturesVersion FeaturesVersion;
         private DictionaryTable DictionaryTable;
         private AbbreviationsTable AbbreviationTable;
-        private TextDecoder TextDecoder;
+        private TextProcessor TextDecoder;
         private ObjectTable ObjectTable;
 
         public InstructionDecoder InstructionDecoder { get; }
@@ -42,7 +37,7 @@ namespace ZMachineTools
             this.FeaturesVersion = LibraryUtilities.GetFeatureVersion(StoryHeader.Version);
             this.DictionaryTable = new DictionaryTable(StoryHeader.DictionaryTable, Memory);
             this.AbbreviationTable = new AbbreviationsTable(StoryHeader.AbbreviationTable, Memory, StoryHeader.Version);
-            this.TextDecoder = new TextDecoder(Memory, AbbreviationTable, StoryHeader.Version);
+            this.TextDecoder = new TextProcessor(Memory, AbbreviationTable, StoryHeader.Version);
             this.ObjectTable = new ObjectTable(this.StoryHeader.ObjectTable, this.StoryHeader.Version, Memory);
 
             this.InstructionDecoder = new InstructionDecoder(LibraryUtilities.GetVersionInstructions(this.FeaturesVersion), StoryHeader.Version);
@@ -70,13 +65,39 @@ namespace ZMachineTools
 
             }
 
-            Dictionary<int, RoutineInfo> Routines = new Dictionary<int, RoutineInfo> { { mainRoutineAddress, new RoutineInfo(mainRoutineAddress, 0, 0,0, false) } };
+            Dictionary<int, RoutineInfo> Routines = new Dictionary<int, RoutineInfo> { { mainRoutineAddress, new RoutineInfo(mainRoutineAddress, 0, 0, 0, false) } };
             // Collect all the routines we can muster
             CollectRoutineInfo(mainRoutineAddress, Routines);
             //Now order them.
             var allLayouts = ProcessRoutines(Routines.OrderBy(a => a.Key)
                            .Select(a => a.Value).ToList());
 
+        }
+
+        public void Decode(byte[] instructions)
+        {
+            int start = 0;
+            var currentInstr = this.InstructionDecoder.Decode(instructions, ref start);
+
+            switch (currentInstr.instruction.Name)
+            {
+                case "print":
+                    {
+                        var bytes = TextDecoder.GetZChars(currentInstr.operands[0].operand);
+                        var stringData = $"{TextDecoder.DecodeZChars(bytes)}";
+                        Console.WriteLine($"\"{stringData.Replace("\r", "^")}\"");
+                        break;
+                    }
+                case "add":
+                    {
+                        var opCodel = currentInstr.operands[0].operand[0] <<8 | ;
+                        var opCoder = currentInstr.operands[1].operand;
+
+
+                        Console.WriteLine();
+                        break;
+                    }
+            }
         }
 
         private List<RoutineLayout> ProcessRoutines(List<RoutineInfo> routineInfos)
@@ -87,7 +108,7 @@ namespace ZMachineTools
             foreach (var routine in routineInfos)
             {
                 // Skip the arguments bit
-                var address = routine.addressStart+1;
+                var address = routine.addressStart + 1;
                 List<string> instructions = new();
                 while (address < routine.lastInstruction)
                 {
@@ -97,7 +118,8 @@ namespace ZMachineTools
                         instructions.Add($"${instruction.startAddress:X} : {instruction.instruction.Name} {instruction.hexBytes}");
                         address += 1;
                     }
-                    catch (Exception ex){
+                    catch (Exception ex)
+                    {
                         ;
                     }
                 }
@@ -108,7 +130,7 @@ namespace ZMachineTools
                     arguments: routine.arguments,
                     disassembly: instructions
                 ));
-                
+
             }
             return layouts;
         }
@@ -149,7 +171,7 @@ namespace ZMachineTools
                                     var operands = currentInstr.operands[0];
                                     var packedAddress = (operands.operand[0] << 8 | operands.operand[1]).GetPackedAddress(this.StoryHeader.Version, 0, 0);
                                     if (!Routines.ContainsKey(packedAddress))
-                                        Routines[packedAddress] = new RoutineInfo(packedAddress, 0, 0,0, false);
+                                        Routines[packedAddress] = new RoutineInfo(packedAddress, 0, 0, 0, false);
                                     break;
                                 }
                                 //case "print":
@@ -173,7 +195,7 @@ namespace ZMachineTools
                         {
                             addressStart = startAddress,
                             addressError = routineAddress,
-                            lastInstruction= lastAddress,
+                            lastInstruction = lastAddress,
                             arguments = arguments,
                             isParsed = true
                         };

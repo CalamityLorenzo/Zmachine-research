@@ -2,7 +2,7 @@
 {
     static class ZCharDictionaries
     {
-        public static Dictionary<char, int> A2V3 = new()
+        public static Dictionary<char, byte> A2V3Encode = new()
         {
             { '\r', 7 },
             { '0', 8 },
@@ -31,7 +31,7 @@
             { ')', 31 },
         };
 
-        public static Dictionary<char, int> A2V1 = new()
+        public static Dictionary<char, byte> A2V1Encode = new()
         {
             { '0', 7 },
             { '1', 8 },
@@ -60,7 +60,7 @@
             { ')', 31 },
         };
 
-        public static Dictionary<char, int> A0Encode = new()
+        public static Dictionary<char, byte> A0Encode = new()
         {
             { 'a', 6 },
             { 'b', 7 },
@@ -122,7 +122,7 @@
             { 31, 'z' },
         };
 
-        public static Dictionary<char, int> A1Encode = new()
+        public static Dictionary<char, byte> A1Encode = new()
         {
             { 'A', 6 },
             { 'B', 7 },

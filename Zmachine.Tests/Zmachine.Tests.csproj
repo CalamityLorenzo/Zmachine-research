@@ -21,6 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Curses\BlahOnMyKnees.z5">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Curses\curses.z5">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

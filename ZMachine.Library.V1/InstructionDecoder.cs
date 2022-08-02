@@ -1,7 +1,4 @@
-﻿using ZMachine.Library.V1;
-using ZMachine.Library.V1.Instructions;
-using ZMachine.Library.V1.Objects;
-using ZMachine.Library.V1.Utilities;
+﻿using ZMachine.Library.V1.Instructions;
 
 namespace ZMachine.Library.V1
 {

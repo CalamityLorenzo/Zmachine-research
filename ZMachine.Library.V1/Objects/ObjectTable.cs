@@ -5,15 +5,16 @@ namespace ZMachine.Library.V1.Objects
 {
     public class ObjectTable
     {
-        // v4 object layout
-        // the 48 attribute flags       parent sibling child     properties
+        // v4 object layout       6                           12             14
+        // the 48 attribute flags       parent sibling child     propertyTable
         // ---48 bits in 6 bytes--- ---3 words, i.e. 6 bytes---- ---2 bytes--
 
         // v1->3 object layout
+        //                  4                       7             9
         // 32 atribute flags    parent sibling child    properties
         // 
 
-        private int objectTableStartLocation;
+        private int ObjectTreeStart;
         private readonly int version;
         private byte[] memory;
 
@@ -32,7 +33,7 @@ namespace ZMachine.Library.V1.Objects
             int maximumObjects = version > 3 ? 65535 : 255;
             ObjectSize = version > 3 ? 14 : 9;
 
-            // Byte address of a list of properties.
+            // Byte address of a list of default properties.
             PropertyDefaults = new ushort[defaultSize];
             int PropertyHeaderIdx = objectTableLocation;
             for (var x = 0; x < defaultSize; x++)
@@ -43,7 +44,7 @@ namespace ZMachine.Library.V1.Objects
             }
 
             // We should be at the start location for the actual objects table.
-            objectTableStartLocation = PropertyHeaderIdx;
+            ObjectTreeStart = PropertyHeaderIdx;
 
             // Now populate the objects
             // 1. Find the first property table address
@@ -53,19 +54,25 @@ namespace ZMachine.Library.V1.Objects
             int propertyTableStartAddress = 0;
             for (int x = 0; x < maximumObjects; ++x)
             {
-                var objectStartLocation = memory[objectTableStartLocation + ObjectSize * x];
-                propertyTableStartAddress = memory.Get2ByteValue(objectStartLocation);
-                if (propertyTableStartAddress != 0)
+                var objectAddress = ObjectTreeStart + ObjectSize * x;
+                if (x == 0)
                 {
-                    break;
+                    var proprtyTableLocation = objectAddress + (version > 3 ? 12 : 8);
+                    propertyTableStartAddress = memory.Get2ByteValue(proprtyTableLocation);
+                }
+                else
+                {
+                    if (objectAddress > propertyTableStartAddress)
+                        break;
                 }
             }
-            var totalObjectTableSize = propertyTableStartAddress - objectTableStartLocation;
+            var totalObjectTableSize = propertyTableStartAddress - ObjectTreeStart;
             if (totalObjectTableSize == 0) throw new ArgumentOutOfRangeException("Cannnot calculate object table");
 
             TotalObjects = totalObjectTableSize / ObjectSize;
 
         }
+
         /// <summary>
         /// We build the object back to front.
         /// calculate all the relevnant boundaries, and then add propties, propertyheader, finally Objevt.
@@ -76,14 +83,16 @@ namespace ZMachine.Library.V1.Objects
         public ZmObject GetObject(ushort objectId)
         {
 
+            var attrbFlagsLength = version > 3 ? 6 : 4;
+
             if (objectId > TotalObjects) throw new ArgumentOutOfRangeException("object id is nonsense.");
-            var startAttributes = objectTableStartLocation + ObjectSize * objectId;
-            var startPaSibCh = startAttributes + 6;
+            var startAttributes = ObjectTreeStart + ObjectSize * (objectId-1);
+            var startPaSibCh = startAttributes + attrbFlagsLength;
             var attributes = memory[startAttributes..startPaSibCh]; // First 6 bytes are the attributes (48/32 bits)
 
 
             // Get the object properties list.
-            var propertyTableAddress = memory.Get2ByteValue(startPaSibCh + 6);
+            var propertyTableAddress = memory.Get2ByteValue(startPaSibCh + attrbFlagsLength);
             var propertyHeaderLength = memory[propertyTableAddress];
             var headerNameStart = propertyTableAddress + 1;
             var headerNameEnd = headerNameStart + (propertyHeaderLength * 2);
@@ -127,7 +136,7 @@ namespace ZMachine.Library.V1.Objects
             var objectPropertyTable = new ObjectPropertyTable(propertyHeaderLength, propertyHeaderNameBytes, objectProperties.ToArray());
             var objectDetails = new ZmObject(
                 ObjectId: objectId,
-                StartAddress: $"{objectTableStartLocation + ObjectSize * objectId} : ${objectTableStartLocation + ObjectSize * objectId:X}",
+                StartAddress: $"{ObjectTreeStart + ObjectSize * objectId} : ${ObjectTreeStart + ObjectSize * objectId:X}",
                 Attributes: new BitArray(attributes),
                 Parent: memory.Get2ByteValue(startPaSibCh),
                 Sibling: memory.Get2ByteValue(startPaSibCh + 2),
