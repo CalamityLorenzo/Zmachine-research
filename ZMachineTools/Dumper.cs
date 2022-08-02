@@ -17,7 +17,7 @@ namespace ZMachineTools
         private TextProcessor TextDecoder;
         private ObjectTable ObjectTable;
 
-        public HeaderExtensionTable HeaderExtensions;
+        public HeaderExtensionTable? HeaderExtensions;
 
         public Tools(Stream storyData)
         {

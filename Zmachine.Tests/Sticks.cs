@@ -99,7 +99,7 @@ namespace Zmachine.Tests
             using var fileStream = File.Open(filename, FileMode.Open);
             var zmachineTools = new Tools(fileStream);
             //var message2 = zmachineTools.DecodeText(stringBuffer);
-            var messageToEncode = "Where the weary wander @\"£ and the mighty cheese drowned.";
+            var messageToEncode = "Where the weary wander and the mighty cheese drowned.";
             var zChars = zmachineTools.EncodeText(messageToEncode);
             var decodedZChars = zmachineTools.DecodeZChars(zChars);
             var encodedBytes= zmachineTools.EncodeWords(zChars);
