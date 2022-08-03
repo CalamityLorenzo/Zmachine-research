@@ -89,8 +89,9 @@ namespace ZMachine.Monogame
                     case "new_line":
                         {
                             using StreamWriter sw = new StreamWriter(this.outputScreen, System.Text.Encoding.UTF8, bufferSize: 1, leaveOpen: true);
-                            sw.WriteLine();
+                            sw.Write(System.Environment.NewLine);
                             sw.Close();
+                            sw.Dispose();
                         }
                         break;
                 }

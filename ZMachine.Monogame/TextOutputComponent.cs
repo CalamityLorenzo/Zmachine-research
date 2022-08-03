@@ -22,18 +22,23 @@ namespace ZMachine.Monogame
         }
         public override void Update(GameTime gameTime)
         {
+
+            // TODO : THis is all very unsatisfactory.
             if (this.output.Length > 0)
             {
                 this.output.Position = 0;
                 using StreamReader sr = new StreamReader(this.output, Encoding.UTF8, bufferSize: (int)this.output.Length, leaveOpen: true);
-                //var theChars = new char[this.output.Length];
-                //Span<Char> sp = theChars;
-                //sr.ReadBlock(sp);
-                //sr.Close();
-                //output.SetLength(0);  
-                //this.textStream = new string(sp);
-                this.textStream += sr.ReadLine();
+                var theChars = new char[this.output.Length];
+                Span<Char> sp = theChars;
+                sr. ReadBlock(sp);
                 sr.Close();
+                //output.SetLength(0);  
+                //this.textStream = new string(sp)
+                ;
+                //var s = sr.ReadLine();
+                this.textStream += new string(sp).Replace("\0",String.Empty);
+                //sr.Close();
+                output.SetLength(0);
             }
         }
 
