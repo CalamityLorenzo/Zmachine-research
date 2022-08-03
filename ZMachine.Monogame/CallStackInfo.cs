@@ -1,4 +1,4 @@
 ﻿namespace ZMachine.Monogame
 {
-    internal record CallStackInfo(int returnAdrress, int startAdress, byte[] locals) { };
+    internal record ActivationRecord(int returnAdrress, int startAdress, byte[] locals) { };
 }

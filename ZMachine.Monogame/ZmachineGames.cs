@@ -24,7 +24,7 @@ namespace ZMachine.Monogame
         private TextProcessor TextDecoder;
         private ObjectTable ObjectTable;
         private InstructionDecoder InstructionDecoder;
-        private Stack<CallStackInfo> CallStackReturns = new Stack<CallStackInfo>();
+        private Stack<ActivationRecord> CallStackReturns = new Stack<ActivationRecord>();
         public ZMachineGamee(Stream input0, Stream input1, Stream outputScreen, Stream outputTranscript, Stream storyData)
         {
             this.input0 = input0;
@@ -59,10 +59,18 @@ namespace ZMachine.Monogame
         {
             this.Memory = bytes;
             this.ProgramCounter = 0;
+            this.CallStackReturns.Push(new(-1, 0, Array.Empty<Byte>()));
         }
 
         public void Update()
         {
+            //  a nonsense!
+
+            if(this.ProgramCounter == -1)
+            {
+                return;
+            }
+
             if (ProgramCounter < Memory.Length - 1)
             {
                 var currentInstr = InstructionDecoder.Decode(Memory, ref ProgramCounter);
@@ -83,7 +91,7 @@ namespace ZMachine.Monogame
                             var returnAddress = this.ProgramCounter;
                             this.ProgramCounter = address;
                             // Create stackframe
-                            this.CallStackReturns.Push(new CallStackInfo(returnAddress, address, new byte[this.Memory[ProgramCounter]]));
+                            this.CallStackReturns.Push(new ActivationRecord(returnAddress, address, new byte[this.Memory[ProgramCounter]]));
                         }
                         break;
                     case "new_line":
@@ -92,6 +100,12 @@ namespace ZMachine.Monogame
                             sw.Write(System.Environment.NewLine);
                             sw.Close();
                             sw.Dispose();
+                        }
+                        break;
+                    case "rtrue":
+                        {
+                            var record = this.CallStackReturns.Pop();
+                            this.ProgramCounter = record.returnAdrress;
                         }
                         break;
                 }
