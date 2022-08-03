@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using ZMachine.Library.V1;
 using ZMachine.Library.V1.Objects;
@@ -23,7 +24,7 @@ namespace ZMachine.Monogame
         private TextProcessor TextDecoder;
         private ObjectTable ObjectTable;
         private InstructionDecoder InstructionDecoder;
-
+        private Stack<CallStackInfo> CallStackReturns = new Stack<CallStackInfo>();
         public ZMachineGamee(Stream input0, Stream input1, Stream outputScreen, Stream outputTranscript, Stream storyData)
         {
             this.input0 = input0;
@@ -65,7 +66,6 @@ namespace ZMachine.Monogame
             if (ProgramCounter < Memory.Length - 1)
             {
                 var currentInstr = InstructionDecoder.Decode(Memory, ref ProgramCounter);
-
                 switch (currentInstr.instruction.Name)
                 {
                     case "print":
@@ -75,11 +75,34 @@ namespace ZMachine.Monogame
                             using StreamWriter sw = new StreamWriter(this.outputScreen, System.Text.Encoding.UTF8, bufferSize: literal.Length, leaveOpen: true);
                             sw.Write(literal);
                             sw.Close();
-
+                        }
+                        break;
+                    case "call_1n":
+                        {
+                            var address = (currentInstr.operands[0].operand[0] << 8 | currentInstr.operands[0].operand[1]).GetPackedAddress(StoryHeader.Version, 0, 0);
+                            var returnAddress = this.ProgramCounter;
+                            this.ProgramCounter = address;
+                            // Create stackframe
+                            this.CallStackReturns.Push(new CallStackInfo(returnAddress, address, new byte[this.Memory[ProgramCounter]]));
+                        }
+                        break;
+                    case "new_line":
+                        {
+                            using StreamWriter sw = new StreamWriter(this.outputScreen, System.Text.Encoding.UTF8, bufferSize: 1, leaveOpen: true);
+                            sw.WriteLine();
+                            sw.Close();
                         }
                         break;
                 }
+                this.ProgramCounter += 1;
             }
         }
+
+        private void RunRoutine(int returnAddress)
+        {
+
+        }
+
+
     }
 }

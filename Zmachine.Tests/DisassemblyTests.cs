@@ -100,7 +100,7 @@ namespace Zmachine.Tests
             var zmachineTools = new Tools(fileStream);
             
             //var message2 = zmachineTools.DecodeText(stringBuffer);
-            var messageToEncode = "Where the weary wander and@%'\" the mighty cheese drowned.";
+            var messageToEncode = "Enter first number:";
             // Create raw zchars
             var zChars = zmachineTools.EncodeText(messageToEncode);
             // Encode into words and then spit into byte array

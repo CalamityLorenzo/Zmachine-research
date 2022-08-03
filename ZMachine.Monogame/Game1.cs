@@ -24,7 +24,7 @@ namespace ZMachine.Monogame
 
         protected override void Initialize()
         {
-          
+
             // TODO: Add your initialization logic here
             base.Initialize();
         }
@@ -42,7 +42,15 @@ namespace ZMachine.Monogame
 
             this.machineGame.LoadCustomMemory(new byte[]
             {
-                0xb2, 19,141,42,234,3,45,40,28,40,215,120,28,26,105,42,224,26,105,20,194,0,166,4,165,96,185,3,45,40,18,57,141,103,192,33,170,43,10,1,55,83,147,41,37,200,165
+                0x8f, 00,1, // call_1n x x (4)
+                0xb0,       // return true
+                // Routine start
+                3,
+                0xb2, 18,42,103,0,25,41,3,20,73,64,79,82,29,87,224,165,  //Print a big fat string.
+                0xbb,
+                0xb2, 17,83,101,87,1,110,95,25,2,122,72,234,220,189,    // More groovy strings
+                0xb0,       // return true
+                // routine end.
 
             });
         }

@@ -10,6 +10,7 @@ namespace ZMachine.Library.V1
                            int ProgramCounterInitalValue,
                            int DictionaryTable,
                            int ObjectTable,
+                           // 6.2 The table consists of 240 2-byte words and the initial values of the global variables are the values initially containedin the table.
                            int GlobalVariables,
                            int BaseOfStaticMemory,
                            BitArray Flags2,

@@ -25,15 +25,14 @@ namespace ZMachine.Monogame
             if (this.output.Length > 0)
             {
                 this.output.Position = 0;
-
-                using StreamReader sr = new StreamReader(this.output, Encoding.UTF8, bufferSize: (int)this.output.Length, leaveOpen:true);
+                using StreamReader sr = new StreamReader(this.output, Encoding.UTF8, bufferSize: (int)this.output.Length, leaveOpen: true);
                 //var theChars = new char[this.output.Length];
                 //Span<Char> sp = theChars;
                 //sr.ReadBlock(sp);
                 //sr.Close();
                 //output.SetLength(0);  
                 //this.textStream = new string(sp);
-                this.textStream = sr.ReadLine();
+                this.textStream += sr.ReadLine();
                 sr.Close();
             }
         }
