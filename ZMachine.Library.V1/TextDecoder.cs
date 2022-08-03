@@ -261,29 +261,30 @@ namespace ZMachine.Library.V1
             }
         }
 
+      
+        /// <summary>
+        /// This method assumes you have passed in reasonable zchars.
+        /// eg ends with correct padding, and has upper bit set, is divisible by 3.
+        /// </summary>
+        /// <param name="zChars"></param>
+        /// <returns></returns>
         public byte[] EncodeZcharsToWords(byte[] zChars)
         {
-            // each 2 byte word contains 3 charactres.
-            // if the amount of chars is not divisible by3 
-            // add the remainder as padding (5's)
-            var mod3 = zChars.Length % 3;
-            if (mod3 == 1)
-                zChars = zChars.Concat(new byte[] { 5, 5 }).ToArray();
-            if (mod3 == 2)
-                zChars = zChars.Concat(new byte[] { 5 }).ToArray();
 
             List<byte> zWords = new();
             // now take that stack of bytes and turn 3 chars into 2 bytes....
             for (var x = 0; x < zChars.Length; x += 3)
             {
                 var top = zChars[x];
-                var middle = x + 1 < zChars.Length ? zChars[x + 1] : 5;
-                var bottom = x + 2 < zChars.Length ? zChars[x + 2] : 5;
+                var middle = zChars[x + 1];
+                var bottom = zChars[x + 2];
+                // Create the word here
                 var zWord = (ushort)((top & 0x1f) << 10 | (middle & 0x1f) << 5 | (bottom & 0x1f));
+                // if we are at the end tag it.
                 if (x + 3 >= zChars.Length)
-                    zWord = (ushort)(zWord | 0x8000); // set the top bit to show we are terminating the string.
-                zWords.Add((byte)(zWord>>8));
-                zWords.Add((byte)(zWord & 255 ));
+                    zWord = (ushort)(zWord | 0x8000);
+                zWords.Add((byte)(zWord >> 8));
+                zWords.Add((byte)(zWord & 255));
             }
 
             return zWords.ToArray();
@@ -424,24 +425,21 @@ namespace ZMachine.Library.V1
                 }
             }
 
+            // Ensure we have any requisite padding.
+            // each 2 byte word contains 3 charactres.
+            // if the amount of chars is not divisible by3 
+            // add the remainder as padding (5's)
+            var mod3 = zChars.Count % 3;
+            if (mod3 == 1)
+                zChars.AddRange(new byte[] { 5, 5 }); //.ToArray();
+            if (mod3 == 2)
+                zChars.Add(5);
+
+            // Now ensure the 2nd to last byte has the 7th (8th ashualkly) but set.
 
             return zChars.ToArray();
         }
 
-        public void Dothings(List<byte> zChars)
-        {
-            List<byte> zWords = new List<byte>();
-            // now take that stack of bytes and turn 3 chars into 2 bytes....
-            for (var x = 0; x < zChars.Count; x += 3)
-            {
-                var top = zChars[x];
-                var middle = x + 1 < zChars.Count ? zChars[x + 1] : 5;
-                var bottom = x + 2 < zChars.Count ? zChars[x + 2] : 5;
-                var zWord = (ushort)(top & 0x1f | middle & 0x1f | bottom & 0x1f);
-                if (x + 3 > zChars.Count)
-                    zWord = (ushort)(zWord | 0x800); // set the top bit to show we are terminating the string.
-                zWords.AddRange(GetZCharBytesFromWord(zWord));
-            }
-        }
+
     }
 }

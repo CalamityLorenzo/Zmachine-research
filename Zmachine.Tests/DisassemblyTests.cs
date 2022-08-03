@@ -1,8 +1,10 @@
+using System.Text.Encodings.Web;
+using ZMachine.Library.V1;
 using ZMachineTools;
 
 namespace Zmachine.Tests
 {
-    
+
     public class BasicTests
     {
         [SetUp]
@@ -10,7 +12,7 @@ namespace Zmachine.Tests
         {
         }
 
-        [Test(Description ="Load v5 story file display header")]
+        [Test(Description = "Load v5 story file display header")]
         public void HeaderDetails()
         {
             var filename = "Curses\\curses.z5";
@@ -23,7 +25,7 @@ namespace Zmachine.Tests
             Assert.Pass("Passed!");
         }
 
-        [Test(Description ="Display all the abbreviations")]
+        [Test(Description = "Display all the abbreviations")]
         public void AbbreviationTable()
         {
             var filename = "Curses\\curses.z5";
@@ -94,21 +96,32 @@ namespace Zmachine.Tests
         public void EncodeWords()
         {
             var filename = "Curses\\curses.z5";
-
-            //Console.WriteLine($"==== {filename} ====");
             using var fileStream = File.Open(filename, FileMode.Open);
             var zmachineTools = new Tools(fileStream);
+            
             //var message2 = zmachineTools.DecodeText(stringBuffer);
-            var messageToEncode = "Where the weary wander and the mighty cheese drowned.";
+            var messageToEncode = "Where the weary wander and@%'\" the mighty cheese drowned.";
+            // Create raw zchars
             var zChars = zmachineTools.EncodeText(messageToEncode);
-            var decodedZChars = zmachineTools.DecodeZChars(zChars);
-            var encodedBytes= zmachineTools.EncodeWords(zChars);
-            var wordsEncoded = zmachineTools.DecodeText(encodedBytes);
+            // Encode into words and then spit into byte array
+            var encodedBytes = zmachineTools.EncodeWords(zChars);
+            // finally the text
+            var completeDecodedText = zmachineTools.DecodeText(encodedBytes);
+
+            var i = 0;
+            var decodedZChars = TextProcessor.GetZChars(encodedBytes, ref i);
+
             Console.WriteLine($"Raw :\t{messageToEncode}");
-            Console.WriteLine($"Chars :\t {decodedZChars}");
-            Console.WriteLine($"Words :\t {wordsEncoded}");
-            Assert.IsTrue(decodedZChars == wordsEncoded);
-            Assert.IsTrue(messageToEncode == wordsEncoded);
+            //Console.WriteLine($"Chars :\t {zChars}");
+            Console.WriteLine($"Words :\t{completeDecodedText}");
+
+            // Are these two the same?
+            Console.WriteLine(String.Join(",", decodedZChars));
+            Console.WriteLine(String.Join(",", zChars));
+            
+            Console.WriteLine(String.Join(",", encodedBytes));
+
+            Assert.IsTrue(messageToEncode == completeDecodedText);
         }
 
 
