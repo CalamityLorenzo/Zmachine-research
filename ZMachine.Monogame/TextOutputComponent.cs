@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.IO;
+using System.Text;
 
 namespace ZMachine.Monogame
 {
@@ -22,13 +24,17 @@ namespace ZMachine.Monogame
         {
             if (this.output.Length > 0)
             {
-                var byteBuffer = new byte[output.Length];
-                output.Position = 0;
-                output.Read(byteBuffer, 0, byteBuffer.Length);
-                output.Flush();
+                this.output.Position = 0;
 
-                this.textStream = System.Text.Encoding.UTF8.GetString(byteBuffer);
-                output.SetLength(0);
+                using StreamReader sr = new StreamReader(this.output, Encoding.UTF8, bufferSize: (int)this.output.Length, leaveOpen:true);
+                //var theChars = new char[this.output.Length];
+                //Span<Char> sp = theChars;
+                //sr.ReadBlock(sp);
+                //sr.Close();
+                //output.SetLength(0);  
+                //this.textStream = new string(sp);
+                this.textStream = sr.ReadLine();
+                sr.Close();
             }
         }
 

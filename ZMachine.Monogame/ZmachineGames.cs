@@ -74,6 +74,7 @@ namespace ZMachine.Monogame
                             var literal = this.TextDecoder.DecodeZChars(chars);
                             using StreamWriter sw = new StreamWriter(this.outputScreen, System.Text.Encoding.UTF8, bufferSize: literal.Length, leaveOpen: true);
                             sw.Write(literal);
+                            sw.Close();
 
                         }
                         break;
