@@ -113,11 +113,5 @@ namespace ZMachine.Monogame
             }
         }
 
-        private void RunRoutine(int returnAddress)
-        {
-
-        }
-
-
     }
 }
