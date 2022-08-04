@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using ZMachine.Library.V1;
+using ZMachine.Library.V1.Instructions;
 using ZMachine.Library.V1.Objects;
 using ZMachine.Library.V1.Utilities;
 
@@ -25,6 +26,10 @@ namespace ZMachine.Monogame
         private ObjectTable ObjectTable;
         private InstructionDecoder InstructionDecoder;
         private Stack<ActivationRecord> CallStackReturns = new Stack<ActivationRecord>();
+        private DecodedInstruction currentInstr;
+
+        public bool IsReadingInstruction { get; private set; }
+
         public ZMachineGamee(Stream input0, Stream input1, Stream outputScreen, Stream outputTranscript, Stream storyData)
         {
             this.input0 = input0;
@@ -64,8 +69,13 @@ namespace ZMachine.Monogame
 
         public void Update()
         {
-            //  a nonsense!
+            if (IsReadingInstruction)
+            {
+                ProcessRead();
+                return;
+            }
 
+            //  a nonsense!
             if(this.ProgramCounter == -1)
             {
                 return;
@@ -73,7 +83,7 @@ namespace ZMachine.Monogame
 
             if (ProgramCounter < Memory.Length - 1)
             {
-                var currentInstr = InstructionDecoder.Decode(Memory, ref ProgramCounter);
+                this.currentInstr = InstructionDecoder.Decode(Memory, ref ProgramCounter);
                 switch (currentInstr.instruction.Name)
                 {
                     case "print":
@@ -108,10 +118,48 @@ namespace ZMachine.Monogame
                             this.ProgramCounter = record.returnAdrress;
                         }
                         break;
+                    case "aread":
+                        {
+                            // Kill the current stream
+                            this.input0.SetLength(0);
+                            // reset the input
+                            this.inputText = "";
+                            var record = currentInstr;
+                            this.IsReadingInstruction = true;
+                        }
+                        break;
                 }
                 this.ProgramCounter += 1;
             }
         }
 
+        private void ProcessRead()
+        {
+            if (this.input0.Length > 0)
+            {
+                this.input0.Position = 0;
+                var bytes = new byte[input0.Length];
+                var span = bytes.AsSpan();
+                input0.Read(span);
+                var rawString = System.Text.Encoding.UTF8.GetString(span).ToLower();
+
+
+
+
+                var rawZchars = TextDecoder.EncodeUtf8ZChars(rawString);
+                var outputString = TextDecoder.DecodeZChars(rawZchars);
+                using StreamWriter sw = new StreamWriter(this.outputScreen, System.Text.Encoding.UTF8, bufferSize: outputString.Length, leaveOpen: true);
+                sw.Write(outputString);
+                sw.Close();
+
+                if (rawString.EndsWith((char)13))
+                {
+                    this.IsReadingInstruction = false;
+                }
+
+                this.input0.SetLength(0);
+            }
+
+        }
     }
 }

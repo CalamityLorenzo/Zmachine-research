@@ -13,7 +13,7 @@ namespace ZMachine.Monogame.Component
     {
         
         private readonly SpriteFont fnt;
-        private TypedTextSource textSource;
+        private TypeToStream textSource;
         private Vector2 caretSize;
 
         private Texture2D Cursor { get; }
@@ -30,7 +30,7 @@ namespace ZMachine.Monogame.Component
 
         public TextInputControl(Game game, SpriteBatch _spriteBatch, SpriteFont fnt) : base(game)
         {
-            textSource = new TypedTextSource(game.Window);
+            textSource = new TypeToStream(game);
             this._spriteBatch = _spriteBatch;
             this.fnt = fnt;
             var fntWidth = fnt.MeasureString("0");

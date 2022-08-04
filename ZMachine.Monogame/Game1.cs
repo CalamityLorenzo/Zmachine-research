@@ -13,9 +13,11 @@ namespace ZMachine.Monogame
         private SpriteBatch _spriteBatch;
         private SpriteFont arial;
         private TextOutputComponent textOutput;
+
+        internal TypeToStream TypeToStream { get; private set; }
+
         private MemoryStream input0 = new(), input1 = new(), outputScreen = new(), outputTranscript = new();
         private ZMachineGamee machineGame;
-        private TextInputControl inputControl;
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -41,8 +43,8 @@ namespace ZMachine.Monogame
             this.machineGame = new ZMachineGamee(input0, input1, outputScreen, outputTranscript, fileStream);
             this.textOutput = new TextOutputComponent(this, _spriteBatch, arial, outputScreen);
             // TODO: use this.Content to load your game content here
-            this.inputControl = new TextInputControl(this, _spriteBatch, arial, outputScreen, new Vector2(20, 100));
-            this.Components.Add(inputControl);
+
+            this.TypeToStream = new TypeToStream(this, this.input0);
 
             this.machineGame.LoadCustomMemory(new byte[]
             {
@@ -55,6 +57,7 @@ namespace ZMachine.Monogame
                 0xb2, 18,42,103,0,25,41,3,20,73,64,79,82,29,87,224,165,  //Print a big fat string.
                 0xbb,
                 0xb2, 17,83,101,87,1,110,95,25,2,122,72,234,220,189,    // More groovy strings
+                0xe4, 15, 0x5d, 0xd5, 0x5e, 0x4e, 0xff,
                 0xb0,       // return true
                 // routine end.
             });
@@ -68,6 +71,7 @@ namespace ZMachine.Monogame
 
             this.textOutput.Update(gameTime);
             // TODO: Add your update logic here
+            this.TypeToStream.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -78,8 +82,8 @@ namespace ZMachine.Monogame
             _spriteBatch.Begin();
             // TODO: Add your drawing code here
             this.textOutput.Draw(gameTime);
-
-            this.inputControl.Draw(gameTime);
+            
+            
             _spriteBatch.End();
 
         }
