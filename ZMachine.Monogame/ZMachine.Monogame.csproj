@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
@@ -24,9 +24,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ZMachine.Library.V1\ZMachine.Library.V1.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Component\" />
   </ItemGroup>
   <ItemGroup>
     <None Update="curses.z5">
