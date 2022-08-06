@@ -144,8 +144,6 @@ namespace ZMachine.Monogame
                 var rawString = System.Text.Encoding.UTF8.GetString(span).ToLower();
 
 
-
-
                 var rawZchars = TextDecoder.EncodeUtf8ZChars(rawString);
                 var outputString = TextDecoder.DecodeZChars(rawZchars);
                 using StreamWriter sw = new StreamWriter(this.outputScreen, System.Text.Encoding.UTF8, bufferSize: outputString.Length, leaveOpen: true);
