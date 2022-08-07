@@ -41,9 +41,6 @@ namespace ZMachine.Monogame
 
             // Here's an assumption...
             storyData.Position = 0;
-            StoryData = new MemoryStream();
-            storyData.CopyTo(StoryData);
-            StoryData.Position = 0;
 
             Memory = new byte[StoryData.Length];
             // Nom, nom nom game data.
