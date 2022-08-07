@@ -41,6 +41,9 @@ namespace ZMachine.Monogame
 
             // Here's an assumption...
             storyData.Position = 0;
+            StoryData = new MemoryStream();
+            storyData.CopyTo(StoryData);
+            StoryData.Position = 0;
 
             Memory = new byte[StoryData.Length];
             // Nom, nom nom game data.
@@ -74,7 +77,7 @@ namespace ZMachine.Monogame
             }
 
             //  a nonsense!
-            if(this.ProgramCounter == -1)
+            if (this.ProgramCounter == -1)
             {
                 return;
             }
@@ -124,6 +127,12 @@ namespace ZMachine.Monogame
                             this.readInputText = "";
                             var record = currentInstr;
                             this.IsReadingInstruction = true;
+                        }
+                        break;
+                    case "jump":
+                        {
+                            short offSet =(short)(currentInstr.operands[0].operand[0] << 8 | currentInstr.operands[0].operand[1]);
+                            this.ProgramCounter = ProgramCounter + offSet - 2;
                         }
                         break;
                 }

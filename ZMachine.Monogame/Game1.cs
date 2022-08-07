@@ -46,12 +46,12 @@ namespace ZMachine.Monogame
 
             this.TypeToStream = new TypeToStream(this, this.input0);
 
-            this.machineGame.LoadCustomMemory(new byte[]
+            var customProg = new byte[]
             {
                 // Routine start
                 0x8f, 00,1, // call_1n x x (4)
                 0xb0,       // return true
-                // Routine end
+                // Routine end\
                 // Routine start
                 3,
                 0xb2, 18,42,103,0,25,41,3,20,73,64,79,82,29,87,96,180,148,229,  //Print a big fat string.
@@ -62,10 +62,12 @@ namespace ZMachine.Monogame
                 0xb2, 18,70,120,234,20,229,28,153,53,87,40,8,83,81,36,7,40,18,82,234,2,139,3,45,59,5,84,167,0,0,0,0,0,0,58,120,101,70,36,166,15,197,24,64,23,165,24,36,20,197,12,166,11,197,156,165,
                 0xbb,
                 0xbb,
-                0x8c, 00,05,
+                0x8c, 255,119,
                 0xb0,       // return true
                 // routine end.
-            });
+            };
+
+            this.machineGame.LoadCustomMemory(customProg);
         }
   
         protected override void Update(GameTime gameTime)
