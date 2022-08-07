@@ -27,6 +27,7 @@ namespace ZMachine.Monogame
         private InstructionDecoder InstructionDecoder;
         private Stack<ActivationRecord> CallStackReturns = new Stack<ActivationRecord>();
         private DecodedInstruction currentInstr;
+        private string readInputText;
 
         public bool IsReadingInstruction { get; private set; }
 
@@ -107,7 +108,7 @@ namespace ZMachine.Monogame
                     case "new_line":
                         {
                             using StreamWriter sw = new StreamWriter(this.outputScreen, System.Text.Encoding.UTF8, bufferSize: 1, leaveOpen: true);
-                            sw.Write(System.Environment.NewLine);
+                            sw.Write((char)13);
                             sw.Close();
                             sw.Dispose();
                         }
@@ -123,7 +124,7 @@ namespace ZMachine.Monogame
                             // Kill the current stream
                             this.input0.SetLength(0);
                             // reset the input
-                            this.inputText = "";
+                            this.readInputText = "";
                             var record = currentInstr;
                             this.IsReadingInstruction = true;
                         }
@@ -133,6 +134,8 @@ namespace ZMachine.Monogame
             }
         }
 
+        // A read collects a command
+        // and terminates when the return key is found.
         private void ProcessRead()
         {
             if (this.input0.Length > 0)
@@ -141,20 +144,60 @@ namespace ZMachine.Monogame
                 var bytes = new byte[input0.Length];
                 var span = bytes.AsSpan();
                 input0.Read(span);
-                var rawString = System.Text.Encoding.UTF8.GetString(span).ToLower();
-
-
-                var rawZchars = TextDecoder.EncodeUtf8ZChars(rawString);
-                var outputString = TextDecoder.DecodeZChars(rawZchars);
-                using StreamWriter sw = new StreamWriter(this.outputScreen, System.Text.Encoding.UTF8, bufferSize: outputString.Length, leaveOpen: true);
-                sw.Write(outputString);
-                sw.Close();
-
-                if (rawString.EndsWith((char)13))
+                var chars = System.Text.Encoding.UTF8
+                                                .GetString(span)
+                                                .ToLower(System.Globalization.CultureInfo.CurrentCulture)
+                                                .GetValidZSCIIChars(this.StoryHeader.Version);
+                for (var x = 0; x < chars.Length; x++)
                 {
-                    this.IsReadingInstruction = false;
-                }
+                    var charA = (char)chars[x];
+                    if (charA == '\b')
+                    { // backspace
+                        if (readInputText.Length == 1)
+                        {
+                            readInputText = "";
+                        }
+                        else if (readInputText.Length > 1)
+                        {
+                            readInputText = readInputText.Remove(readInputText.Length - 1, 1);
+                        }
+                    }
+                    //else if (charA == '\u007f')  // forward del
+                    //{
+                    //    //;
+                    //    ;
+                    //}
+                    else if (charA == 27) // escape
+                    {
+                        this.readInputText = "";
+                    }
+                    else // Append character.
+                    {
+                        this.readInputText = this.readInputText + charA;
+                    }
 
+                    if (charA == 13) // we have completed our task.
+                    {
+                        this.IsReadingInstruction = false;
+                    }
+                }
+                // Convert what we have into zChars, and then back again for output.
+                var rawZchars = TextDecoder.EncodeUtf8ZChars(readInputText);
+                var outputString = TextDecoder.DecodeZChars(rawZchars);
+
+                // we write that into the output stream.
+                // Which is then drawn onto the screen.
+                // Whatever collects the output stream, must have a concept of acurrent line.
+                // Which it will accept blithely. This is that current line. Everytime we update. we are effectively sending an incomplete command.
+                // every new change is a new line.
+                // word-wrapping etc can all be handedl by the screen for the moment.
+                // new-line is the terminator here. The screen don't care.
+                if (outputString.Length > 0)
+                {
+                    using StreamWriter sw = new StreamWriter(this.outputScreen, System.Text.Encoding.UTF8, bufferSize: outputString.Length, leaveOpen: true);
+                    sw.Write(outputString);
+                    sw.Close();
+                }
                 this.input0.SetLength(0);
             }
 

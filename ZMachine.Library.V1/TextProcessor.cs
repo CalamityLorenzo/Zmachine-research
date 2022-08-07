@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ZMachine.Library.V1
+﻿namespace ZMachine.Library.V1
 {
     public class TextProcessor
     {
@@ -261,7 +255,7 @@ namespace ZMachine.Library.V1
             }
         }
 
-      
+
         /// <summary>
         /// This method assumes you have passed in reasonable zchars.
         /// eg ends with correct padding, and has upper bit set, is divisible by 3.
@@ -440,6 +434,48 @@ namespace ZMachine.Library.V1
             return zChars.ToArray();
         }
 
+
+        /// <summary>
+        /// process the input string, and return only the valid ZSCII (input)chars.
+        /// 3.8 Table 2
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="version"></param>
+        /// <returns></returns>
+        public static byte[] ValidZsciiChars(string data, int version)
+        {
+            int dL = data.Length;
+            List<byte> validChars = new();
+            for(var x = 0; x < data.Length; ++x)
+            {
+                var thisChar = (byte)data[x];
+                // Backspace
+                if (thisChar == 8) validChars.Add(thisChar);
+                // new line
+                if (thisChar == 13) validChars.Add(thisChar);
+                // Sentence space
+                if (version ==6 && thisChar == 11) validChars.Add(thisChar);
+                // escape
+                if (thisChar == 27) validChars.Add(thisChar);
+                // standard ascii
+                if (thisChar >=32 && thisChar<=126) validChars.Add(thisChar);
+                // cursor u/d/l/r
+                if (thisChar >= 129 && thisChar <= 132) validChars.Add(thisChar);
+                // FKeys
+                if (thisChar >= 133 && thisChar <= 144) validChars.Add(thisChar);
+                // Key pad
+                if (thisChar >= 145 && thisChar <= 154) validChars.Add(thisChar);
+                // extra chars
+                if (thisChar >= 155 && thisChar <= 251) validChars.Add(thisChar);
+                // menu click (v6)
+                if (version == 6 && thisChar == 252) validChars.Add(thisChar);
+                // double click (v6)
+                if (version == 6 && thisChar == 253) validChars.Add(thisChar);
+                // single click 
+                if (thisChar == 254) validChars.Add(thisChar);
+            }
+            return validChars.ToArray();
+        }
 
     }
 }
