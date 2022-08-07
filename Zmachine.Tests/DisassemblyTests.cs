@@ -64,7 +64,7 @@ namespace Zmachine.Tests
             fileStream.Read(stringBuffer, 0, 20);
 
             var zmachineTools = new Tools(fileStream);
-            var message = zmachineTools.DecodeText(new byte[] { 18, 42, 103, 0, 25, 41, 3, 20, 73, 64, 79, 82, 29, 87, 224, 165 });
+            var message = zmachineTools.DecodeText(new byte[] { 17, 52, 79, 32, 122, 154, 3, 45, 58, 112, 3, 45, 42, 234, 3, 13, 83, 81, 36, 7, 40, 18, 82, 234, 2, 139, 3, 45, 27, 37, 212, 165 });
             Console.WriteLine(message);
             Console.WriteLine("History of the Meldrews (vol. II)");
             Assert.IsTrue("History of the Meldrews (vol. II)" == message);
@@ -100,7 +100,7 @@ namespace Zmachine.Tests
             var zmachineTools = new Tools(fileStream);
             
             //var message2 = zmachineTools.DecodeText(stringBuffer);
-            var messageToEncode = "Lets add some numbers!\r";
+            var messageToEncode = "Maybe\r\rThere could be more of this?\r         instead~@:$£^\r";
             // Create raw zchars
             var zChars = zmachineTools.EncodeText(messageToEncode);
             // Encode into words and then spit into byte array

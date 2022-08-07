@@ -41,7 +41,7 @@ namespace ZMachine.Monogame
             var fileStream = File.Open(filename, FileMode.Open);
             fileStream.Position = 0;
             this.machineGame = new ZMachineGamee(input0, input1, outputScreen, outputTranscript, fileStream);
-            this.textOutput = new TextOutputComponent(this, _spriteBatch, arial, new Vector2(20,20), outputScreen);
+            this.textOutput = new TextOutputComponent(this, _spriteBatch, arial, new Vector2(40,20), outputScreen);
             // TODO: use this.Content to load your game content here
 
             this.TypeToStream = new TypeToStream(this, this.input0);
@@ -58,6 +58,10 @@ namespace ZMachine.Monogame
                 0xbb,
                 0xb2, 17,83,101,87,1,110,95,25,2,122,72,234,92,189,148,229,    // More groovy strings
                 0xe4, 15, 0x5d, 0xd5, 0x5e, 0x4e, 0xff,
+                0xb2, 17,52,79,32,122,154,3,45,58,112,3,45,42,234,3,13,83,81,36,7,40,18,82,234,2,139,3,45,27,37,212,167,
+                0xb2, 18,70,120,234,20,229,28,153,53,87,40,8,83,81,36,7,40,18,82,234,2,139,3,45,59,5,84,167,0,0,0,0,0,0,58,120,101,70,36,166,15,197,24,64,23,165,24,36,20,197,12,166,11,197,156,165,
+                0xbb,
+                0xbb,
                 0xb0,       // return true
                 // routine end.
             });

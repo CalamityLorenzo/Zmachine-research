@@ -21,6 +21,9 @@ namespace ZMachine.Monogame.Component
 
         private float HorizontalStart = 0;
         private float RowHeight = 0;
+        private string prompt;
+        private Vector2 promptSize;
+
         public TextOutputComponent(Game game, SpriteBatch batch, SpriteFont font, Vector2 startPosition, Stream output) : base(game)
         {
             this.batch = batch;
@@ -31,7 +34,8 @@ namespace ZMachine.Monogame.Component
 
             this.HorizontalStart = startPosition.X;
             this.RowHeight = font.MeasureString("W").Y + 2;
-
+            this.prompt = "> _";
+            this.promptSize = font.MeasureString(prompt);
         }
         public override void Update(GameTime gameTime)
         {
@@ -78,8 +82,17 @@ namespace ZMachine.Monogame.Component
 
             if (this.currentLine.Length > 0)
             {
+                var currentLineWidth = font.MeasureString(currentLine);
+                batch.DrawString(font, ">  ", new Vector2(currentDrawingPosition.X - this.promptSize.X-1, currentDrawingPosition.Y), Color.Black);
                 batch.DrawString(font, currentLine, currentDrawingPosition, Color.White);
+                batch.DrawString(font, "_", new Vector2(currentDrawingPosition.X + currentLineWidth.X, currentDrawingPosition.Y), Color.Black);
             }
+            else
+            {
+                batch.DrawString(font, this.prompt, new Vector2(currentDrawingPosition.X - this.promptSize.X, currentDrawingPosition.Y), Color.Black);
+            }
+
+
 
         }
     }

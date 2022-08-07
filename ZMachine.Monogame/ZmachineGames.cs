@@ -162,11 +162,6 @@ namespace ZMachine.Monogame
                             readInputText = readInputText.Remove(readInputText.Length - 1, 1);
                         }
                     }
-                    //else if (charA == '\u007f')  // forward del
-                    //{
-                    //    //;
-                    //    ;
-                    //}
                     else if (charA == 27) // escape
                     {
                         this.readInputText = "";
