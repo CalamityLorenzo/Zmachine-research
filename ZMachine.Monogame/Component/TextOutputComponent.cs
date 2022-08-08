@@ -7,9 +7,9 @@ using System.Text;
 
 namespace ZMachine.Monogame.Component
 {
-    internal class TextOutputComponent : DrawableGameComponent
+    internal class TextOutputComponent : DrawableGameComponent, IScrollablePanelContent
     {
-        private readonly SpriteBatch batch;
+        private SpriteBatch batch;
         private readonly SpriteFont font;
         private readonly Stream output;
 
@@ -74,6 +74,18 @@ namespace ZMachine.Monogame.Component
 
         public override void Draw(GameTime gameTime)
         {
+        
+        }
+
+        public void SetSpriteBatch(SpriteBatch spritebatch)
+        {
+            this.batch = spritebatch;
+        }
+
+        public Rectangle ContentDimensions() => new Rectangle(0, 0, 500, ((int)this.RowHeight * this.history.Count));
+
+        public void DrawPanel(GameTime time)
+        {
             foreach (var lineData in history)
             {
                 var line = lineData.Item2;
@@ -83,7 +95,7 @@ namespace ZMachine.Monogame.Component
             if (this.currentLine.Length > 0)
             {
                 var currentLineWidth = font.MeasureString(currentLine);
-                batch.DrawString(font, ">  ", new Vector2(currentDrawingPosition.X - this.promptSize.X-1, currentDrawingPosition.Y), Color.Black);
+                batch.DrawString(font, ">  ", new Vector2(currentDrawingPosition.X - this.promptSize.X - 1, currentDrawingPosition.Y), Color.Black);
                 batch.DrawString(font, currentLine, currentDrawingPosition, Color.White);
                 batch.DrawString(font, "_", new Vector2(currentDrawingPosition.X + currentLineWidth.X, currentDrawingPosition.Y), Color.Black);
             }
@@ -91,8 +103,6 @@ namespace ZMachine.Monogame.Component
             {
                 batch.DrawString(font, this.prompt, new Vector2(currentDrawingPosition.X - this.promptSize.X, currentDrawingPosition.Y), Color.Black);
             }
-
-
 
         }
     }

@@ -18,6 +18,8 @@ namespace ZMachine.Monogame
 
         private MemoryStream input0 = new(), input1 = new(), outputScreen = new(), outputTranscript = new();
         private ZMachineGamee machineGame;
+
+        private ScrollablePanel scrollPanel;
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -27,10 +29,25 @@ namespace ZMachine.Monogame
 
         protected override void Initialize()
         {
-
+            this.Window.AllowUserResizing = true;
+            this.Window.ClientSizeChanged += Window_ClientSizeChanged;
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             // TODO: Add your initialization logic here
             base.Initialize();
+
+        }
+
+        private void Window_ClientSizeChanged(object? sender, EventArgs e)
+        {
+            if (Window.ClientBounds.Width != this._graphics.PreferredBackBufferWidth)
+            {
+               // this.ScaleFactor.Update(Window.ClientBounds.Width);
+            }
+
+            this._graphics.PreferredBackBufferWidth = Window.ClientBounds.Width;
+            this._graphics.PreferredBackBufferHeight = Window.ClientBounds.Height;
+
+            this._graphics.ApplyChanges();
 
         }
 
@@ -41,11 +58,14 @@ namespace ZMachine.Monogame
             var fileStream = File.Open(filename, FileMode.Open);
             fileStream.Position = 0;
             this.machineGame = new ZMachineGamee(input0, input1, outputScreen, outputTranscript, fileStream);
+
+            scrollPanel = new ScrollablePanel(this._spriteBatch, true, new Rectangle(40, 20, 500, 300));
             this.textOutput = new TextOutputComponent(this, _spriteBatch, arial, new Vector2(40,20), outputScreen);
+            scrollPanel.AddContent(textOutput);
             // TODO: use this.Content to load your game content here
 
             this.TypeToStream = new TypeToStream(this, this.input0);
-
+            
             var customProg = new byte[]
             {
                 // Routine start
@@ -77,6 +97,9 @@ namespace ZMachine.Monogame
             machineGame.Update();
 
             this.textOutput.Update(gameTime);
+            
+            this.scrollPanel.Update(gameTime);
+           
             // TODO: Add your update logic here
             this.TypeToStream.Update(gameTime);
 
@@ -88,9 +111,9 @@ namespace ZMachine.Monogame
             GraphicsDevice.Clear(Color.CornflowerBlue);
             _spriteBatch.Begin();
             // TODO: Add your drawing code here
-            this.textOutput.Draw(gameTime);
-            
-            
+            // this.textOutput.Draw(gameTime);
+            this.scrollPanel.Draw(gameTime);
+
             _spriteBatch.End();
 
         }
