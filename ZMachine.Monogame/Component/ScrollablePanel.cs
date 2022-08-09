@@ -3,6 +3,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 using Color = Microsoft.Xna.Framework.Color;
 using System.Linq;
+using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace ZMachine.Monogame.Component
 {
@@ -39,8 +41,9 @@ namespace ZMachine.Monogame.Component
         private RasterizerState rasterState;
         private Texture2D scrollbarTexture;
         private Texture2D scrollbarNubTexture;
+        private bool lButtonPressed;
 
-        public ScrollablePanel(SpriteBatch sb, bool verticalScrollbar, Rectangle startingDimensions)
+        public ScrollablePanel(Game game, SpriteBatch sb, bool verticalScrollbar, Rectangle startingDimensions)
         {
 
             this.sb = new SpriteBatch(sb.GraphicsDevice);
@@ -63,7 +66,6 @@ namespace ZMachine.Monogame.Component
             rasterState.CullMode = CullMode.CullCounterClockwiseFace;
             rasterState.DepthBias = 0;
             rasterState.SlopeScaleDepthBias = 0;
-
             UpdateTotalArea();
         }
 
@@ -115,6 +117,34 @@ namespace ZMachine.Monogame.Component
                 }
                 //if (contentDimensions != this.DisplayArea) UpdateDimensions(contentDimensions);
             }
+
+            var mState = Mouse.GetState();
+
+            MousePosition(mState);
+
+        }
+
+        private void MousePosition(MouseState mState)
+        {
+            if (mState.LeftButton == ButtonState.Pressed && !lButtonPressed)
+            {
+                lButtonPressed = true;
+                if (vScrollbarDimensions.Intersects(new Rectangle(mState.X, mState.Y, 1, 1)))
+                {
+                    var direction = UpdateVerticalScrollPosition(mState.X, mState.Y);
+                    // up = head to the negatives
+                    // down increate the vertical
+                    var dimensions = this.Content.ContentDimensions();
+                    var factor = (float)dimensions.Height / dimensions.Height;
+
+                    
+                }
+            }
+
+            if (mState.LeftButton == ButtonState.Released && lButtonPressed)
+            {
+                lButtonPressed = false;
+            }
         }
 
         public void Draw(GameTime gameTime)
@@ -165,7 +195,7 @@ namespace ZMachine.Monogame.Component
                 {
                     var newPos = vScrollbarButtonDimensons.Y - (int)distance;
                     if (newPos < 0) newPos = 0;
-                    vScrollbarButtonDimensons.Y = newPos;
+                        vScrollbarButtonDimensons.Y = newPos;
                     return ScrollDirection.Down;
                 }
             }

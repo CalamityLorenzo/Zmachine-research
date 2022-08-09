@@ -24,6 +24,8 @@ namespace ZMachine.Monogame.Component
         private string prompt;
         private Vector2 promptSize;
 
+        private Vector2 OffSet = Vector2.Zero;
+
         public TextOutputComponent(Game game, SpriteBatch batch, SpriteFont font, Vector2 startPosition, Stream output) : base(game)
         {
             this.batch = batch;
@@ -37,6 +39,7 @@ namespace ZMachine.Monogame.Component
             this.prompt = "> _";
             this.promptSize = font.MeasureString(prompt);
         }
+
         public override void Update(GameTime gameTime)
         {
             // TODO : THis is all very unsatisfactory.
@@ -84,24 +87,26 @@ namespace ZMachine.Monogame.Component
 
         public Rectangle ContentDimensions() => new Rectangle(0, 0, 500, ((int)this.RowHeight * this.history.Count));
 
+        internal void SetOffSet(Vector2 newOffset) => this.OffSet = newOffset;
+
         public void DrawPanel(GameTime time)
         {
             foreach (var lineData in history)
             {
                 var line = lineData.Item2;
-                batch.DrawString(font, line, new Vector2(HorizontalStart, lineData.Item1), Color.White);
+                batch.DrawString(font, line, new Vector2(HorizontalStart, lineData.Item1)+ this.OffSet, Color.White);
             }
 
             if (this.currentLine.Length > 0)
             {
                 var currentLineWidth = font.MeasureString(currentLine);
-                batch.DrawString(font, ">  ", new Vector2(currentDrawingPosition.X - this.promptSize.X - 1, currentDrawingPosition.Y), Color.Black);
-                batch.DrawString(font, currentLine, currentDrawingPosition, Color.White);
-                batch.DrawString(font, "_", new Vector2(currentDrawingPosition.X + currentLineWidth.X, currentDrawingPosition.Y), Color.Black);
+                batch.DrawString(font, ">  ", new Vector2(currentDrawingPosition.X - this.promptSize.X - 1, currentDrawingPosition.Y) + this.OffSet, Color.Black);
+                batch.DrawString(font, currentLine, currentDrawingPosition + this.OffSet, Color.White);
+                batch.DrawString(font, "_", new Vector2(currentDrawingPosition.X + currentLineWidth.X, currentDrawingPosition.Y) + this.OffSet, Color.Black);
             }
             else
             {
-                batch.DrawString(font, this.prompt, new Vector2(currentDrawingPosition.X - this.promptSize.X, currentDrawingPosition.Y), Color.Black);
+                batch.DrawString(font, this.prompt, new Vector2(currentDrawingPosition.X - this.promptSize.X, currentDrawingPosition.Y) + this.OffSet, Color.Black);
             }
 
         }

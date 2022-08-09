@@ -59,7 +59,7 @@ namespace ZMachine.Monogame
             fileStream.Position = 0;
             this.machineGame = new ZMachineGamee(input0, input1, outputScreen, outputTranscript, fileStream);
 
-            scrollPanel = new ScrollablePanel(this._spriteBatch, true, new Rectangle(40, 20, 500, 300));
+            scrollPanel = new ScrollablePanel(this, this._spriteBatch, true, new Rectangle(40, 20, 500, 300));
             this.textOutput = new TextOutputComponent(this, _spriteBatch, arial, new Vector2(40,20), outputScreen);
             scrollPanel.AddContent(textOutput);
             // TODO: use this.Content to load your game content here
