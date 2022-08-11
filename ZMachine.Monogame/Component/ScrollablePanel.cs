@@ -32,7 +32,7 @@ namespace ZMachine.Monogame.Component
         // Used to calculate the scollbar button size.
         private Rectangle ContentDimensions = Rectangle.Empty;
         public Rectangle vScrollbarDimensions { get; private set; } = Rectangle.Empty;
-        private Rectangle vScrollbarButtonDimensons = Rectangle.Empty;
+        private Rectangle vScrollbarNubDimensons = Rectangle.Empty;
 
         public bool VerticalScrollbar { get; }
         public IScrollablePanelContent Content { get; private set; }
@@ -40,8 +40,10 @@ namespace ZMachine.Monogame.Component
 
         private RasterizerState rasterState;
         private Texture2D scrollbarTexture;
+        private Texture2D disabledScrollbarTexture;
         private Texture2D scrollbarNubTexture;
         private bool lButtonPressed;
+        private bool disableVerticalScroll;
 
         public ScrollablePanel(Game game, SpriteBatch sb, bool verticalScrollbar, Rectangle startingDimensions)
         {
@@ -54,7 +56,9 @@ namespace ZMachine.Monogame.Component
 
             // Scrollbar and butotn
             scrollbarTexture = new Texture2D(this.sb.GraphicsDevice, 1, 1);
+            disabledScrollbarTexture = new Texture2D(this.sb.GraphicsDevice, 1, 1);
             scrollbarNubTexture = new Texture2D(this.sb.GraphicsDevice, 1, 1);
+            disabledScrollbarTexture.SetData<Color>(Enumerable.Range(0, 1).Select(a => Color.Beige).ToArray());
             scrollbarTexture.SetData<Color>(Enumerable.Range(0, 1).Select(a => Color.Gray).ToArray());
             scrollbarNubTexture.SetData<Color>(Enumerable.Range(0, 1).Select(a => Color.DarkGray).ToArray());
 
@@ -100,7 +104,7 @@ namespace ZMachine.Monogame.Component
             {
                 float factor = (float)ContentDimensions.Height >= DisplayArea.Height ? (float)ContentDimensions.Height / DisplayArea.Height : 1;
                 vScrollbarDimensions = new(DisplayArea.X + DisplayArea.Width - 20, DisplayArea.Y, 22, DisplayArea.Height);
-                vScrollbarButtonDimensons = new(DisplayArea.X + DisplayArea.Width - 20, DisplayArea.Y, 22, 22);
+                vScrollbarNubDimensons = new(DisplayArea.X + DisplayArea.Width - 20, DisplayArea.Y, 22, 22);
             }
         }
 
@@ -116,6 +120,10 @@ namespace ZMachine.Monogame.Component
                     FormatScrollbar();
                 }
                 //if (contentDimensions != this.DisplayArea) UpdateDimensions(contentDimensions);
+                if (contentDimensions.Height < this.DisplayArea.Height && disableVerticalScroll == false)
+                    disableVerticalScroll = true;
+                else if (contentDimensions.Height > this.DisplayArea.Height && disableVerticalScroll == true)
+                    disableVerticalScroll = false;
             }
 
             var mState = Mouse.GetState();
@@ -136,8 +144,8 @@ namespace ZMachine.Monogame.Component
                     // down increate the vertical
                     var dimensions = this.Content.ContentDimensions();
                     var factor = (float)dimensions.Height / dimensions.Height;
+                    //this.Content.Off  
 
-                    
                 }
             }
 
@@ -161,8 +169,8 @@ namespace ZMachine.Monogame.Component
                 {
 
                     // this.sb.Draw(this.scrollbarTexture, new Vector2(this.DisplayArea.X + this.DisplayArea.Width - 20, this.DisplayArea.Y), new Rectangle(0, 0, 20, (int)this.DisplayArea.Height), Color.White);
-                    sb.Draw(scrollbarTexture, new Vector2(vScrollbarDimensions.X, vScrollbarDimensions.Y), new Rectangle(0, 0, 20, DisplayArea.Height), Color.White);
-                    sb.Draw(scrollbarNubTexture, new Vector2(vScrollbarButtonDimensons.X, vScrollbarButtonDimensons.Y), new Rectangle(0, 0, vScrollbarButtonDimensons.Width, vScrollbarButtonDimensons.Height), Color.White);
+                    sb.Draw( disableVerticalScroll ? disabledScrollbarTexture: scrollbarTexture, new Vector2(vScrollbarDimensions.X, vScrollbarDimensions.Y), new Rectangle(0, 0, 20, DisplayArea.Height), Color.White);
+                    sb.Draw(scrollbarNubTexture, new Vector2(vScrollbarNubDimensons.X, vScrollbarNubDimensons.Y), new Rectangle(0, 0, vScrollbarNubDimensons.Width, vScrollbarNubDimensons.Height), Color.White);
                 }
             }
             sb.End();
@@ -177,25 +185,25 @@ namespace ZMachine.Monogame.Component
             var factor = (float)ContentDimensions.Height / DisplayArea.Height;
             var distance = DisplayArea.Height / factor;
             // Clicked after the halfway point of  the button, so button down and scroll up
-            if (y > vScrollbarButtonDimensons.Y + vScrollbarButtonDimensons.Height / 2)
+            if (y > vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height / 2)
             {
-                if (vScrollbarButtonDimensons.Y + 22 == vScrollbarDimensions.Height) return ScrollDirection.Unknown;
+                if (vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height == vScrollbarDimensions.Height) return ScrollDirection.Unknown;
 
-                if (vScrollbarButtonDimensons.Y + 22 < vScrollbarDimensions.Height)
+                if (vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height < vScrollbarDimensions.Height)
                 {
-                    vScrollbarButtonDimensons.Y += (int)distance;
-                    if (vScrollbarButtonDimensons.Y + 22 > vScrollbarDimensions.Height)
-                        vScrollbarButtonDimensons.Y = vScrollbarDimensions.Height - 22;
+                    vScrollbarNubDimensons.Y += (int)distance;
+                    if (vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height > vScrollbarDimensions.Height)
+                        vScrollbarNubDimensons.Y = vScrollbarDimensions.Height - vScrollbarNubDimensons.Height;
                     return ScrollDirection.Up;
                 }
             }
             else
             {
-                if (y < vScrollbarButtonDimensons.Y)
+                if (y < vScrollbarNubDimensons.Y)
                 {
-                    var newPos = vScrollbarButtonDimensons.Y - (int)distance;
+                    var newPos = vScrollbarNubDimensons.Y - (int)distance;
                     if (newPos < 0) newPos = 0;
-                        vScrollbarButtonDimensons.Y = newPos;
+                        vScrollbarNubDimensons.Y = newPos;
                     return ScrollDirection.Down;
                 }
             }
