@@ -5,6 +5,7 @@ using Color = Microsoft.Xna.Framework.Color;
 using System.Linq;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Diagnostics;
 
 namespace ZMachine.Monogame.Component
 {
@@ -34,6 +35,8 @@ namespace ZMachine.Monogame.Component
         private Rectangle ContentDimensions = Rectangle.Empty;
         public Rectangle vScrollbarDimensions { get; private set; } = Rectangle.Empty;
         private Rectangle vScrollbarNubDimensons = Rectangle.Empty;
+
+        private Vector2 previousMouse = Vector2.Zero;
 
         public bool VerticalScrollbar { get; }
         public IScrollablePanelContent Content { get; private set; }
@@ -135,10 +138,11 @@ namespace ZMachine.Monogame.Component
 
         private void MousePosition(MouseState mState)
         {
+            var mouseRect = new Rectangle(mState.X, mState.Y, 1, 1);
             if (mState.LeftButton == ButtonState.Pressed && !lButtonPressed)
             {
                 lButtonPressed = true;
-                if (vScrollbarDimensions.Intersects(new Rectangle(mState.X, mState.Y, 1, 1)))
+                if (vScrollbarDimensions.Intersects(mouseRect))
                 {
                     var direction = UpdateVerticalScrollPosition(mState.X, mState.Y);
                     // up = head to the negatives
@@ -148,12 +152,57 @@ namespace ZMachine.Monogame.Component
                     //this.Content.Off  
 
                 }
+
             }
+
+            if (mState.LeftButton == ButtonState.Pressed && lButtonPressed && vScrollbarNubDimensons.Intersects(mouseRect))
+                ScrollVerticalScrollBar(new Vector2(mState.X, mState.Y));
+
+
 
             if (mState.LeftButton == ButtonState.Released && lButtonPressed)
             {
+                previousMouse = Vector2.Zero;
                 lButtonPressed = false;
             }
+        }
+
+        private void ScrollVerticalScrollBar(Vector2 currentMousePos)
+        {
+            if (previousMouse == Vector2.Zero)
+            {
+                previousMouse = currentMousePos;
+                Debug.WriteLine("WOT");
+                return;
+            }
+            if (currentMousePos == previousMouse)
+                return;
+            else if (previousMouse != currentMousePos)
+            {
+                // work out the different and move the nubbin the same distance.
+                // Move nubbin up, (so scroll down)]
+                var nubPos = 0;
+                if (previousMouse.Y > currentMousePos.Y)
+                {
+                    nubPos = -(int)(previousMouse.Y - currentMousePos.Y);
+                }
+                else if (previousMouse.Y < currentMousePos.Y)
+                {
+                    nubPos = (int)(currentMousePos.Y - previousMouse.Y);
+                }
+
+                this.vScrollbarNubDimensons.Y += nubPos;
+                Debug.WriteLine(vScrollbarNubDimensons.Y);
+
+
+                if (this.vScrollbarNubDimensons.Y < this.vScrollbarDimensions.Y)
+                    this.vScrollbarNubDimensons.Y = 0;
+                if (this.vScrollbarNubDimensons.Y + this.vScrollbarNubDimensons.Height > this.vScrollbarDimensions.Y + this.vScrollbarDimensions.Height)
+                    this.vScrollbarNubDimensons.Y = (this.vScrollbarDimensions.Y + this.vScrollbarNubDimensons.Height) - this.vScrollbarNubDimensons.Height;
+                previousMouse = currentMousePos;
+            }
+
+
         }
 
         public void Draw(GameTime gameTime)
@@ -179,6 +228,8 @@ namespace ZMachine.Monogame.Component
 
         internal ScrollDirection UpdateVerticalScrollPosition(int x, int y)
         {
+            // If we have clicked the nubn eject.
+            if (new Rectangle(x, y, 1, 1).Intersects(vScrollbarNubDimensons)) return ScrollDirection.Unknown;
             // X and Y have beenc lieced.
             // do we move the button up or down?
             ScrollDirection sd = ScrollDirection.Unknown;
@@ -188,8 +239,10 @@ namespace ZMachine.Monogame.Component
             // remove the screen offset.
             var screenOffSet = vScrollbarDimensions.Y;
             float newContentYPos = 0;
+
+
             // Clicked after the halfway point of  the button, so nub scrolls down and content scroll up
-            if (y >= vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height / 2)
+            if (y >= vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height)
             {
                 if (vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height == vScrollbarDimensions.Height) return ScrollDirection.Unknown;
 
@@ -198,8 +251,8 @@ namespace ZMachine.Monogame.Component
                 {
                     //vScrollbarNubDimensons.Y += (int)distance;
                     var newPos = vScrollbarNubDimensons.Y + (int)distanceToMove;
-                    newContentYPos = (newPos- screenOffSet) * pages;
-                    
+                    newContentYPos = (newPos - screenOffSet) * pages;
+
                     // if the height of the nub is outside the bounds of the gutter move itback in.
                     if (newPos + vScrollbarNubDimensons.Height > vScrollbarDimensions.Height)
                         vScrollbarNubDimensons.Y = (vScrollbarDimensions.Y + vScrollbarDimensions.Height) - vScrollbarNubDimensons.Height;
@@ -211,11 +264,11 @@ namespace ZMachine.Monogame.Component
             else // nub moves up, content scrolls down
             {
                 var newPos = vScrollbarNubDimensons.Y - (int)distanceToMove;
-                newContentYPos =(newPos - screenOffSet) * pages;
+                newContentYPos = (newPos - screenOffSet) * pages;
                 //newContentYPos = newPos * factor;
                 if (newPos < vScrollbarDimensions.Y) newPos = vScrollbarDimensions.Y;
                 vScrollbarNubDimensons.Y = newPos;
-                sd= ScrollDirection.Down;
+                sd = ScrollDirection.Down;
 
             }
             this.Content.SetVerticalOffset(newContentYPos);

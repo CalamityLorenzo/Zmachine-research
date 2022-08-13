@@ -51,8 +51,6 @@ namespace ZMachine.Monogame.Component
         public void DrawPanel(GameTime time)
         {
             var pos = new Rectangle(0, 0 + (int)offSet.Y, largeText.Width, largeText.Height);
-
-
             _sp.Draw(this.largeText, largeText.Bounds, pos, Color.White);
             //for (var x = 0; x < this.textures.Length; ++x)
             //{
