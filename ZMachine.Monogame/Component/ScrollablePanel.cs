@@ -13,6 +13,7 @@ namespace ZMachine.Monogame.Component
         void SetSpriteBatch(SpriteBatch spritebatch);
         Rectangle ContentDimensions();
         void DrawPanel(GameTime time);
+        void SetVerticalOffset(float y);
     }
 
     public enum ScrollDirection
@@ -180,37 +181,45 @@ namespace ZMachine.Monogame.Component
         {
             // X and Y have beenc lieced.
             // do we move the button up or down?
-
+            ScrollDirection sd = ScrollDirection.Unknown;
             // Stepping distnace
-            var factor = (float)ContentDimensions.Height / DisplayArea.Height;
-            var distance = DisplayArea.Height / factor;
-            // Clicked after the halfway point of  the button, so button down and scroll up
-            if (y > vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height / 2)
+            var pages = (float)ContentDimensions.Height / DisplayArea.Height;
+            var distanceToMove = DisplayArea.Height / pages;
+            // remove the screen offset.
+            var screenOffSet = vScrollbarDimensions.Y;
+            float newContentYPos = 0;
+            // Clicked after the halfway point of  the button, so nub scrolls down and content scroll up
+            if (y >= vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height / 2)
             {
                 if (vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height == vScrollbarDimensions.Height) return ScrollDirection.Unknown;
 
-                // Is the total height of the nub still in bounds?
+                // Is the total height of the nub still in bounds?cva
                 if (vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height < vScrollbarDimensions.Height)
                 {
-                    vScrollbarNubDimensons.Y += (int)distance;
+                    //vScrollbarNubDimensons.Y += (int)distance;
+                    var newPos = vScrollbarNubDimensons.Y + (int)distanceToMove;
+                    newContentYPos = (newPos- screenOffSet) * pages;
+                    
                     // if the height of the nub is outside the bounds of the gutter move itback in.
-                    if (vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height > vScrollbarDimensions.Height)
+                    if (newPos + vScrollbarNubDimensons.Height > vScrollbarDimensions.Height)
                         vScrollbarNubDimensons.Y = (vScrollbarDimensions.Y + vScrollbarDimensions.Height) - vScrollbarNubDimensons.Height;
-                    return ScrollDirection.Up;
+                    else
+                        vScrollbarNubDimensons.Y = newPos;
+                    sd = ScrollDirection.Up;
                 }
             }
-            else
+            else // nub moves up, content scrolls down
             {
-                if (y < vScrollbarNubDimensons.Y)
-                {
-                    var newPos = vScrollbarNubDimensons.Y - (int)distance;
-                    if (newPos < vScrollbarDimensions.Y) newPos = vScrollbarDimensions.Y;
+                var newPos = vScrollbarNubDimensons.Y - (int)distanceToMove;
+                newContentYPos =(newPos - screenOffSet) * pages;
+                //newContentYPos = newPos * factor;
+                if (newPos < vScrollbarDimensions.Y) newPos = vScrollbarDimensions.Y;
+                vScrollbarNubDimensons.Y = newPos;
+                sd= ScrollDirection.Down;
 
-                    vScrollbarNubDimensons.Y = newPos;
-                    return ScrollDirection.Down;
-                }
             }
-            return ScrollDirection.Unknown;
+            this.Content.SetVerticalOffset(newContentYPos);
+            return sd;
         }
     }
 }

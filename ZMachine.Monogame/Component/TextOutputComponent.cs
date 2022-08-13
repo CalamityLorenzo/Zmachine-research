@@ -110,5 +110,10 @@ namespace ZMachine.Monogame.Component
             }
 
         }
+
+        public void SetVerticalOffset(float y)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

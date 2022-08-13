@@ -37,7 +37,6 @@ namespace ZMachine.Monogame
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             // TODO: Add your initialization logic here
             base.Initialize();
-
         }
 
         private void Window_ClientSizeChanged(object? sender, EventArgs e)
