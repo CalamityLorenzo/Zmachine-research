@@ -169,7 +169,7 @@ namespace ZMachine.Monogame.Component
                 {
 
                     // this.sb.Draw(this.scrollbarTexture, new Vector2(this.DisplayArea.X + this.DisplayArea.Width - 20, this.DisplayArea.Y), new Rectangle(0, 0, 20, (int)this.DisplayArea.Height), Color.White);
-                    sb.Draw( disableVerticalScroll ? disabledScrollbarTexture: scrollbarTexture, new Vector2(vScrollbarDimensions.X, vScrollbarDimensions.Y), new Rectangle(0, 0, 20, DisplayArea.Height), Color.White);
+                    sb.Draw(disableVerticalScroll ? disabledScrollbarTexture : scrollbarTexture, new Vector2(vScrollbarDimensions.X, vScrollbarDimensions.Y), new Rectangle(0, 0, 20, DisplayArea.Height), Color.White);
                     sb.Draw(scrollbarNubTexture, new Vector2(vScrollbarNubDimensons.X, vScrollbarNubDimensons.Y), new Rectangle(0, 0, vScrollbarNubDimensons.Width, vScrollbarNubDimensons.Height), Color.White);
                 }
             }
@@ -189,11 +189,13 @@ namespace ZMachine.Monogame.Component
             {
                 if (vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height == vScrollbarDimensions.Height) return ScrollDirection.Unknown;
 
+                // Is the total height of the nub still in bounds?
                 if (vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height < vScrollbarDimensions.Height)
                 {
                     vScrollbarNubDimensons.Y += (int)distance;
+                    // if the height of the nub is outside the bounds of the gutter move itback in.
                     if (vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height > vScrollbarDimensions.Height)
-                        vScrollbarNubDimensons.Y = vScrollbarDimensions.Height - vScrollbarNubDimensons.Height;
+                        vScrollbarNubDimensons.Y = (vScrollbarDimensions.Y + vScrollbarDimensions.Height) - vScrollbarNubDimensons.Height;
                     return ScrollDirection.Up;
                 }
             }
@@ -202,8 +204,9 @@ namespace ZMachine.Monogame.Component
                 if (y < vScrollbarNubDimensons.Y)
                 {
                     var newPos = vScrollbarNubDimensons.Y - (int)distance;
-                    if (newPos < 0) newPos = 0;
-                        vScrollbarNubDimensons.Y = newPos;
+                    if (newPos < vScrollbarDimensions.Y) newPos = vScrollbarDimensions.Y;
+
+                    vScrollbarNubDimensons.Y = newPos;
                     return ScrollDirection.Down;
                 }
             }

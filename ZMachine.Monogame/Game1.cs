@@ -13,6 +13,7 @@ namespace ZMachine.Monogame
         private SpriteBatch _spriteBatch;
         private SpriteFont arial;
         private TextOutputComponent textOutput;
+        private TestPanelContent _testContent;
 
         internal TypeToStream TypeToStream { get; private set; }
 
@@ -20,6 +21,8 @@ namespace ZMachine.Monogame
         private ZMachineGamee machineGame;
 
         private ScrollablePanel scrollPanel;
+
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -61,7 +64,8 @@ namespace ZMachine.Monogame
 
             scrollPanel = new ScrollablePanel(this, this._spriteBatch, true, new Rectangle(40, 20, 500, 300));
             this.textOutput = new TextOutputComponent(this, _spriteBatch, arial, new Vector2(40,20), outputScreen);
-            scrollPanel.AddContent(textOutput);
+            this._testContent = new TestPanelContent(this);
+            scrollPanel.AddContent(_testContent);
             // TODO: use this.Content to load your game content here
 
             this.TypeToStream = new TypeToStream(this, this.input0);
@@ -96,8 +100,10 @@ namespace ZMachine.Monogame
                 Exit();
             machineGame.Update();
 
-            this.textOutput.Update(gameTime);
-            
+            //this.textOutput.Update(gameTime);
+
+            this._testContent.Update(gameTime);
+
             this.scrollPanel.Update(gameTime);
            
             // TODO: Add your update logic here
