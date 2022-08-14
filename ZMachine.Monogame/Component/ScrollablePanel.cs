@@ -48,6 +48,7 @@ namespace ZMachine.Monogame.Component
         private Texture2D scrollbarNubTexture;
         private bool lButtonPressed;
         private bool disableVerticalScroll;
+        private int currentScrollHeight;
 
         public ScrollablePanel(Game game, SpriteBatch sb, bool verticalScrollbar, Rectangle startingDimensions)
         {
@@ -104,11 +105,15 @@ namespace ZMachine.Monogame.Component
         // Set the size of the scrollbar button in relation to the content being displayed
         private void FormatScrollbar()
         {
+
             if (VerticalScrollbar)
             {
-                float factor = (float)ContentDimensions.Height >= DisplayArea.Height ? (float)ContentDimensions.Height / DisplayArea.Height : 1;
+                var pages = (float)ContentDimensions.Height / DisplayArea.Height;
+                var nubHeight = pages == 0 ? vScrollbarDimensions.Height / 1 : vScrollbarDimensions.Height / pages;
+                if (nubHeight > vScrollbarDimensions.Height) nubHeight = vScrollbarDimensions.Height;
+                //float factor = (float)ContentDimensions.Height >= DisplayArea.Height ? (float)ContentDimensions.Height / DisplayArea.Height : 1;
                 vScrollbarDimensions = new(DisplayArea.X + DisplayArea.Width - 20, DisplayArea.Y, 22, DisplayArea.Height);
-                vScrollbarNubDimensons = new(DisplayArea.X + DisplayArea.Width - 20, DisplayArea.Y, 22, 22);
+                vScrollbarNubDimensons = new(DisplayArea.X + DisplayArea.Width - 20, DisplayArea.Y, 22, (int)nubHeight);
             }
         }
 
@@ -122,17 +127,16 @@ namespace ZMachine.Monogame.Component
                     // well do something!
                     ContentDimensions = contentDimensions;
                     FormatScrollbar();
+                    SetVerticalScrollbarRelativePosition(this.vScrollbarDimensions.Y + this.vScrollbarDimensions.Height);
                 }
                 //if (contentDimensions != this.DisplayArea) UpdateDimensions(contentDimensions);
                 if (contentDimensions.Height < this.DisplayArea.Height && disableVerticalScroll == false)
                     disableVerticalScroll = true;
                 else if (contentDimensions.Height > this.DisplayArea.Height && disableVerticalScroll == true)
                     disableVerticalScroll = false;
+                var mState = Mouse.GetState();
+                MousePosition(mState);
             }
-
-            var mState = Mouse.GetState();
-
-            MousePosition(mState);
 
         }
 
@@ -144,21 +148,12 @@ namespace ZMachine.Monogame.Component
                 lButtonPressed = true;
                 if (vScrollbarDimensions.Intersects(mouseRect))
                 {
-                    var direction = UpdateVerticalScrollPosition(mState.X, mState.Y);
-                    // up = head to the negatives
-                    // down increate the vertical
-                    var dimensions = this.Content.ContentDimensions();
-                    var factor = (float)dimensions.Height / dimensions.Height;
-                    //this.Content.Off  
-
+                    ClickVerticalScrollPosition(mState.X, mState.Y);
                 }
-
             }
 
             if (mState.LeftButton == ButtonState.Pressed && lButtonPressed && vScrollbarNubDimensons.Intersects(mouseRect))
-                ScrollVerticalScrollBar(new Vector2(mState.X, mState.Y));
-
-
+                HoldVerticalScrollPosition(new Vector2(mState.X, mState.Y));
 
             if (mState.LeftButton == ButtonState.Released && lButtonPressed)
             {
@@ -167,12 +162,13 @@ namespace ZMachine.Monogame.Component
             }
         }
 
-        private void ScrollVerticalScrollBar(Vector2 currentMousePos)
+        // When you click and hold on the nub. you can move the nub, up and down
+        // Appesr to scroll that way.
+        private void HoldVerticalScrollPosition(Vector2 currentMousePos)
         {
             if (previousMouse == Vector2.Zero)
             {
                 previousMouse = currentMousePos;
-                Debug.WriteLine("WOT");
                 return;
             }
             if (currentMousePos == previousMouse)
@@ -190,19 +186,68 @@ namespace ZMachine.Monogame.Component
                 {
                     nubPos = (int)(currentMousePos.Y - previousMouse.Y);
                 }
-
-                this.vScrollbarNubDimensons.Y += nubPos;
-                Debug.WriteLine(vScrollbarNubDimensons.Y);
-
-
-                if (this.vScrollbarNubDimensons.Y < this.vScrollbarDimensions.Y)
-                    this.vScrollbarNubDimensons.Y = 0;
-                if (this.vScrollbarNubDimensons.Y + this.vScrollbarNubDimensons.Height > this.vScrollbarDimensions.Y + this.vScrollbarDimensions.Height)
-                    this.vScrollbarNubDimensons.Y = (this.vScrollbarDimensions.Y + this.vScrollbarNubDimensons.Height) - this.vScrollbarNubDimensons.Height;
+                SetVerticalScrollbarRelativePosition(nubPos);
+                // Set the position.
                 previousMouse = currentMousePos;
             }
 
 
+        }
+
+        // When you click the gutter onthe scroll bar how it moves.
+        // we are trying to page from one section to the next.
+        // If you click the nub it returns.
+        internal void ClickVerticalScrollPosition(int x, int y)
+        {
+            // If we have clicked the nubn eject.
+            if (new Rectangle(x, y, 1, 1).Intersects(vScrollbarNubDimensons)) return;
+            // X and Y have beenc clicked.
+            // do we move the button up or down?
+            // Stepping distnace
+            var pages = (float)ContentDimensions.Height / DisplayArea.Height;
+            // Effectively we are asking is the positive or negative?
+            var distanceToMove = DisplayArea.Height / pages;
+
+            var newPos = 0;
+            // Clicked after the halfway point of  the button, so nub scrolls down and content scroll up
+            if (y >= vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height)
+            {
+                if (vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height < vScrollbarDimensions.Height)
+                {
+                    newPos = (int)distanceToMove;
+                }
+            }
+            else // nub moves up, content scrolls down
+            {
+                newPos = -(int)distanceToMove;
+            }
+            this.SetVerticalScrollbarRelativePosition(newPos);
+        }
+
+        /// <summary>
+        /// Change the position of the nub realtive to existing position.
+        /// </summary>
+        /// <param name="relativeNubY"></param>
+        private void SetVerticalScrollbarRelativePosition(int relativeNubY)
+        {
+            var newPos = this.vScrollbarNubDimensons.Y + relativeNubY;
+            this.SetVerticalScrollbarAbsolutePosition(newPos);
+        }
+
+        private void SetVerticalScrollbarAbsolutePosition(int NubY)
+        {
+            this.vScrollbarNubDimensons.Y = NubY;
+            // Above the height of the gutter.
+            if (this.vScrollbarNubDimensons.Y < this.vScrollbarDimensions.Y)
+                this.vScrollbarNubDimensons.Y = this.vScrollbarDimensions.Y;
+            // Bottom of the nub is below the gutter end.
+            if (this.vScrollbarNubDimensons.Y + this.vScrollbarNubDimensons.Height > this.vScrollbarDimensions.Y + this.vScrollbarDimensions.Height)
+                this.vScrollbarNubDimensons.Y = (this.vScrollbarDimensions.Y + this.vScrollbarDimensions.Height) - this.vScrollbarNubDimensons.Height;
+
+            // Now based on that position, set the content offset.
+            var actualPosition = vScrollbarNubDimensons.Y - vScrollbarDimensions.Y;
+            var pages = (float)ContentDimensions.Height / DisplayArea.Height;
+            this.Content.SetVerticalOffset(actualPosition * pages);
         }
 
         public void Draw(GameTime gameTime)
@@ -226,53 +271,5 @@ namespace ZMachine.Monogame.Component
             sb.End();
         }
 
-        internal ScrollDirection UpdateVerticalScrollPosition(int x, int y)
-        {
-            // If we have clicked the nubn eject.
-            if (new Rectangle(x, y, 1, 1).Intersects(vScrollbarNubDimensons)) return ScrollDirection.Unknown;
-            // X and Y have beenc lieced.
-            // do we move the button up or down?
-            ScrollDirection sd = ScrollDirection.Unknown;
-            // Stepping distnace
-            var pages = (float)ContentDimensions.Height / DisplayArea.Height;
-            var distanceToMove = DisplayArea.Height / pages;
-            // remove the screen offset.
-            var screenOffSet = vScrollbarDimensions.Y;
-            float newContentYPos = 0;
-
-
-            // Clicked after the halfway point of  the button, so nub scrolls down and content scroll up
-            if (y >= vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height)
-            {
-                if (vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height == vScrollbarDimensions.Height) return ScrollDirection.Unknown;
-
-                // Is the total height of the nub still in bounds?cva
-                if (vScrollbarNubDimensons.Y + vScrollbarNubDimensons.Height < vScrollbarDimensions.Height)
-                {
-                    //vScrollbarNubDimensons.Y += (int)distance;
-                    var newPos = vScrollbarNubDimensons.Y + (int)distanceToMove;
-                    newContentYPos = (newPos - screenOffSet) * pages;
-
-                    // if the height of the nub is outside the bounds of the gutter move itback in.
-                    if (newPos + vScrollbarNubDimensons.Height > vScrollbarDimensions.Height)
-                        vScrollbarNubDimensons.Y = (vScrollbarDimensions.Y + vScrollbarDimensions.Height) - vScrollbarNubDimensons.Height;
-                    else
-                        vScrollbarNubDimensons.Y = newPos;
-                    sd = ScrollDirection.Up;
-                }
-            }
-            else // nub moves up, content scrolls down
-            {
-                var newPos = vScrollbarNubDimensons.Y - (int)distanceToMove;
-                newContentYPos = (newPos - screenOffSet) * pages;
-                //newContentYPos = newPos * factor;
-                if (newPos < vScrollbarDimensions.Y) newPos = vScrollbarDimensions.Y;
-                vScrollbarNubDimensons.Y = newPos;
-                sd = ScrollDirection.Down;
-
-            }
-            this.Content.SetVerticalOffset(newContentYPos);
-            return sd;
-        }
     }
 }

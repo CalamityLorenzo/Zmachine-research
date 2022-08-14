@@ -61,10 +61,10 @@ namespace ZMachine.Monogame
             fileStream.Position = 0;
             this.machineGame = new ZMachineGamee(input0, input1, outputScreen, outputTranscript, fileStream);
 
-            scrollPanel = new ScrollablePanel(this, this._spriteBatch, true, new Rectangle(40, 20, 500, 300));
+            scrollPanel = new ScrollablePanel(this, this._spriteBatch, true, new Rectangle(40, 20, this._graphics.PreferredBackBufferWidth-80, this._graphics.PreferredBackBufferHeight));
             this.textOutput = new TextOutputComponent(this, _spriteBatch, arial, new Vector2(40,20), outputScreen);
-            this._testContent = new TestPanelContent(this);
-            scrollPanel.AddContent(_testContent);
+       //     this._testContent = new TestPanelContent(this);
+            scrollPanel.AddContent(textOutput);
             // TODO: use this.Content to load your game content here
 
             this.TypeToStream = new TypeToStream(this, this.input0);
@@ -99,10 +99,7 @@ namespace ZMachine.Monogame
                 Exit();
             machineGame.Update();
 
-            //this.textOutput.Update(gameTime);
-
-            this._testContent.Update(gameTime);
-
+            this.textOutput.Update(gameTime);
             this.scrollPanel.Update(gameTime);
            
             // TODO: Add your update logic here
@@ -116,7 +113,7 @@ namespace ZMachine.Monogame
             GraphicsDevice.Clear(Color.CornflowerBlue);
             _spriteBatch.Begin();
             // TODO: Add your drawing code here
-            // this.textOutput.Draw(gameTime);
+            this.textOutput.Draw(gameTime);
             this.scrollPanel.Draw(gameTime);
 
             _spriteBatch.End();

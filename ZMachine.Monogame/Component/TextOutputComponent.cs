@@ -85,35 +85,33 @@ namespace ZMachine.Monogame.Component
             this.batch = spritebatch;
         }
 
-        public Rectangle ContentDimensions() => new Rectangle(0, 0, 500, ((int)this.RowHeight * this.history.Count));
-
-        internal void SetOffSet(Vector2 newOffset) => this.OffSet = newOffset;
+        public Rectangle ContentDimensions() => new Rectangle(0, 0, 500, ((int)this.RowHeight * (this.history.Count+2)));
 
         public void DrawPanel(GameTime time)
         {
             foreach (var lineData in history)
             {
                 var line = lineData.Item2;
-                batch.DrawString(font, line, new Vector2(HorizontalStart, lineData.Item1)+ this.OffSet, Color.White);
+                batch.DrawString(font, line, new Vector2(HorizontalStart, lineData.Item1)- this.OffSet, Color.White);
             }
 
             if (this.currentLine.Length > 0)
             {
                 var currentLineWidth = font.MeasureString(currentLine);
-                batch.DrawString(font, ">  ", new Vector2(currentDrawingPosition.X - this.promptSize.X - 1, currentDrawingPosition.Y) + this.OffSet, Color.Black);
-                batch.DrawString(font, currentLine, currentDrawingPosition + this.OffSet, Color.White);
-                batch.DrawString(font, "_", new Vector2(currentDrawingPosition.X + currentLineWidth.X, currentDrawingPosition.Y) + this.OffSet, Color.Black);
+                batch.DrawString(font, ">  ", new Vector2(currentDrawingPosition.X - this.promptSize.X - 1, currentDrawingPosition.Y) - this.OffSet, Color.Black);
+                batch.DrawString(font, currentLine, currentDrawingPosition - this.OffSet, Color.White);
+                batch.DrawString(font, "_", new Vector2(currentDrawingPosition.X + currentLineWidth.X, currentDrawingPosition.Y) - this.OffSet, Color.Black);
             }
             else
             {
-                batch.DrawString(font, this.prompt, new Vector2(currentDrawingPosition.X - this.promptSize.X, currentDrawingPosition.Y) + this.OffSet, Color.Black);
+                batch.DrawString(font, this.prompt, new Vector2(currentDrawingPosition.X - this.promptSize.X, currentDrawingPosition.Y) - this.OffSet, Color.Black);
             }
 
         }
 
         public void SetVerticalOffset(float y)
         {
-            throw new NotImplementedException();
+            this.OffSet.Y = y;
         }
     }
 }

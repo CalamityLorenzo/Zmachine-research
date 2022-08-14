@@ -21,7 +21,7 @@ namespace ZMachine.Monogame.Component
             var textRect = new Rectangle(0, 0, 1, 1);
             this.textures = Enumerable.Empty<Texture2D>().ToArray();
 
-            this.largeText =Texture2D.FromFile(this.GraphicsDevice, "Content\\cupcake_small.jpg");
+            this.largeText =Texture2D.FromFile(this.GraphicsDevice, "Content\\cupcake.jpg");
 
             //this.textures = new[]
             //{
