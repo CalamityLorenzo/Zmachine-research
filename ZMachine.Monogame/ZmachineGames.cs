@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using ZMachine.Library.V1;
 using ZMachine.Library.V1.Instructions;
 using ZMachine.Library.V1.Objects;
@@ -28,6 +29,7 @@ namespace ZMachine.Monogame
         private Stack<ActivationRecord> CallStackReturns = new Stack<ActivationRecord>();
         private DecodedInstruction currentInstr;
         private string readInputText;
+        private byte[] terminatingChars; // Which characters can terminate a read command.
 
         public bool IsReadingInstruction { get; private set; }
 
@@ -49,6 +51,21 @@ namespace ZMachine.Monogame
             // Nom, nom nom game data.
             StoryData.Read(Memory, 0, Memory.Length);
             this.StoryHeader = StoryHeader.CreateHeader(Memory);
+
+            if (this.StoryHeader.Version < 5)
+            {
+                this.terminatingChars = new byte[] { (byte)'\r' };
+            }
+            else
+            {
+                if (this.StoryHeader.TerminatingCharsTable != 0)
+                {
+                    this.terminatingChars = Enumerable.Empty<Byte>().ToArray();
+                }
+                // add other chars then
+                this.terminatingChars = this.terminatingChars.Concat(new byte[] { (byte)'\r' }).ToArray();
+            }
+
             if (this.StoryHeader.HeaderExtensionTable != 0)
             {
                 this.HeaderExtensions = HeaderExtensionTable.CreateHeaderExtenions(Memory, this.StoryHeader.HeaderExtensionTable);
@@ -131,7 +148,7 @@ namespace ZMachine.Monogame
                         break;
                     case "jump":
                         {
-                            short offSet =(short)(currentInstr.operands[0].operand[0] << 8 | currentInstr.operands[0].operand[1]);
+                            short offSet = (short)(currentInstr.operands[0].operand[0] << 8 | currentInstr.operands[0].operand[1]);
                             this.ProgramCounter = ProgramCounter + offSet - 2;
                         }
                         break;
@@ -177,7 +194,7 @@ namespace ZMachine.Monogame
                         this.readInputText = this.readInputText + charA;
                     }
 
-                    if (charA == 13) // we have completed our task.
+                    if (this.terminatingChars.Any(s => s == charA)) // we have completed our task.
                     {
                         this.IsReadingInstruction = false;
                     }
