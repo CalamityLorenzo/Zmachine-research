@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -30,6 +31,7 @@ namespace ZMachine.Monogame
         private DecodedInstruction currentInstr;
         private string readInputText;
         private byte[] terminatingChars; // Which characters can terminate a read command.
+        private Dictionary<short, Color> ColorMapper = new Dictionary<short, Color>();
 
         public bool IsReadingInstruction { get; private set; }
 
@@ -58,14 +60,17 @@ namespace ZMachine.Monogame
             }
             else
             {
-                if (this.StoryHeader.TerminatingCharsTable != 0)
+                if (this.StoryHeader.TerminatingCharsTable == 0)
                 {
                     this.terminatingChars = Enumerable.Empty<Byte>().ToArray();
                 }
-                // add other chars then
-                this.terminatingChars = this.terminatingChars.Concat(new byte[] { (byte)'\r' }).ToArray();
+                else
+                {
+                    // add other chars then
+                    this.terminatingChars = Enumerable.Empty<Byte>().ToArray();
+                    this.terminatingChars = this.terminatingChars.Concat(new byte[] { (byte)'\r' }).ToArray();
+                }
             }
-
             if (this.StoryHeader.HeaderExtensionTable != 0)
             {
                 this.HeaderExtensions = HeaderExtensionTable.CreateHeaderExtenions(Memory, this.StoryHeader.HeaderExtensionTable);
@@ -83,6 +88,31 @@ namespace ZMachine.Monogame
             this.Memory = bytes;
             this.ProgramCounter = 0;
             this.CallStackReturns.Push(new(-1, 0, Array.Empty<Byte>()));
+        }
+
+        private void MapColors()
+        {
+
+            // Current
+            ColorMapper.Add(-2, Color.White);
+            // Default
+            ColorMapper.Add(-1, Color.White);
+
+            ColorMapper.Add(0x0000, Color.Black);
+            ColorMapper.Add(0x001D, Color.Red);
+            ColorMapper.Add(0x0340, Color.Green);
+            ColorMapper.Add(0x03BD, Color.Yellow);
+            ColorMapper.Add(0x59A0, Color.Blue);
+            ColorMapper.Add(0x7C1F, Color.Magenta);
+            
+            ColorMapper.Add(0x77A0, Color.Cyan);
+            ColorMapper.Add(0x7FFF, Color.White);
+            ColorMapper.Add(0x5AD6, Color.LightGray);
+            ColorMapper.Add(0x4631, Color.DimGray);
+            ColorMapper.Add(0x2D6B, Color.DarkGray);
+            ColorMapper.Add(-4, Color.Transparent);
+
+
         }
 
         public void Update()
