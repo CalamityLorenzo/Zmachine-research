@@ -9,7 +9,7 @@ using ZMachine.Monogame.Extensions;
 
 namespace ZMachine.Monogame.Component
 {
-    public class TextInputControl : DrawableGameComponent
+    public class DEnnis : DrawableGameComponent
     {
         
         private readonly SpriteFont fnt;
@@ -28,7 +28,7 @@ namespace ZMachine.Monogame.Component
         private bool isRightArrowPressed;
         private SpriteBatch _spriteBatch;
 
-        public TextInputControl(Game game, SpriteBatch _spriteBatch, SpriteFont fnt) : base(game)
+        public DEnnis(Game game, SpriteBatch _spriteBatch, SpriteFont fnt) : base(game)
         {
             textSource = new TypeToStream(game);
             this._spriteBatch = _spriteBatch;
@@ -42,7 +42,7 @@ namespace ZMachine.Monogame.Component
             this.startPos = new Vector2(20, 20);
         }
 
-        public TextInputControl(Game game, SpriteBatch _spriteBatch, SpriteFont fnt, Stream writeableStream, Vector2 startPos) : this(game, _spriteBatch, fnt)
+        public DEnnis(Game game, SpriteBatch _spriteBatch, SpriteFont fnt, Stream writeableStream, Vector2 startPos) : this(game, _spriteBatch, fnt)
         {
             MemStream = writeableStream;
             this.startPos = startPos;

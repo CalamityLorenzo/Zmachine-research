@@ -1,3 +1,3 @@
 ﻿
-using var game = new ZMachine.Monogame.Game1();
+using var game = new ZMachine.Monogame.TestGame();
 game.Run();
