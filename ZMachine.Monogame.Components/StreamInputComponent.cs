@@ -1,13 +1,17 @@
 ﻿namespace ZMachine.Monogame.Components
 {
+    // Collects the known text input from the stream
+    // Also appends other chars (like arrow keys, home, ctrl) into the stream
+    // Tihs is the start of the input process, it just generates a stream for another component to handle.
     public class StreamInputComponent : GameComponent
     {
         private Stream TextStream { get; set; }
         private GameWindow gameWindow;
         private bool isEnterPressed;
         private bool isLeftArrowPressed;
-        private int _cursorCharPosition;
         private bool isRightArrowPressed;
+        private bool isUpArrowPressed;
+        private bool isDownArrowPressed;
 
         public long TextStreamLength => TextStream.Length;
 
@@ -34,26 +38,37 @@
             {
                 isEnterPressed = true;
                 TextStream.WriteByte(13); // ZSCII new line.
-                _cursorCharPosition = 0;
             }
 
             if (kboard.IsKeyDown(Keys.Left) && isLeftArrowPressed == false)
             {
                 isLeftArrowPressed = true;
-                if (_cursorCharPosition == 0) return;
-
-                _cursorCharPosition -= 1;
+                TextStream.WriteByte(37);
+            }
+            if (kboard.IsKeyDown(Keys.Up) && isUpArrowPressed == false)
+            {
+                isUpArrowPressed = true;
+                TextStream.WriteByte(38);
             }
 
             if (kboard.IsKeyDown(Keys.Right) && isRightArrowPressed == false)
             {
                 isRightArrowPressed = true;
-                _cursorCharPosition += 1;
+                TextStream.WriteByte(39);
+            }
+
+            if (kboard.IsKeyDown(Keys.Down) && isDownArrowPressed == false)
+            {
+                isDownArrowPressed= true;
+                TextStream.WriteByte(40);
             }
 
             if (kboard.IsKeyUp(Keys.Enter) && isEnterPressed) isEnterPressed = false;
             if (kboard.IsKeyUp(Keys.Left) && isLeftArrowPressed) isLeftArrowPressed = false;
             if (kboard.IsKeyUp(Keys.Right) && isRightArrowPressed) isRightArrowPressed = false;
+
+            if (kboard.IsKeyUp(Keys.Up) && isUpArrowPressed) isUpArrowPressed = false;
+            if (kboard.IsKeyUp(Keys.Down) && isDownArrowPressed) isDownArrowPressed = false;
         }
 
         private void GameWindow_TextInput(object sender, TextInputEventArgs e)
