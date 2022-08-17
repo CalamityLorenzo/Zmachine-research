@@ -16,7 +16,7 @@ namespace ZMachine.Monogame
         private SpriteBatch _spriteBatch;
         private ZMachineScreenOutput screenOutput;
         private Stream outputStream;
-        private StreamInputComponent sic;
+        private StreamInputProcessor sic;
         public TestGame()
         {
             _graphics = new GraphicsDeviceManager(this);
