@@ -1,11 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ZMachine.Monogame.Components
 {
+
+    public class LineAddedEventArgs : EventArgs
+    {
+        public LineAddedEventArgs(string newLine)
+        {
+            NewLine = newLine;
+        }
+
+        public string NewLine { get; }
+    }
+    /// <summary>
+    /// A basic text control. reads input from a stream.
+    /// Outputs text into another output stream.
+    /// </summary>
     public class TextControl : DrawableGameComponent
     {
         private int _cursorPosition;
@@ -13,13 +24,16 @@ namespace ZMachine.Monogame.Components
         private string _currentLine;
         private readonly SpriteFont currentFont;
         private readonly Stream inputStream;
+        private readonly Stream ouputStream;
 
-        public string Value { get; private set; }
+        public string Value { get => new String(this._currentContent.ToArray()); }
         public event Action<object, EventArgs> OnValueChanged;
-        public TextControl(Game game, SpriteFont fnt, Stream inputStream) : base(game)
+        public event Action<object, LineAddedEventArgs> OnLineAdded;
+        public TextControl(Game game, SpriteFont fnt, Stream inputStream, Stream ouputStream) : base(game)
         {
             this.currentFont = fnt;
             this.inputStream = inputStream;
+            this.ouputStream = ouputStream;
         }
 
         public override void Initialize()
@@ -40,7 +54,7 @@ namespace ZMachine.Monogame.Components
 
         private void ProcessStream()
         {
-            if(this.inputStream.Length> 0)
+            if (this.inputStream.Length > 0)
             {
                 // Do stream things
                 _currentLine = "";
@@ -50,26 +64,50 @@ namespace ZMachine.Monogame.Components
                 Span<char> sp = theChars;
                 sr.Read(sp);
                 sr.Close();
-                // That's our line of text that we are going to draw.
-                // we have no knowledge whats in that text. at all.
-                var streamLine = new string(sp).Replace("\0", string.Empty);
-                var displayLines = streamLine.Split(new char[] { '\r' });
-                for (var x = 0; x < displayLines.Length; ++x)
+
+                // enumerate the colleciton of chars
+
+                var charEnumerator = sp.GetEnumerator();
+
+                while (charEnumerator.MoveNext())
                 {
-                    // These all had new lines, and so go to the history table.
-                    if (x < displayLines.Length - 1)
+                    var currentChar = charEnumerator.Current;
+                    // Cursors
+                    if (currentChar == (char)Keys.Left)
                     {
-                        this.history.Add(Tuple.Create(currentDrawingPosition.Y, displayLines[x]));
-                        this.currentDrawingPosition.Y += RowHeight;
+                        this.ChangeCursorPosition(-1);
                     }
-                    // must be the last entry (cos otherwise there would be a blank entry after)
-                    if (x == displayLines.Length - 1 && displayLines[x].Length > 0)
+                    else if (currentChar == (char)Keys.Right)
                     {
-                        this.currentLine = displayLines[x];
+                        this.ChangeCursorPosition(1);
+                    }else if (currentChar == '\b') // Backspace.
+                    {
+                        this._currentContent.RemoveAt(_currentContent.Count);
+                    }
+                    else if (currentChar == (char)Keys.Escape)
+                    {
+                        this._currentContent = new List<char>();
+                    }else if (currentChar == (byte)Keys.Enter)
+                    {
+                        var outputContent = System.Text.Encoding.UTF8.GetBytes(_currentContent.ToArray());
+                        this.ouputStream.Write(outputContent, 0, outputContent.Length);
+                    }
+                    else
+                    {
+                        this._currentContent.Add(currentChar);
+                        this.RaiseValueChanged();
                     }
                 }
-                inputStream
+
+                inputStream.SetLength(0);
             }
+        }
+
+        private void ChangeCursorPosition(int cursorChange)
+        {
+            this._cursorPosition += cursorChange;
+            if (_cursorPosition < 0) this._cursorPosition = 0;
+            if (_cursorPosition > this._currentLine.Length + 1) this._cursorPosition = _currentLine.Length + 1;
         }
 
         public override void Draw(GameTime gameTime)
@@ -77,7 +115,9 @@ namespace ZMachine.Monogame.Components
             base.Draw(gameTime);
         }
 
-        protected virtual void RaiseValueChanged()=> OnValueChanged?.Invoke(this, new EventArgs());
+        protected virtual void RaiseValueChanged() => OnValueChanged?.Invoke(this, new EventArgs());
+        protected virtual void RaiseLineAdded(string newLine) => OnLineAdded?.Invoke(this, new LineAddedEventArgs(newLine));
+
 
     }
 }
