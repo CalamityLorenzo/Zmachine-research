@@ -109,16 +109,18 @@ namespace ZMachine.Monogame.Component
         public void DrawPanel(GameTime time)
         {
 
-
-            batch.Draw(reverseBackground,new Vector2(0,0), new Rectangle(0,0, this.ContentDimensions().Width, (int)this.RowHeight-(int)OffSet.Y), Color.White);
+            var row = (this).RowHeight;
+            batch.Draw(reverseBackground,new Vector2(0,0), new Rectangle(0,0, this.ContentDimensions().Width, (int)row-(int)OffSet.Y), Color.White);
             if(this.statusLine is not null)
-                batch.DrawString(font, statusLine, new Vector2(HorizontalStart, 0) - this.OffSet, background);            
+                batch.DrawString(font, statusLine, new Vector2(HorizontalStart, 0) - this.OffSet, background);
 
+            row += font.MeasureString(statusLine).Y;
+            
             // Colour in the background 
             foreach (var lineData in history)
             {
                 var line = lineData.Item2;
-                batch.DrawString(font, line, new Vector2(HorizontalStart, lineData.Item1) - this.OffSet, Color.White);
+                batch.DrawString(font, line, new Vector2(HorizontalStart, lineData.Item1+row) -  this.OffSet, Color.White);
             }
 
             if (this.currentLine.Length > 0)

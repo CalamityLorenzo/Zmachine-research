@@ -15,15 +15,14 @@ namespace ZMachine.Monogame
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private ZMachineScreenOutput screenOutput;
-        private Stream outputStream;
+        private Stream outputStream, inputStream;
         private StreamInputProcessor sic;
+        private TextControl tc;
         public TestGame()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-
-
         }
 
         protected override void Initialize()
@@ -36,11 +35,15 @@ namespace ZMachine.Monogame
         protected override void LoadContent()
         {
             var arial = Content.Load<SpriteFont>("Arial");
+            var cascade = Content.Load<SpriteFont>("Cascadia");
+            var cbm128 = Content.Load<SpriteFont>("cbm128");
 
             outputStream = new MemoryStream();
+            inputStream = new MemoryStream();
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            sic = new(this, outputStream);
-            screenOutput = new(this, this._spriteBatch, arial, new Color(new Vector3(113f, 202f, 197f)), Color.Black, new Vector2(10, 10), outputStream);
+            sic = new(this, inputStream);
+            tc = new(this, cbm128, inputStream, outputStream, new Vector2(10, 60));
+            screenOutput = new(this, this._spriteBatch, cbm128, new Color(new Vector3(113f, 202f, 197f)), Color.Black, new Vector2(10, 10), outputStream);
 
             // TODO: use this.Content to load your game content here
             var statusLineText = "@@STATUS_LINE@@:Hello Doctor";
@@ -58,6 +61,7 @@ namespace ZMachine.Monogame
 
             // TODO: Add your update logic here
             sic.Update(gameTime);
+            tc.Update(gameTime);
             screenOutput.Update(gameTime);
             base.Update(gameTime);
         }
@@ -67,6 +71,7 @@ namespace ZMachine.Monogame
             GraphicsDevice.Clear(Color.CornflowerBlue);
             this._spriteBatch.Begin();
             // TODO: Add your drawing code here
+            tc.Draw(gameTime);
             screenOutput.Draw(gameTime);
             this._spriteBatch.End();
             base.Draw(gameTime);

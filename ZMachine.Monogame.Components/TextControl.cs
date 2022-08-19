@@ -19,21 +19,25 @@ namespace ZMachine.Monogame.Components
     /// </summary>
     public class TextControl : DrawableGameComponent
     {
-        private int _cursorPosition;
+        private int _cursorPosition = 1;
         private List<char> _currentContent;
         private string _currentLine;
         private readonly SpriteFont currentFont;
         private readonly Stream inputStream;
         private readonly Stream ouputStream;
+        private Vector2 position;
+        private SpriteBatch _spriteBatch;
 
         public string Value { get => new String(this._currentContent.ToArray()); }
         public event Action<object, EventArgs> OnValueChanged;
-        public event Action<object, LineAddedEventArgs> OnLineAdded;
-        public TextControl(Game game, SpriteFont fnt, Stream inputStream, Stream ouputStream) : base(game)
+        public TextControl(Game game, SpriteFont fnt, Stream inputStream, Stream ouputStream, Vector2 position) : base(game)
         {
             this.currentFont = fnt;
             this.inputStream = inputStream;
             this.ouputStream = ouputStream;
+            this.position = position;
+            this._spriteBatch = new SpriteBatch(game.GraphicsDevice);
+            this._currentContent = new List<char>();
         }
 
         public override void Initialize()
@@ -52,6 +56,7 @@ namespace ZMachine.Monogame.Components
             this.ProcessStream();
         }
 
+        private void SetPosition(Vector2 newPosition) => this.position = newPosition;
         private void ProcessStream()
         {
             if (this.inputStream.Length > 0)
@@ -80,21 +85,44 @@ namespace ZMachine.Monogame.Components
                     else if (currentChar == (char)Keys.Right)
                     {
                         this.ChangeCursorPosition(1);
-                    }else if (currentChar == '\b') // Backspace.
+                    }
+                    else if (currentChar == '\b') // Backspace.
                     {
-                        this._currentContent.RemoveAt(_currentContent.Count);
+                        if (this._currentContent.Count > 0 && _cursorPosition == _currentContent.Count)
+                            this._currentContent.RemoveAt(_currentContent.Count - 1);
+                        else if (_cursorPosition > -1 && this._currentContent.Count>0)
+                        {
+                            
+                           this._currentContent.RemoveAt(_cursorPosition-2);
+                            ChangeCursorPosition(-1);
+                        }
                     }
                     else if (currentChar == (char)Keys.Escape)
                     {
                         this._currentContent = new List<char>();
-                    }else if (currentChar == (byte)Keys.Enter)
+                    }
+                    else if (currentChar == (byte)Keys.Enter)
                     {
+                        _currentContent.Add(currentChar);
                         var outputContent = System.Text.Encoding.UTF8.GetBytes(_currentContent.ToArray());
                         this.ouputStream.Write(outputContent, 0, outputContent.Length);
+                        this._currentContent = new List<char>();
+                        this.RaiseValueChanged();
+                        _cursorPosition = 0;
                     }
                     else
                     {
-                        this._currentContent.Add(currentChar);
+                        // This is all cursor position dependent
+                        if (_cursorPosition == _currentContent.Count+1)
+                        {
+                            this._currentContent.Add(currentChar);
+                        }
+                        else
+                        {
+                            this._currentContent.Insert(_cursorPosition, currentChar);
+                        }
+                        this.ChangeCursorPosition(1);
+
                         this.RaiseValueChanged();
                     }
                 }
@@ -106,17 +134,21 @@ namespace ZMachine.Monogame.Components
         private void ChangeCursorPosition(int cursorChange)
         {
             this._cursorPosition += cursorChange;
+            // Left
             if (_cursorPosition < 0) this._cursorPosition = 0;
-            if (_cursorPosition > this._currentLine.Length + 1) this._cursorPosition = _currentLine.Length + 1;
+            // Right boundary
+            if (_cursorPosition > this._currentContent.Count + 1) this._cursorPosition = _currentLine.Length + 1;
         }
 
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
+            this._spriteBatch.Begin();
+            this._spriteBatch.DrawString(this.currentFont, new String(this._currentContent.ToArray()), this.position, Color.White);
+            this._spriteBatch.End();
         }
 
         protected virtual void RaiseValueChanged() => OnValueChanged?.Invoke(this, new EventArgs());
-        protected virtual void RaiseLineAdded(string newLine) => OnLineAdded?.Invoke(this, new LineAddedEventArgs(newLine));
 
 
     }
