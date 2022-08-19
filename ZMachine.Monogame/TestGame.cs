@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+﻿ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -42,8 +42,8 @@ namespace ZMachine.Monogame
             inputStream = new MemoryStream();
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             sic = new(this, inputStream);
-            tc = new(this, cbm128, inputStream, outputStream, new Vector2(10, 60));
-            screenOutput = new(this, this._spriteBatch, cbm128, new Color(new Vector3(113f, 202f, 197f)), Color.Black, new Vector2(10, 10), outputStream);
+            tc = new(this, cascade, inputStream, outputStream, new Vector2(10, 60));
+            screenOutput = new(this, this._spriteBatch, cascade, new Color(new Vector3(113f, 202f, 197f)), Color.Black, new Vector2(10, 10), outputStream);
 
             // TODO: use this.Content to load your game content here
             var statusLineText = "@@STATUS_LINE@@:Hello Doctor";
