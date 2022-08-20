@@ -19,6 +19,7 @@ namespace ZMachine.Monogame
         private ZMachineScreenOutput screenOutput;
         private Stream outputStream, inputStream;
         private StreamInputProcessor sic;
+        private ScrollablePanel hostPanel;
         private TextControl tc;
         private bool tp =true;
 
@@ -27,6 +28,29 @@ namespace ZMachine.Monogame
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            this.Window.AllowUserResizing = true;
+            this.Window.ClientSizeChanged += Window_ClientSizeChanged;
+        }
+
+        private void Window_ClientSizeChanged(object sender, EventArgs e)
+        {
+            bool viewUpdate = false;
+            if (this._graphics.PreferredBackBufferWidth != _graphics.GraphicsDevice.Viewport.Width)
+            {
+                this._graphics.PreferredBackBufferWidth = _graphics.GraphicsDevice.Viewport.Width;
+                viewUpdate = true;
+            }
+
+            if (this._graphics.PreferredBackBufferHeight != _graphics.GraphicsDevice.Viewport.Height)
+            {
+                this._graphics.PreferredBackBufferHeight = _graphics.GraphicsDevice.Viewport.Height;
+                viewUpdate = true;
+            }
+
+            if (viewUpdate)
+                this._graphics.ApplyChanges();
+
+            this.hostPanel.UpdateDisplayArea(new Rectangle(0,0, this._graphics.PreferredBackBufferWidth, this._graphics.PreferredBackBufferHeight));
         }
 
         protected override void Initialize()
@@ -49,12 +73,16 @@ namespace ZMachine.Monogame
             //tc = new(this, cascade, inputStream, outputStream, new Vector2(10, 60));
             screenOutput = new(this, this._spriteBatch, cbm128, new Color(new Vector3(113f, 202f, 197f)), Color.Black, new Vector2(10, 10), inputStream, outputStream);
 
+            hostPanel = new ScrollablePanel(this, this._spriteBatch, true, new(0, 0, this._graphics.PreferredBackBufferWidth, this._graphics.PreferredBackBufferHeight));
+            hostPanel.AddContent(screenOutput);
             // TODO: use this.Content to load your game content here
             var statusLineText = "@@STATUS_LINE@@:West of house";
             var byteArr = Encoding.UTF8.GetBytes(statusLineText);
             Span<byte> bytes = new Span<byte>(byteArr);
             //Convert.TryFromBase64String(statusLineText, bytes, out var byteWRite);
             outputStream.Write(bytes);
+
+            
         }
 
         protected override void Update(GameTime gameTime)
@@ -65,7 +93,8 @@ namespace ZMachine.Monogame
             // TODO: Add your update logic here
             sic.Update(gameTime);
             //tc.Update(gameTime);
-            screenOutput.Update(gameTime);
+            //screenOutput.Update(gameTime);
+            hostPanel.Update(gameTime);
             if (tp == true)
             {
                 var ff = new Span<byte>(Encoding.UTF8.GetBytes(TestContent.data[0]));
@@ -108,7 +137,8 @@ namespace ZMachine.Monogame
             this._spriteBatch.Begin();
             // TODO: Add your drawing code here
             //tc.Draw(gameTime);
-            screenOutput.Draw(gameTime);
+            //screenOutput.Draw(gameTime);
+            hostPanel.Draw(gameTime);
             this._spriteBatch.End();
             base.Draw(gameTime);
         }

@@ -75,7 +75,11 @@ namespace ZMachine.Monogame.Components.TextComponents
 
         internal void SetPosition(Vector2 newPosition)
         {
-            if (position != newPosition) position = newPosition;
+            if (position != newPosition)
+            {
+                position = newPosition;
+                cursor.UpdateAnchor(newPosition);
+            }
         }
         private void ProcessStream()
         {

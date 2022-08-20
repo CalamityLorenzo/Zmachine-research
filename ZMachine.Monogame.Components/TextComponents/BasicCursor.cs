@@ -71,7 +71,13 @@ namespace ZMachine.Monogame.Components.TextComponents
             if (this.shouldDisplay)
             {
                 if (this.cursorTexture == null)
-                    sb.DrawString(fnt, this.cursor, new Vector2(this.anchorPosition.X + (fntSize.X*numberOfChars), this.anchorPosition.Y), this.cursorColour);
+                {
+                    sb.DrawString(fnt, this.cursor, new Vector2(this.anchorPosition.X + (fntSize.X * numberOfChars), this.anchorPosition.Y), this.cursorColour);
+                }
+                else
+                {
+                sb.Draw(this.cursorTexture, new Vector2(this.anchorPosition.X + (fntSize.X * numberOfChars), this.anchorPosition.Y), this.cursorColour);
+                }
             }
                 
 

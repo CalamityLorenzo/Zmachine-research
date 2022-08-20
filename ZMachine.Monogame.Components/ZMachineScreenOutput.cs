@@ -114,38 +114,35 @@ namespace ZMachine.Monogame.Component
             this.batch = spritebatch;
         }
         // +3 =1 Status line 2 lines after prompt
-        public Rectangle ContentDimensions() => new Rectangle(0, 0, 500, ((int)this.RowHeight * (this.history.Count + 3)));
+        public Rectangle ContentDimensions() => new Rectangle(0, 0, this.Game.Window.ClientBounds.Width, ((int)this.RowHeight * (this.history.Count + 5)));
 
         public void DrawPanel(GameTime time)
         {
 
-            var row = (this).RowHeight;
-            batch.Draw(reverseBackground,new Vector2(0,0), new Rectangle(0,0, this.ContentDimensions().Width, (int)row-(int)OffSet.Y), Color.White);
-            if(this.statusLine is not null)
-                batch.DrawString(font, statusLine, new Vector2(HorizontalStart, 0) - this.OffSet, background);
+            var StartRow = (this).RowHeight;
+
             // moves the row down
-            row += font.MeasureString(statusLine).Y;
+            var row = StartRow+ font.MeasureString(statusLine).Y;
             
             var cPosAccumulator = new Vector2(0,0);
             // Colour in the background 
             foreach (var lineData in history)
             {
                 cPosAccumulator = new Vector2(HorizontalStart, lineData.Item1 + row) - this.OffSet;
-                var line = lineData.Item2;
-                batch.DrawString(font, line, cPosAccumulator, Color.White);
+                if (cPosAccumulator.Y > 0 - this.RowHeight)
+                {
+                    var line = lineData.Item2;
+                    batch.DrawString(font, line, cPosAccumulator, Color.White);
+                }
             }
 
             textControl.SetPosition(new Vector2(HorizontalStart, cPosAccumulator.Y+row));
 
             textControl.Draw(time);
 
-            if (this.currentLine.Length > 0)
-            {
-                var currentLineWidth = font.MeasureString(currentLine);
-                batch.DrawString(font, currentLine, currentDrawingPosition - this.OffSet, Color.White);
-            }
-
-
+            batch.Draw(reverseBackground, new Vector2(0, 0), new Rectangle(0, 0, this.ContentDimensions().Width, (int)StartRow), Color.White);
+            if (this.statusLine is not null)
+                batch.DrawString(font, statusLine, new Vector2(HorizontalStart, 0), background);
 
         }
 
