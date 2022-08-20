@@ -126,14 +126,16 @@ namespace ZMachine.Monogame.Component
             // moves the row down
             row += font.MeasureString(statusLine).Y;
             
+            var cPosAccumulator = new Vector2(0,0);
             // Colour in the background 
             foreach (var lineData in history)
             {
+                cPosAccumulator = new Vector2(HorizontalStart, lineData.Item1 + row) - this.OffSet;
                 var line = lineData.Item2;
-                batch.DrawString(font, line, new Vector2(HorizontalStart, lineData.Item1+row) -  this.OffSet, Color.White);
+                batch.DrawString(font, line, cPosAccumulator, Color.White);
             }
 
-            textControl.SetPosition(new Vector2(HorizontalStart, history.Count * row));
+            textControl.SetPosition(new Vector2(HorizontalStart, cPosAccumulator.Y+row));
 
             textControl.Draw(time);
 
