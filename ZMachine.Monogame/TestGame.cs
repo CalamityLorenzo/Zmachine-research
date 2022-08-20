@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ZMachine.Monogame.Component;
 using ZMachine.Monogame.Components;
+using ZMachine.Monogame.Components.TextComponents;
 
 namespace ZMachine.Monogame
 {

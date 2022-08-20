@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace ZMachine.Monogame.Components
+namespace ZMachine.Monogame.Components.TextComponents
 {
 
     public class LineAddedEventArgs : EventArgs
@@ -19,8 +19,17 @@ namespace ZMachine.Monogame.Components
     /// </summary>
     public class TextControl : DrawableGameComponent
     {
-        private int _cursorPosition = 1;
+        private int _cursorPosition = 0;
         private List<char> _currentContent;
+
+        public string Prompt { get; }
+
+        private Vector2 promptSize;
+        private Vector2 chrSize;
+        private BasicBlinkCursor cursor;
+        /// <summary>
+        /// This is only used interally to sdisplay,and to limit the amount of converting from array -> String
+        /// </summary>
         private string _currentLine;
         private readonly SpriteFont currentFont;
         private readonly Stream inputStream;
@@ -28,16 +37,23 @@ namespace ZMachine.Monogame.Components
         private Vector2 position;
         private SpriteBatch _spriteBatch;
 
-        public string Value { get => new String(this._currentContent.ToArray()); }
+        public string Value { get => new string(_currentContent.ToArray()); }
         public event Action<object, EventArgs> OnValueChanged;
         public TextControl(Game game, SpriteFont fnt, Stream inputStream, Stream ouputStream, Vector2 position) : base(game)
         {
-            this.currentFont = fnt;
+            currentFont = fnt;
             this.inputStream = inputStream;
             this.ouputStream = ouputStream;
             this.position = position;
-            this._spriteBatch = new SpriteBatch(game.GraphicsDevice);
-            this._currentContent = new List<char>();
+            _spriteBatch = new SpriteBatch(game.GraphicsDevice);
+            _currentContent = new List<char>();
+            Prompt = ">";
+            promptSize = fnt.MeasureString(Prompt);
+            chrSize = fnt.MeasureString("0");
+            this._currentLine = ""; 
+            // The Anchor position must take into account the prompt.
+            // So this first position is actually 1.
+            this.cursor = new BasicBlinkCursor(this.Game, _spriteBatch, 200.0f, fnt, Color.DarkGreen, new Vector2(this.position.X, this.position.Y), chrSize, "_");
         }
 
         public override void Initialize()
@@ -53,13 +69,14 @@ namespace ZMachine.Monogame.Components
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            this.ProcessStream();
+            cursor.Update(gameTime);
+            ProcessStream();
         }
 
-        private void SetPosition(Vector2 newPosition) => this.position = newPosition;
+        private void SetPosition(Vector2 newPosition) => position = newPosition;
         private void ProcessStream()
         {
-            if (this.inputStream.Length > 0)
+            if (inputStream.Length > 0)
             {
                 // Do stream things
                 _currentLine = "";
@@ -80,52 +97,57 @@ namespace ZMachine.Monogame.Components
                     // Cursors
                     if (currentChar == (char)Keys.Left)
                     {
-                        this.ChangeCursorPosition(-1);
+                        ChangeCursorPosition(-1);
                     }
                     else if (currentChar == (char)Keys.Right)
                     {
-                        this.ChangeCursorPosition(1);
+                        ChangeCursorPosition(1);
                     }
                     else if (currentChar == '\b') // Backspace.
                     {
-                        if (this._currentContent.Count > 0 && _cursorPosition == _currentContent.Count)
-                            this._currentContent.RemoveAt(_currentContent.Count - 1);
-                        else if (_cursorPosition > -1 && this._currentContent.Count>0)
+                        if (_currentContent.Count > 0 && _cursorPosition == _currentContent.Count)
+                            _currentContent.RemoveAt(_currentContent.Count - 1);
+                        else if (_cursorPosition > -1 && _currentContent.Count > 0)
                         {
-                            
-                           this._currentContent.RemoveAt(_cursorPosition-2);
+
+                            _currentContent.RemoveAt(_cursorPosition - 2);
                             ChangeCursorPosition(-1);
                         }
                     }
                     else if (currentChar == (char)Keys.Escape)
                     {
-                        this._currentContent = new List<char>();
+                        _currentContent = new List<char>();
                     }
                     else if (currentChar == (byte)Keys.Enter)
                     {
                         _currentContent.Add(currentChar);
-                        var outputContent = System.Text.Encoding.UTF8.GetBytes(_currentContent.ToArray());
-                        this.ouputStream.Write(outputContent, 0, outputContent.Length);
-                        this._currentContent = new List<char>();
-                        this.RaiseValueChanged();
+                        _currentContent.InsertRange(0, this.Prompt.ToArray());
+                        var outputContent = Encoding.UTF8.GetBytes(_currentContent.ToArray());
+                        ouputStream.Write(outputContent, 0, outputContent.Length);
+                        _currentContent = new List<char>();
+                        RaiseValueChanged();
                         _cursorPosition = 0;
                     }
                     else
                     {
                         // This is all cursor position dependent
-                        if (_cursorPosition == _currentContent.Count+1)
+                        if (_cursorPosition == _currentContent.Count + 1)
                         {
-                            this._currentContent.Add(currentChar);
+                            _currentContent.Add(currentChar);
                         }
                         else
                         {
-                            this._currentContent.Insert(_cursorPosition, currentChar);
+                            _currentContent.Insert(_cursorPosition, currentChar);
                         }
-                        this.ChangeCursorPosition(1);
+                        ChangeCursorPosition(1);
 
-                        this.RaiseValueChanged();
+                        RaiseValueChanged();
                     }
                 }
+                this._currentLine = new string(_currentContent.ToArray());
+
+                // Measure the string up to the cursor position;
+                cursor.MoveCursorPosition(_cursorPosition == _currentLine.Length + 1? _cursorPosition-1: _cursorPosition);
 
                 inputStream.SetLength(0);
             }
@@ -133,19 +155,22 @@ namespace ZMachine.Monogame.Components
 
         private void ChangeCursorPosition(int cursorChange)
         {
-            this._cursorPosition += cursorChange;
+            _cursorPosition += cursorChange;
             // Left
-            if (_cursorPosition < 0) this._cursorPosition = 0;
+            if (_cursorPosition < 0) _cursorPosition = 0;
             // Right boundary
-            if (_cursorPosition > this._currentContent.Count + 1) this._cursorPosition = _currentLine.Length + 1;
+            if (_cursorPosition > _currentContent.Count + 1) 
+                _cursorPosition = _currentContent.Count + 1;
         }
 
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
-            this._spriteBatch.Begin();
-            this._spriteBatch.DrawString(this.currentFont, new String(this._currentContent.ToArray()), this.position, Color.White);
-            this._spriteBatch.End();
+            _spriteBatch.Begin();
+            _spriteBatch.DrawString(currentFont, Prompt, new Vector2(position.X - promptSize.X, position.Y), Color.White);
+            _spriteBatch.DrawString(currentFont, _currentLine, position, Color.White);
+            this.cursor.Draw(gameTime);
+            _spriteBatch.End();
         }
 
         protected virtual void RaiseValueChanged() => OnValueChanged?.Invoke(this, new EventArgs());

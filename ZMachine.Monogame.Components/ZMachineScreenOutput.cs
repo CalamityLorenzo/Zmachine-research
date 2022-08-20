@@ -3,6 +3,10 @@ using ZMachine.Monogame.Extensions;
 
 namespace ZMachine.Monogame.Component
 {
+    /// <summary>
+    /// This is effectively the screen envirtonment for the games.
+    /// And because of that It's hella complicated.
+    /// </summary>
     public class ZMachineScreenOutput : DrawableGameComponent, IScrollablePanelContent
     {
         private SpriteBatch batch;
@@ -20,8 +24,6 @@ namespace ZMachine.Monogame.Component
         private Texture2D reverseBackground;
         private float HorizontalStart = 0;
         private float RowHeight = 0;
-        private string prompt;
-        private Vector2 promptSize;
 
         private Vector2 OffSet = Vector2.Zero;
         private string statusLine;
@@ -41,8 +43,6 @@ namespace ZMachine.Monogame.Component
 
             this.HorizontalStart = startPosition.X;
             this.RowHeight = font.MeasureString("W").Y + 2;
-            this.prompt = "> _";
-            this.promptSize = font.MeasureString(prompt);
             this.backgroundDisplay = this.batch.CreateFilledRectTexture(this.ContentDimensions(), this.background);
             this.reverseBackground = this.batch.CreateFilledRectTexture(this.ContentDimensions(), this.foreground);
         }
@@ -126,13 +126,7 @@ namespace ZMachine.Monogame.Component
             if (this.currentLine.Length > 0)
             {
                 var currentLineWidth = font.MeasureString(currentLine);
-                batch.DrawString(font, ">  ", new Vector2(currentDrawingPosition.X - this.promptSize.X - 1, currentDrawingPosition.Y) - this.OffSet, Color.Black);
                 batch.DrawString(font, currentLine, currentDrawingPosition - this.OffSet, Color.White);
-                batch.DrawString(font, "_", new Vector2(currentDrawingPosition.X + currentLineWidth.X, currentDrawingPosition.Y) - this.OffSet, Color.Black);
-            }
-            else
-            {
-                batch.DrawString(font, this.prompt, new Vector2(currentDrawingPosition.X - this.promptSize.X, currentDrawingPosition.Y) - this.OffSet, Color.Black);
             }
 
         }
