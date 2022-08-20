@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using ZMachine.Monogame.Components.TextComponents;
 using ZMachine.Monogame.Extensions;
 
 namespace ZMachine.Monogame.Component
@@ -22,13 +23,14 @@ namespace ZMachine.Monogame.Component
         private Vector2 currentDrawingPosition;
         private Texture2D backgroundDisplay;
         private Texture2D reverseBackground;
+        private TextControl textControl;
         private float HorizontalStart = 0;
         private float RowHeight = 0;
 
         private Vector2 OffSet = Vector2.Zero;
         private string statusLine;
 
-        public ZMachineScreenOutput(Game game, SpriteBatch batch, SpriteFont font, Color foreground, Color background, Vector2 startPosition, Stream output) : base(game)
+        public ZMachineScreenOutput(Game game, SpriteBatch batch, SpriteFont font, Color foreground, Color background, Vector2 startPosition, Stream input,  Stream output) : base(game)
         {
             this.batch = batch;
             this.font = font;
@@ -45,11 +47,19 @@ namespace ZMachine.Monogame.Component
             this.RowHeight = font.MeasureString("W").Y + 2;
             this.backgroundDisplay = this.batch.CreateFilledRectTexture(this.ContentDimensions(), this.background);
             this.reverseBackground = this.batch.CreateFilledRectTexture(this.ContentDimensions(), this.foreground);
+
+            this.textControl = new TextControl(game, this.font, input, output, new Vector2(20, 40));
         }
 
         public override void Update(GameTime gameTime)
         {
             // TODO : THis is all very unsatisfactory.
+            OuputStreamProcessing();
+            this.textControl.Update(gameTime);
+        }
+
+        private void OuputStreamProcessing()
+        {
             if (output.Length > 0)
             {
                 currentLine = "";
@@ -63,7 +73,7 @@ namespace ZMachine.Monogame.Component
                 // That's our line of text that we are going to draw.
                 // we have no knowledge whats in that text. at all.
                 var streamLine = new string(sp).Replace("\0", string.Empty);
-               
+
                 // Can't think of a neater way to write to the status line with out adding machinery.
                 // So instead, i'm now embedding cmds in a raw stream...Fucking genius is what your thinking...No?...
                 var statusLineCmd = "@@STATUS_LINE@@:";
@@ -113,7 +123,7 @@ namespace ZMachine.Monogame.Component
             batch.Draw(reverseBackground,new Vector2(0,0), new Rectangle(0,0, this.ContentDimensions().Width, (int)row-(int)OffSet.Y), Color.White);
             if(this.statusLine is not null)
                 batch.DrawString(font, statusLine, new Vector2(HorizontalStart, 0) - this.OffSet, background);
-
+            // moves the row down
             row += font.MeasureString(statusLine).Y;
             
             // Colour in the background 
@@ -123,11 +133,17 @@ namespace ZMachine.Monogame.Component
                 batch.DrawString(font, line, new Vector2(HorizontalStart, lineData.Item1+row) -  this.OffSet, Color.White);
             }
 
+            textControl.SetPosition(new Vector2(HorizontalStart, history.Count * row));
+
+            textControl.Draw(time);
+
             if (this.currentLine.Length > 0)
             {
                 var currentLineWidth = font.MeasureString(currentLine);
                 batch.DrawString(font, currentLine, currentDrawingPosition - this.OffSet, Color.White);
             }
+
+
 
         }
 

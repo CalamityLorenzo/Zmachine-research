@@ -50,7 +50,7 @@ namespace ZMachine.Monogame.Components.TextComponents
             Prompt = ">";
             promptSize = fnt.MeasureString(Prompt);
             chrSize = fnt.MeasureString("0");
-            this._currentLine = ""; 
+            this._currentLine = "";
             // The Anchor position must take into account the prompt.
             // So this first position is actually 1.
             this.cursor = new BasicBlinkCursor(this.Game, _spriteBatch, 200.0f, fnt, Color.DarkGreen, new Vector2(this.position.X, this.position.Y), chrSize, "_");
@@ -73,7 +73,10 @@ namespace ZMachine.Monogame.Components.TextComponents
             ProcessStream();
         }
 
-        private void SetPosition(Vector2 newPosition) => position = newPosition;
+        internal void SetPosition(Vector2 newPosition)
+        {
+            if (position != newPosition) position = newPosition;
+        }
         private void ProcessStream()
         {
             if (inputStream.Length > 0)
@@ -120,13 +123,16 @@ namespace ZMachine.Monogame.Components.TextComponents
                     }
                     else if (currentChar == (byte)Keys.Enter)
                     {
-                        _currentContent.Add(currentChar);
-                        _currentContent.InsertRange(0, this.Prompt.ToArray());
-                        var outputContent = Encoding.UTF8.GetBytes(_currentContent.ToArray());
-                        ouputStream.Write(outputContent, 0, outputContent.Length);
-                        _currentContent = new List<char>();
-                        RaiseValueChanged();
-                        _cursorPosition = 0;
+                        if (_currentContent.Count > 0)
+                        {
+                            _currentContent.Add(currentChar);
+                            _currentContent.InsertRange(0, this.Prompt.ToArray());
+                            var outputContent = Encoding.UTF8.GetBytes(_currentContent.ToArray());
+                            ouputStream.Write(outputContent, 0, outputContent.Length);
+                            _currentContent = new List<char>();
+                            RaiseValueChanged();
+                            _cursorPosition = 0;
+                        }
                     }
                     else
                     {
@@ -147,7 +153,7 @@ namespace ZMachine.Monogame.Components.TextComponents
                 this._currentLine = new string(_currentContent.ToArray());
 
                 // Measure the string up to the cursor position;
-                cursor.MoveCursorPosition(_cursorPosition == _currentLine.Length + 1? _cursorPosition-1: _cursorPosition);
+                cursor.MoveCursorPosition(_cursorPosition == _currentLine.Length + 1 ? _cursorPosition - 1 : _cursorPosition);
 
                 inputStream.SetLength(0);
             }
@@ -159,7 +165,7 @@ namespace ZMachine.Monogame.Components.TextComponents
             // Left
             if (_cursorPosition < 0) _cursorPosition = 0;
             // Right boundary
-            if (_cursorPosition > _currentContent.Count + 1) 
+            if (_cursorPosition > _currentContent.Count + 1)
                 _cursorPosition = _currentContent.Count + 1;
         }
 

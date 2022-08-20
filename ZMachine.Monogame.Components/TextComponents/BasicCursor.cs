@@ -60,6 +60,11 @@ namespace ZMachine.Monogame.Components.TextComponents
 
         }
 
+        public void UpdateAnchor(Vector2 newAnchor)
+        {
+            if (newAnchor != anchorPosition) anchorPosition = newAnchor;
+        }
+
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);

@@ -37,7 +37,7 @@
             if (kboard.IsKeyDown(Keys.Enter) && isEnterPressed == false)
             {
                 isEnterPressed = true;
-                TextStream.WriteByte(13); // ZSCII new line.
+            //    TextStream.WriteByte(13); // ZSCII new line.
             }
 
             if (kboard.IsKeyDown(Keys.Left) && isLeftArrowPressed == false)
