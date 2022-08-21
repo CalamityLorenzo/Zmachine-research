@@ -1,6 +1,6 @@
 ﻿namespace ZMachine.Monogame.Component
 {
-    internal class TestPanelContent : DrawableGameComponent, IScrollablePanelContent
+    public class TestPanelContent : DrawableGameComponent, IScrollablePanelContent
     {
         private SpriteBatch _sp;
         private Rectangle ContentRect;

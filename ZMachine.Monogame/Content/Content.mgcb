@@ -34,3 +34,9 @@
 /processorParam:TextureFormat=Compressed
 /build:cbm128.spritefont
 
+#begin crt-lottes-mg.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:crt-lottes-mg.fx
+

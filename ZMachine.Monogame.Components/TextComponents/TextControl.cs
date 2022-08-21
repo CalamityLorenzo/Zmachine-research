@@ -35,16 +35,20 @@ namespace ZMachine.Monogame.Components.TextComponents
         private readonly Stream inputStream;
         private readonly Stream ouputStream;
         private Vector2 position;
+        private readonly Color foreground;
+        private readonly Color background;
         private SpriteBatch _spriteBatch;
 
         public string Value { get => new string(_currentContent.ToArray()); }
         public event Action<object, EventArgs> OnValueChanged;
-        public TextControl(Game game, SpriteFont fnt, Stream inputStream, Stream ouputStream, Vector2 position) : base(game)
+        public TextControl(Game game, SpriteFont fnt, Stream inputStream, Stream ouputStream, Vector2 position, Color foreground, Color background) : base(game)
         {
             currentFont = fnt;
             this.inputStream = inputStream;
             this.ouputStream = ouputStream;
             this.position = position;
+            this.foreground = foreground;
+            this.background = background;
             _spriteBatch = new SpriteBatch(game.GraphicsDevice);
             _currentContent = new List<char>();
             Prompt = ">";
@@ -177,8 +181,8 @@ namespace ZMachine.Monogame.Components.TextComponents
         {
             base.Draw(gameTime);
             _spriteBatch.Begin();
-            _spriteBatch.DrawString(currentFont, Prompt, new Vector2(position.X - promptSize.X, position.Y), Color.White);
-            _spriteBatch.DrawString(currentFont, _currentLine, position, Color.White);
+            _spriteBatch.DrawString(currentFont, Prompt, new Vector2(position.X - promptSize.X, position.Y), foreground);
+            _spriteBatch.DrawString(currentFont, _currentLine, position, foreground);
             this.cursor.Draw(gameTime);
             _spriteBatch.End();
         }

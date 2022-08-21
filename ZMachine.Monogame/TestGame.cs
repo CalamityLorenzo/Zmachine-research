@@ -16,16 +16,18 @@ namespace ZMachine.Monogame
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        private ZMachineScreenOutput screenOutput;
         private Stream outputStream, inputStream;
+        private ZMachineScreenOutput screenOutput;
         private StreamInputProcessor sic;
         private ScrollablePanel hostPanel;
         private TextControl tc;
         private bool tp =true;
 
+
         public TestGame()
         {
             _graphics = new GraphicsDeviceManager(this);
+            _graphics.GraphicsProfile = GraphicsProfile.HiDef;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             this.Window.AllowUserResizing = true;
@@ -71,9 +73,9 @@ namespace ZMachine.Monogame
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             sic = new(this, inputStream);
             //tc = new(this, cascade, inputStream, outputStream, new Vector2(10, 60));
-            screenOutput = new(this, this._spriteBatch, cbm128, new Color(new Vector3(113f, 202f, 197f)), Color.Black, new Vector2(10, 10), inputStream, outputStream);
+            screenOutput = new(this,  cbm128, new Color(139, 243, 236,255), Color.Black, new Vector2(10, 10), inputStream, outputStream, new MemoryStream());
 
-            hostPanel = new ScrollablePanel(this, this._spriteBatch, true, new(0, 0, this._graphics.PreferredBackBufferWidth, this._graphics.PreferredBackBufferHeight));
+            hostPanel = new ScrollablePanel(this, true, new(0, 0, this._graphics.PreferredBackBufferWidth, this._graphics.PreferredBackBufferHeight));
             hostPanel.AddContent(screenOutput);
             // TODO: use this.Content to load your game content here
             var statusLineText = "@@STATUS_LINE@@:West of house";
@@ -133,8 +135,18 @@ namespace ZMachine.Monogame
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-            this._spriteBatch.Begin();
+            GraphicsDevice.Clear(Color.Black);
+            Matrix view = Matrix.Identity;
+
+
+            int width = GraphicsDevice.Viewport.Width;
+            int height = GraphicsDevice.Viewport.Height;
+            Matrix projection = Matrix.CreateOrthographicOffCenter(0, width, height, 0, 0, 1);
+
+            // testShader.Parameters["crt_lottes"].SetValue(view * projection);
+
+            this._spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+            //testShader.CurrentTechnique.Passes[0].Apply();
             // TODO: Add your drawing code here
             //tc.Draw(gameTime);
             //screenOutput.Draw(gameTime);

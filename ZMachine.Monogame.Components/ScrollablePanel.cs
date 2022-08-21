@@ -15,6 +15,7 @@ namespace ZMachine.Monogame.Component
     public class ScrollablePanel
     {
         private readonly SpriteBatch sb;
+
         // This is our scissor rect
         public Rectangle DisplayArea { get; private set; } = Rectangle.Empty;
         // The total area of the content to be displayed.
@@ -36,10 +37,10 @@ namespace ZMachine.Monogame.Component
         private bool lButtonPressed;
         private bool disableVerticalScroll;
 
-        public ScrollablePanel(Game game, SpriteBatch sb, bool verticalScrollbar, Rectangle startingDimensions)
+        public ScrollablePanel(Game game, bool verticalScrollbar, Rectangle startingDimensions)
         {
 
-            this.sb = new SpriteBatch(sb.GraphicsDevice);
+            this.sb = new SpriteBatch(game.GraphicsDevice);
             VerticalScrollbar = verticalScrollbar;
 
             // This is the panel content area
@@ -242,7 +243,7 @@ namespace ZMachine.Monogame.Component
 
         public void Draw(GameTime gameTime)
         {
-            sb.Begin(SpriteSortMode.Deferred, null, null, null, rasterState, null, null);
+            sb.Begin(SpriteSortMode.Deferred, null, null, null, rasterState, null);
             sb.GraphicsDevice.ScissorRectangle = DisplayArea;
             // Draw content here...Maybe?
             // this.sb.Draw(this.scrollbarTexture, this.ContentArea, null, Color.Aqua);

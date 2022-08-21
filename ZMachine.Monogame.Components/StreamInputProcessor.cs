@@ -1,6 +1,6 @@
 ﻿namespace ZMachine.Monogame.Components
 {
-    // Collects the known text input from an event handler, and puts them intoa stream.
+    // Collects the known text input from an event handler,  and keyboard state, and puts them intoa stream.
     // Also appends other chars (like arrow keys, home, ctrl) into the stream
     // Tihs is the start of the input process, it populates a stream for another component to handle.
     public class StreamInputProcessor : GameComponent

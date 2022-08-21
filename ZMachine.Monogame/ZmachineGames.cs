@@ -63,6 +63,7 @@ namespace ZMachine.Monogame
                 if (this.StoryHeader.TerminatingCharsTable == 0)
                 {
                     this.terminatingChars = Enumerable.Empty<Byte>().ToArray();
+                    this.terminatingChars = this.terminatingChars.Concat(new byte[] { (byte)'\r' }).ToArray();
                 }
                 else
                 {

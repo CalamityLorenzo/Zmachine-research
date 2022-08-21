@@ -29,10 +29,11 @@ namespace ZMachine.Monogame.Component
 
         private Vector2 OffSet = Vector2.Zero;
         private string statusLine;
+        private MemoryStream kboardStream;
 
-        public ZMachineScreenOutput(Game game, SpriteBatch batch, SpriteFont font, Color foreground, Color background, Vector2 startPosition, Stream input,  Stream output) : base(game)
+        public ZMachineScreenOutput(Game game, SpriteFont font, Color foreground, Color background, Vector2 startPosition, Stream input,  Stream output, Stream kboardStream) : base(game)
         {
-            this.batch = batch;
+            this.batch = new SpriteBatch(game.GraphicsDevice);
             this.font = font;
             this.foreground = foreground;
             this.background = background;
@@ -47,8 +48,8 @@ namespace ZMachine.Monogame.Component
             this.RowHeight = font.MeasureString("W").Y + 2;
             this.backgroundDisplay = this.batch.CreateFilledRectTexture(this.ContentDimensions(), this.background);
             this.reverseBackground = this.batch.CreateFilledRectTexture(this.ContentDimensions(), this.foreground);
-
-            this.textControl = new TextControl(game, this.font, input, output, new Vector2(20, 40));
+            // Notice this outputs into the read input stream.
+            this.textControl = new TextControl(game, this.font, kboardStream, input, new Vector2(20, 40), foreground, background);
         }
 
         public override void Update(GameTime gameTime)
@@ -106,7 +107,10 @@ namespace ZMachine.Monogame.Component
 
         public override void Draw(GameTime gameTime)
         {
+            //this.GraphicsDevice.Clear(this.background);
+            this.batch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
             this.DrawPanel(gameTime);
+            this.batch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
         }
 
         public void SetSpriteBatch(SpriteBatch spritebatch)
@@ -116,14 +120,20 @@ namespace ZMachine.Monogame.Component
         // +3 =1 Status line 2 lines after prompt
         public Rectangle ContentDimensions() => new Rectangle(0, 0, this.Game.Window.ClientBounds.Width, ((int)this.RowHeight * (this.history.Count + 5)));
 
+        
+
         public void DrawPanel(GameTime time)
         {
 
             var StartRow = (this).RowHeight;
 
-            // moves the row down
-            var row = StartRow+ font.MeasureString(statusLine).Y;
-            
+            float row = 0;
+            if (!String.IsNullOrEmpty(statusLine))
+                // moves the row down
+                row = StartRow + font.MeasureString(statusLine).Y;
+            else
+                row = StartRow;
+
             var cPosAccumulator = new Vector2(0,0);
             // Colour in the background 
             foreach (var lineData in history)
@@ -132,7 +142,7 @@ namespace ZMachine.Monogame.Component
                 if (cPosAccumulator.Y > 0 - this.RowHeight)
                 {
                     var line = lineData.Item2;
-                    batch.DrawString(font, line, cPosAccumulator, Color.White);
+                    batch.DrawString(font, line, cPosAccumulator, foreground);
                 }
             }
 

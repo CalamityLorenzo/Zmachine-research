@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.IO;
 using ZMachine.Monogame.Component;
+using ZMachine.Monogame.Components.TextComponents;
+using ZMachine.Monogame.Components;
 
 namespace ZMachine.Monogame
 {
@@ -12,15 +14,17 @@ namespace ZMachine.Monogame
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private SpriteFont arial;
-        private TextOutputComponent textOutput;
+        private TextControl textControl;
         private TestPanelContent _testContent;
+        private StreamInputProcessor sip;
+        private ScrollablePanel hostPanel;
+        private TextControl tc;
 
-        internal TypeToStream TypeToStream { get; private set; }
-
-        private MemoryStream input0 = new(), input1 = new(), outputScreen = new(), outputTranscript = new();
         private ZMachineGamee machineGame;
 
-        private ScrollablePanel scrollPanel;
+        private MemoryStream input0 = new(), input1 = new(), outputScreen = new(), outputTranscript = new();
+        // This is the abstraction from the keyboard input into the input streams
+        private MemoryStream kboardStream = new();
 
 
         public Game1()
@@ -28,47 +32,57 @@ namespace ZMachine.Monogame
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            this.Window.ClientSizeChanged += Window_ClientSizeChanged;
+            this.Window.AllowUserResizing = true;
+        }
+        private void Window_ClientSizeChanged(object sender, EventArgs e)
+        {
+            bool viewUpdate = false;
+            if (this._graphics.PreferredBackBufferWidth != _graphics.GraphicsDevice.Viewport.Width)
+            {
+                this._graphics.PreferredBackBufferWidth = _graphics.GraphicsDevice.Viewport.Width;
+                viewUpdate = true;
+            }
+
+            if (this._graphics.PreferredBackBufferHeight != _graphics.GraphicsDevice.Viewport.Height)
+            {
+                this._graphics.PreferredBackBufferHeight = _graphics.GraphicsDevice.Viewport.Height;
+                viewUpdate = true;
+            }
+
+            if (viewUpdate)
+                this._graphics.ApplyChanges();
+
+            this.hostPanel.UpdateDisplayArea(new Rectangle(0, 0, this._graphics.PreferredBackBufferWidth, this._graphics.PreferredBackBufferHeight));
         }
 
         protected override void Initialize()
         {
-            this.Window.AllowUserResizing = true;
-            this.Window.ClientSizeChanged += Window_ClientSizeChanged;
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             // TODO: Add your initialization logic here
             base.Initialize();
         }
 
-        private void Window_ClientSizeChanged(object? sender, EventArgs e)
-        {
-            if (Window.ClientBounds.Width != this._graphics.PreferredBackBufferWidth)
-            {
-               // this.ScaleFactor.Update(Window.ClientBounds.Width);
-            }
-
-            this._graphics.PreferredBackBufferWidth = Window.ClientBounds.Width;
-            this._graphics.PreferredBackBufferHeight = Window.ClientBounds.Height;
-
-            this._graphics.ApplyChanges();
-
-        }
-
         protected override void LoadContent()
         {
-            this.arial = Content.Load<SpriteFont>("Arial");
+            var arial = Content.Load<SpriteFont>("Arial");
+            var cascade = Content.Load<SpriteFont>("Cascadia");
+            var cbm128 = Content.Load<SpriteFont>("cbm128");
+
+
             var filename = "Curses\\curses.z5";
             var fileStream = File.Open(filename, FileMode.Open);
             fileStream.Position = 0;
+
+            this.sip = new(this, kboardStream);
+
             this.machineGame = new ZMachineGamee(input0, input1, outputScreen, outputTranscript, fileStream);
+            var screenOutput = new ZMachineScreenOutput(this, cbm128, new Color(139, 243, 236, 255), Color.Black, new Vector2(10, 10), input0, outputScreen, kboardStream);
 
-            scrollPanel = new ScrollablePanel(this, this._spriteBatch, true, new Rectangle(40, 20, this._graphics.PreferredBackBufferWidth-80, this._graphics.PreferredBackBufferHeight));
-            this.textOutput = new TextOutputComponent(this, _spriteBatch, arial, new Vector2(40,20), outputScreen);
-       //     this._testContent = new TestPanelContent(this);
-            scrollPanel.AddContent(textOutput);
+            hostPanel = new ScrollablePanel(this, true, new Rectangle(0, 0, this._graphics.PreferredBackBufferWidth-80, this._graphics.PreferredBackBufferHeight));
+            //     this._testContent = new TestPanelContentextt(this);
+            hostPanel.AddContent(screenOutput);
             // TODO: use this.Content to load your game content here
-
-            this.TypeToStream = new TypeToStream(this, this.input0);
-            
             var customProg = new byte[]
             {
                 // Routine start
@@ -98,24 +112,24 @@ namespace ZMachine.Monogame
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             machineGame.Update();
-
-            this.textOutput.Update(gameTime);
-            this.scrollPanel.Update(gameTime);
+            
+            this.hostPanel.Update(gameTime);
            
             // TODO: Add your update logic here
-            this.TypeToStream.Update(gameTime);
+            this.sip.Update(gameTime);
 
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            //   GraphicsDevice.Clear(Color.CornflowerBlue);
+            this.GraphicsDevice.Clear(Color.Black);
+
             _spriteBatch.Begin();
             // TODO: Add your drawing code here
-            this.textOutput.Draw(gameTime);
-            this.scrollPanel.Draw(gameTime);
-
+            this.hostPanel.Draw(gameTime);
+            
             _spriteBatch.End();
 
         }
