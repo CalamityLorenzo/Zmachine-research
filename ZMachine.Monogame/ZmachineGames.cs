@@ -88,7 +88,7 @@ namespace ZMachine.Monogame
         {
             this.Memory = bytes;
             this.ProgramCounter = 0;
-            this.CallStackReturns.Push(new(-1, 0, Array.Empty<Byte>()));
+            this.CallStackReturns.Push(new(-1, 0, Array.Empty<Byte>(), new Stack<ushort>()));
         }
 
         private void MapColors()
@@ -150,7 +150,7 @@ namespace ZMachine.Monogame
                             var returnAddress = this.ProgramCounter;
                             this.ProgramCounter = address;
                             // Create stackframe
-                            this.CallStackReturns.Push(new ActivationRecord(returnAddress, address, new byte[this.Memory[ProgramCounter]]));
+                            this.CallStackReturns.Push(new ActivationRecord(returnAddress, address, new byte[this.Memory[ProgramCounter]], new Stack<ushort>()));
                         }
                         break;
                     case "new_line":
