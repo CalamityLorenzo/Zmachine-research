@@ -140,5 +140,39 @@ namespace ZMachine.Library.V1.Utilities
 
         }
 
+        public static ushort GetShort(this InstructionOperands @this)
+        {
+            return (ushort)(@this.operand[0] << 8 | @this.operand[1]);
+        }
+
+        public static byte[] ToByteArray(this ushort @this) => new byte[]
+            {
+                (byte)(@this >> 8),
+                (byte)(@this & 0xffff),
+            };
+
+        public static void StoreResult(byte[] Memory, Stack<ActivationRecord> stack, DecodedInstruction currentInstr, ushort globalVariables, ushort result)
+        {
+            switch (currentInstr.store)
+            {
+
+                case 0:             // Stack
+                    stack.Peek().localStack.Push(result);
+                    break;
+                case > 0 and < 16: // Local vars
+                    {
+                        var localVars = stack.Peek().locals;
+                        localVars[currentInstr.store] = result;
+                    }
+                    break;
+                case > 15 and <= 255: // Global
+                    var variable = (currentInstr.store - 15) * 2;
+                    var resultArray = result.ToByteArray();
+                    Memory[globalVariables + variable] = resultArray[0];
+                    Memory[globalVariables + variable + 1] = resultArray[1];
+                    break;
+            }
+        }
+
     }
 }

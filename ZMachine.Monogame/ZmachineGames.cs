@@ -27,7 +27,7 @@ namespace ZMachine.Monogame
         private TextProcessor TextDecoder;
         private ObjectTable ObjectTable;
         private InstructionDecoder InstructionDecoder;
-        private Stack<ActivationRecord> CallStackReturns = new Stack<ActivationRecord>();
+        private Stack<ActivationRecord> CallStack = new Stack<ActivationRecord>();
         private DecodedInstruction currentInstr;
         private string readInputText;
         private byte[] terminatingChars; // Which characters can terminate a read command.
@@ -88,7 +88,7 @@ namespace ZMachine.Monogame
         {
             this.Memory = bytes;
             this.ProgramCounter = 0;
-            this.CallStackReturns.Push(new(-1, 0, Array.Empty<Byte>(), new Stack<ushort>()));
+            this.CallStack.Push(new(-1, 0, Array.Empty<ushort>(), new Stack<ushort>()));
         }
 
         private void MapColors()
@@ -105,7 +105,7 @@ namespace ZMachine.Monogame
             ColorMapper.Add(0x03BD, Color.Yellow);
             ColorMapper.Add(0x59A0, Color.Blue);
             ColorMapper.Add(0x7C1F, Color.Magenta);
-            
+
             ColorMapper.Add(0x77A0, Color.Cyan);
             ColorMapper.Add(0x7FFF, Color.White);
             ColorMapper.Add(0x5AD6, Color.LightGray);
@@ -150,7 +150,9 @@ namespace ZMachine.Monogame
                             var returnAddress = this.ProgramCounter;
                             this.ProgramCounter = address;
                             // Create stackframe
-                            this.CallStackReturns.Push(new ActivationRecord(returnAddress, address, new byte[this.Memory[ProgramCounter]], new Stack<ushort>()));
+                            this.CallStack.Push(new ActivationRecord(returnAddress, address,
+                                                      new ushort[this.Memory[ProgramCounter]],
+                                                      new Stack<ushort>()));
                         }
                         break;
                     case "new_line":
@@ -163,7 +165,7 @@ namespace ZMachine.Monogame
                         break;
                     case "rtrue":
                         {
-                            var record = this.CallStackReturns.Pop();
+                            var record = this.CallStack.Pop();
                             this.ProgramCounter = record.returnAdrress;
                         }
                         break;
@@ -179,8 +181,43 @@ namespace ZMachine.Monogame
                         break;
                     case "jump":
                         {
-                            short offSet = (short)(currentInstr.operands[0].operand[0] << 8 | currentInstr.operands[0].operand[1]);
+                            ushort offSet = currentInstr.operands[0].GetShort();
                             this.ProgramCounter = ProgramCounter + offSet - 2;
+                        }
+                        break;
+                    case "mod":
+                        {
+                            var left = currentInstr.operands[0].GetShort();
+                            var right = currentInstr.operands[1].GetShort();
+                            if (left == 0 || right == 0) throw new DivideByZeroException("Mod division by 0 error");
+                            var result = (ushort)(left % right);
+                            LibraryUtilities.StoreResult(Memory, CallStack, currentInstr, StoryHeader.GlobalVariables, result);
+                        }
+                        break;
+                    case "mul":
+                        {
+                            var left = currentInstr.operands[0].GetShort();
+                            var right = currentInstr.operands[1].GetShort();
+                            if (left == 0 || right == 0) throw new DivideByZeroException("Mod division by 0 error");
+                            var result = (ushort)(left * right);
+                            LibraryUtilities.StoreResult(Memory, CallStack, currentInstr, StoryHeader.GlobalVariables, result);
+                        }
+                        break;
+                    case "add":
+                        {
+                            var left = currentInstr.operands[0].GetShort();
+                            var right = currentInstr.operands[1].GetShort();
+                            var result = (ushort)(left + right);
+                            LibraryUtilities.StoreResult(Memory, CallStack, currentInstr, StoryHeader.GlobalVariables, result);
+                        }
+                        break;
+                    case "div":
+                        {
+                            var left = currentInstr.operands[0].GetShort();
+                            var right = currentInstr.operands[1].GetShort();
+                            if (left == 0 || right == 0) throw new DivideByZeroException("Mod division by 0 error");
+                            var result = (ushort)(left * right);
+                            LibraryUtilities.StoreResult(Memory, CallStack, currentInstr, StoryHeader.GlobalVariables, result);
                         }
                         break;
                 }

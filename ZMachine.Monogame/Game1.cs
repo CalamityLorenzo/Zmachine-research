@@ -79,7 +79,7 @@ namespace ZMachine.Monogame
             this.machineGame = new ZMachineGamee(input0, input1, outputScreen, outputTranscript, fileStream);
             var screenOutput = new ZMachineScreenOutput(this, cbm128, new Color(139, 243, 236, 255), Color.Black, new Vector2(10, 10), input0, outputScreen, kboardStream);
 
-            hostPanel = new ScrollablePanel(this, true, new Rectangle(0, 0, this._graphics.PreferredBackBufferWidth-80, this._graphics.PreferredBackBufferHeight));
+            hostPanel = new ScrollablePanel(this, true, new Rectangle(0, 0, this._graphics.PreferredBackBufferWidth, this._graphics.PreferredBackBufferHeight));
             //     this._testContent = new TestPanelContentextt(this);
             hostPanel.AddContent(screenOutput);
             // TODO: use this.Content to load your game content here
