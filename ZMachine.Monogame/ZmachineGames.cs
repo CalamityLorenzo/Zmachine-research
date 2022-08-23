@@ -42,7 +42,6 @@ namespace ZMachine.Monogame
             this.outputScreen = outputScreen;
             this.outputTranscript = outputTranscript;
 
-
             // Here's an assumption...
             storyData.Position = 0;
             StoryData = new MemoryStream();
