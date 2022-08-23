@@ -90,7 +90,7 @@ namespace ZMachine.Monogame
                 0xb0,       // return true
                 // Routine end\
                 // Routine start
-                3,
+                3,              // local variables
                 0xb2, 18,42,103,0,25,41,3,20,73,64,79,82,29,87,96,180,148,229,  //Print a big fat string.
                 0xbb,
                 0xb2, 17,83,101,87,1,110,95,25,2,122,72,234,92,189,148,229,    // More groovy strings
@@ -99,7 +99,11 @@ namespace ZMachine.Monogame
                 0xb2, 18,70,120,234,20,229,28,153,53,87,40,8,83,81,36,7,40,18,82,234,2,139,3,45,59,5,84,167,0,0,0,0,0,0,58,120,101,70,36,166,15,197,24,64,23,165,24,36,20,197,12,166,11,197,156,165,
                 0xbb,
                 0xbb,
-                0x8c, 255,119,
+                0x0d, 01, 15,     // Store 15 lVar1
+                0x0d, 02, 05,     // Store 15 lVar2
+                0x74, 1, 2, 00,  // Add V, V -> sp
+                
+                0x8c, 255,119,   // Jump, jump back around
                 0xb0,       // return true
                 // routine end.
             };

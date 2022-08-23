@@ -220,6 +220,14 @@ namespace ZMachine.Monogame
                             LibraryUtilities.StoreResult(Memory, CallStack, currentInstr, StoryHeader.GlobalVariables, result);
                         }
                         break;
+                    case "store":
+                        {
+                            var left = currentInstr.operands[0].GetShort();
+                            var right = currentInstr.operands[1].GetShort();
+                            // Store is NOT itself a store md.
+                            //LibraryUtilities.StoreResult(Memory, CallStack, currentInstr, 0, right);
+                        }
+                        break;
                 }
                 this.ProgramCounter += 1;
             }
@@ -270,7 +278,6 @@ namespace ZMachine.Monogame
                 // Convert what we have into zChars, and then back again for output.
                 var rawZchars = TextDecoder.EncodeUtf8ZChars(readInputText);
                 var outputString = TextDecoder.DecodeZChars(rawZchars);
-
                 // we write that into the output stream.
                 // Which is then drawn onto the screen.
                 // Whatever collects the output stream, must have a concept of acurrent line.

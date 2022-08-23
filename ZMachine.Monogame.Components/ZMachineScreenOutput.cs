@@ -16,7 +16,7 @@ namespace ZMachine.Monogame.Component
         private readonly Color background;
         private readonly Stream output;
 
-        private List<Tuple<float, string>> history =
+        private readonly List<Tuple<float, string>> history =
                                            new List<Tuple<float, string>>(); // Everything displayed until now.
         private string currentLine;                        // The line last loaded from the stream
         private string[] displayLines;                     // What gets displayed this time.
