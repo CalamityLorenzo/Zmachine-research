@@ -142,7 +142,10 @@ namespace ZMachine.Library.V1.Utilities
 
         public static ushort GetShort(this InstructionOperands @this)
         {
-            return (ushort)(@this.operand[0] << 8 | @this.operand[1]);
+            if (@this.operand.Length > 1)
+                return (ushort)(@this.operand[0] << 8 | @this.operand[1]);
+            else
+                return (ushort)@this.operand[0];
         }
 
         public static byte[] ToByteArray(this ushort @this) => new byte[]
@@ -172,6 +175,16 @@ namespace ZMachine.Library.V1.Utilities
                     Memory[globalVariables + variable + 1] = resultArray[1];
                     break;
             }
+        }
+
+        public static ushort GetOperandValue(ActivationRecord stackRecord,OperandType operandType, ushort value)
+        {
+            return operandType switch
+            {
+                OperandType.Variable => stackRecord.locals[value],
+                OperandType.SmallConstant => value,
+                OperandType.LargeConstant => value,
+            };
         }
 
     }

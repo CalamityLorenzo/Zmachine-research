@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -190,7 +191,11 @@ namespace ZMachine.Monogame
                             var left = currentInstr.operands[0].GetShort();
                             var right = currentInstr.operands[1].GetShort();
                             if (left == 0 || right == 0) throw new DivideByZeroException("Mod division by 0 error");
-                            var result = (ushort)(left % right);
+                            // Depending on the operand types depends if we have a value or pointer to a variable
+                            var lValue = LibraryUtilities.GetOperandValue(this.CallStack.Peek(), currentInstr.operands[0].operandType, left);
+                            var rValue = LibraryUtilities.GetOperandValue(this.CallStack.Peek(), currentInstr.operands[0].operandType, right);
+
+                            ushort result = (ushort)(lValue % rValue);
                             LibraryUtilities.StoreResult(Memory, CallStack, currentInstr, StoryHeader.GlobalVariables, result);
                         }
                         break;
@@ -198,8 +203,12 @@ namespace ZMachine.Monogame
                         {
                             var left = currentInstr.operands[0].GetShort();
                             var right = currentInstr.operands[1].GetShort();
-                            if (left == 0 || right == 0) throw new DivideByZeroException("Mod division by 0 error");
-                            var result = (ushort)(left * right);
+
+                            // Depending on the operand types depends if we have a value or pointer to a variable
+                            var lValue = LibraryUtilities.GetOperandValue(this.CallStack.Peek(), currentInstr.operands[0].operandType, left);
+                            var rValue = LibraryUtilities.GetOperandValue(this.CallStack.Peek(), currentInstr.operands[0].operandType, right);
+
+                            ushort result = (ushort)(lValue * rValue);
                             LibraryUtilities.StoreResult(Memory, CallStack, currentInstr, StoryHeader.GlobalVariables, result);
                         }
                         break;
@@ -207,7 +216,12 @@ namespace ZMachine.Monogame
                         {
                             var left = currentInstr.operands[0].GetShort();
                             var right = currentInstr.operands[1].GetShort();
-                            var result = (ushort)(left + right);
+
+                            // Depending on the operand types depends if we have a value or pointer to a variable
+                            var lValue = LibraryUtilities.GetOperandValue(this.CallStack.Peek(), currentInstr.operands[0].operandType, left);
+                            var rValue = LibraryUtilities.GetOperandValue(this.CallStack.Peek(), currentInstr.operands[0].operandType, right);
+
+                            ushort result = (ushort)(lValue + rValue);
                             LibraryUtilities.StoreResult(Memory, CallStack, currentInstr, StoryHeader.GlobalVariables, result);
                         }
                         break;
@@ -215,8 +229,12 @@ namespace ZMachine.Monogame
                         {
                             var left = currentInstr.operands[0].GetShort();
                             var right = currentInstr.operands[1].GetShort();
-                            if (left == 0 || right == 0) throw new DivideByZeroException("Mod division by 0 error");
-                            var result = (ushort)(left * right);
+                            if (left == 0 || right == 0) throw new DivideByZeroException("Division by 0 error");
+                            // Depending on the operand types depends if we have a value or pointer to a variable
+                            var lValue = LibraryUtilities.GetOperandValue(this.CallStack.Peek(), currentInstr.operands[0].operandType, left);
+                            var rValue = LibraryUtilities.GetOperandValue(this.CallStack.Peek(), currentInstr.operands[0].operandType, right);
+
+                            ushort result = (ushort)(lValue / rValue);
                             LibraryUtilities.StoreResult(Memory, CallStack, currentInstr, StoryHeader.GlobalVariables, result);
                         }
                         break;
@@ -225,7 +243,28 @@ namespace ZMachine.Monogame
                             var left = currentInstr.operands[0].GetShort();
                             var right = currentInstr.operands[1].GetShort();
                             // Store is NOT itself a store md.
-                            //LibraryUtilities.StoreResult(Memory, CallStack, currentInstr, 0, right);
+                            // LibraryUtilities.StoreResult(Memory, CallStack, currentInstr, 0, right);
+                            switch (left)
+                            {
+
+                                case 0:             // Stack
+                                    CallStack.Peek().localStack.Push(right);
+                                    break;
+                                case > 0 and < 16: // Local vars
+                                    {
+                                        var localVars = CallStack.Peek().locals;
+                                        localVars[left] = right;
+                                    }
+                                    break;
+                                case > 15 and <= 255: // Global
+                                    var variable = (currentInstr.store - 15) * 2;
+                                    var resultArray = left.ToByteArray();
+                                    var globalVariables = Memory[StoryHeader.GlobalVariables];
+                                    Memory[globalVariables + variable] = resultArray[0];
+                                    Memory[globalVariables + variable + 1] = resultArray[1];
+                                    break;
+                            }
+
                         }
                         break;
                 }

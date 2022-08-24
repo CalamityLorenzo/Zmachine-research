@@ -100,7 +100,7 @@ namespace ZMachine.Monogame
                 0xbb,
                 0xbb,
                 0x0d, 01, 15,     // Store 15 lVar1
-                0x0d, 02, 05,     // Store 15 lVar2
+                0x0d, 02, 05,     // Store 05 lVar2
                 0x74, 1, 2, 00,  // Add V, V -> sp
                 
                 0x8c, 255,119,   // Jump, jump back around

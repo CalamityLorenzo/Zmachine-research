@@ -64,7 +64,8 @@ namespace Zmachine.Tests
             fileStream.Read(stringBuffer, 0, 20);
 
             var zmachineTools = new Tools(fileStream);
-            var message = zmachineTools.DecodeText(new byte[] { 17, 52, 79, 32, 122, 154, 3, 45, 58, 112, 3, 45, 42, 234, 3, 13, 83, 81, 36, 7, 40, 18, 82, 234, 2, 139, 3, 45, 27, 37, 212, 165 });
+            //var message = zmachineTools.DecodeText(new byte[] { 17, 52, 79, 32, 122, 154, 3, 45, 58, 112, 3, 45, 42, 234, 3, 13, 83, 81, 36, 7, 40, 18, 82, 234, 2, 139, 3, 45, 27, 37, 212, 165 });
+            var message = zmachineTools.DecodeText(new byte[] { 0x5d, 0xd5 });
             Console.WriteLine(message);
             Console.WriteLine("History of the Meldrews (vol. II)");
             Assert.IsTrue("History of the Meldrews (vol. II)" == message);
@@ -92,7 +93,7 @@ namespace Zmachine.Tests
         }
 
 
-        [Test(Description = "String tests Encode")]
+        [Test(Description = "String tests Encode words")]
         public void EncodeWords()
         {
             var filename = "Curses\\curses.z5";
