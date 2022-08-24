@@ -15,8 +15,6 @@ namespace ZMachine.Library.V1
             this.version = version;
         }
 
-
-
         /// <summary>
         /// Reads the next instruction.
         /// </summary>

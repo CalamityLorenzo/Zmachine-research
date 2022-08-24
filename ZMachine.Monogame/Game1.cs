@@ -71,6 +71,7 @@ namespace ZMachine.Monogame
 
 
             var filename = "Curses\\curses.z5";
+            filename = "hollywoo.dat";
             var fileStream = File.Open(filename, FileMode.Open);
             fileStream.Position = 0;
 

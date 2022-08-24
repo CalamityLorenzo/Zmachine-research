@@ -12,8 +12,8 @@ namespace Zmachine.Tests
         {
         }
 
-        [Test(Description = "Load v5 story file display header")]
-        public void HeaderDetails()
+        [Test(Description = "V5 Load story file display header")]
+        public void V5HeaderDetails()
         {
             var filename = "Curses\\curses.z5";
 
@@ -25,8 +25,35 @@ namespace Zmachine.Tests
             Assert.Pass("Passed!");
         }
 
-        [Test(Description = "Display all the abbreviations")]
-        public void AbbreviationTable()
+        [Test(Description = "V3 story file display header")]
+        public void V3HeaderDetails()
+        {
+            var filename = "Curses\\hollywoo.dat";
+
+            Console.WriteLine($"==== {filename} ====");
+            using var fileStream = File.Open(filename, FileMode.Open);
+            fileStream.Position = 0;
+            var zmachineTools = new Tools(fileStream);
+            zmachineTools.Header();
+            Assert.Pass("Passed!");
+        }
+
+        [Test(Description = "V3 Display all the abbreviations")]
+        public void V3AbbreviationTable()
+        {
+            var filename = "Curses\\hollywoo.dat";
+
+            Console.WriteLine($"==== {filename} ====");
+            using var fileStream = File.Open(filename, FileMode.Open);
+            fileStream.Position = 0;
+            var zmachineTools = new Tools(fileStream);
+            zmachineTools.Abbreviations();
+            Assert.Pass("Passed!");
+        }
+
+
+        [Test(Description = "V5 Display all the abbreviations")]
+        public void V5AbbreviationTable()
         {
             var filename = "Curses\\curses.z5";
 
@@ -130,10 +157,26 @@ namespace Zmachine.Tests
 
 
 
-        [Test(Description = "Object Table")]
-        public void ObjectTable()
+        [Test(Description = "V5 Object Table")]
+        public void V5ObjectTable()
         {
             var filename = "Curses\\curses.z5";
+
+            Console.WriteLine($"==== {filename} ====");
+            using var fileStream = File.Open(filename, FileMode.Open);
+            fileStream.Position = 0;
+
+            var zmachineTools = new Tools(fileStream);
+            zmachineTools.Objects();
+
+            Assert.IsTrue(true);
+        }
+
+
+        [Test(Description = "V3 Object Table")]
+        public void V3ObjectTable()
+        {
+            var filename = "Curses\\hollywoo.dat";
 
             Console.WriteLine($"==== {filename} ====");
             using var fileStream = File.Open(filename, FileMode.Open);
