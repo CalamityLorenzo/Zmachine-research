@@ -65,10 +65,23 @@ namespace Zmachine.Tests
             Assert.Pass("Passed!");
         }
 
-        [Test(Description = "Display all the Dictionary Entries")]
-        public void DictionaryTable()
+        [Test(Description = "V5 Display all the Dictionary Entries")]
+        public void V5DictionaryTable()
         {
             var filename = "Curses\\curses.z5";
+
+            Console.WriteLine($"==== {filename} ====");
+            using var fileStream = File.Open(filename, FileMode.Open);
+            fileStream.Position = 0;
+            var zmachineTools = new Tools(fileStream);
+            zmachineTools.Dictionary();
+            Assert.Pass("Passed!");
+        }
+
+        [Test(Description = "V3 Display all the Dictionary Entries")]
+        public void V3DictionaryTable()
+        {
+            var filename = "Curses\\hollywoo.dat";
 
             Console.WriteLine($"==== {filename} ====");
             using var fileStream = File.Open(filename, FileMode.Open);
@@ -92,7 +105,7 @@ namespace Zmachine.Tests
 
             var zmachineTools = new Tools(fileStream);
             //var message = zmachineTools.DecodeText(new byte[] { 17, 52, 79, 32, 122, 154, 3, 45, 58, 112, 3, 45, 42, 234, 3, 13, 83, 81, 36, 7, 40, 18, 82, 234, 2, 139, 3, 45, 27, 37, 212, 165 });
-            var message = zmachineTools.DecodeText(new byte[] { 0x5d, 0xd5 });
+            var message = zmachineTools.DecodeText(new byte[] { 20, 193, 147 , 106});
             Console.WriteLine(message);
             Console.WriteLine("History of the Meldrews (vol. II)");
             Assert.IsTrue("History of the Meldrews (vol. II)" == message);

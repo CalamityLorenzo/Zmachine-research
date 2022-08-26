@@ -62,7 +62,7 @@
         /// <returns></returns>
         public string DecodeZChars(byte[] singleZChars)
         {
-            if (version > 3)
+            if (version > 2)
                 return DecodeZCharsV3Upwards(singleZChars);
             else
                 return DecodeZCharsV2Downwards(singleZChars);

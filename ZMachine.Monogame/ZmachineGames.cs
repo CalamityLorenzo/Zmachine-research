@@ -77,7 +77,7 @@ namespace ZMachine.Monogame
                 this.HeaderExtensions = HeaderExtensionTable.CreateHeaderExtenions(Memory, this.StoryHeader.HeaderExtensionTable);
             }
             this.FeaturesVersion = LibraryUtilities.GetFeatureVersion(StoryHeader.Version);
-            this.DictionaryTable = new DictionaryTable(StoryHeader.DictionaryTable, Memory);
+            this.DictionaryTable = new DictionaryTable(StoryHeader.Version, StoryHeader.DictionaryTable, Memory);
             this.AbbreviationTable = new AbbreviationsTable(StoryHeader.AbbreviationTable, Memory, StoryHeader.Version);
             this.TextDecoder = new TextProcessor(Memory, AbbreviationTable, StoryHeader.Version);
             this.ObjectTable = new ObjectTable(this.StoryHeader.ObjectTable, this.StoryHeader.Version, Memory);

@@ -8,6 +8,8 @@ namespace ZMachine.Library.V1
         // this type is clearly wrong, but thats what it's v1.
         public char[] WordSeparators { get; }
         public byte WordEntryLength { get; }
+        public int Version { get; }
+
         public int Length;
 
         /// <summary>
@@ -16,8 +18,9 @@ namespace ZMachine.Library.V1
         /// </summary>
         /// <param name="startAddress"></param>
         /// <param name="Memory"></param>
-        public DictionaryTable(int startAddress, byte[] Memory)
+        public DictionaryTable(int version, int startAddress, byte[] Memory)
         {
+            this.Version = version;
             var separatorCount = Memory[startAddress];
 
             this.WordSeparators = new char[separatorCount];
@@ -28,7 +31,9 @@ namespace ZMachine.Library.V1
                 WordSeparators[x] = (char)Memory[startAddress + 1 + x];
             }
 
+            
             this.WordEntryLength = Memory[startAddress + 1 + separatorCount];
+
             this.Length = Memory.Get2ByteValue(startAddress + separatorCount + 1 + 1);
 
             this.Entries = new byte[Length][];
@@ -41,10 +46,18 @@ namespace ZMachine.Library.V1
                 // Move the memory counter along 1 dictionary word length
                 // each entry is a certain length of bytes (WordEntryLength)
                 // get those bytes baby!
-                var Entry = new byte[WordEntryLength];
+                byte[] Entry;
+                if (Version > 3)
+                    Entry = new byte[WordEntryLength];
+                else
+                    Entry = new byte[4];
+
                 for (var i = 0; i < WordEntryLength; i++)
                 {
-                    Entry[i] = Memory[dictionaryEntryAddress + i];
+                    if(Version >3)
+                        Entry[i] = Memory[dictionaryEntryAddress + i];
+                    else if(i<4)
+                        Entry[i] = Memory[dictionaryEntryAddress + i];
                 }
 
                 Entries[x] = Entry;
