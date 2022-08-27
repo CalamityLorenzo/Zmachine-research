@@ -1,5 +1,6 @@
 using System.Text.Encodings.Web;
 using ZMachine.Library.V1;
+using ZMachine.Library.V1.Objects;
 using ZMachineTools;
 
 namespace Zmachine.Tests
@@ -201,6 +202,30 @@ namespace Zmachine.Tests
             Assert.IsTrue(true);
         }
 
+        [Test(Description = "V3 Validate an object")]
+        public void V3ConfirmObjects()
+        {
+            var filename = "Curses\\hollywoo.dat";
+
+            Console.WriteLine($"==== {filename} ====");
+            using var fileStream = File.Open(filename, FileMode.Open);
+            fileStream.Position = 0;
+
+            var zmachineTools = new Tools(fileStream);
+            
+            // Get a ridiculous id for a v3
+            //Assert.Catch(typeof(ArgumentOutOfRangeException), new TestDelegate(()=> zmachineTools.GetObject(65535)));
+            
+            ZmObject v3Object1 = zmachineTools.GetObject(1);
+            ZmObject v3Object21 = zmachineTools.GetObject(21);
+            ZmObject v3Object40 = zmachineTools.GetObject(21);
+            Assert.IsNotNull(v3Object1);
+            Console.WriteLine(zmachineTools.DecodeText(v3Object21.PropertyTable.shortNameBytes));
+            Console.WriteLine(v3Object1);
+            Console.WriteLine(v3Object40);
+            Assert.IsTrue(true);
+
+        }
 
         [Test(Description = "Disassemble")]
         public void BasicDisassemble()

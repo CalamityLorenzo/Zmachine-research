@@ -88,8 +88,13 @@ namespace ZMachineTools
             for (var x = 1; x <= this.ObjectTable.TotalObjects; ++x)
             {
                 var obj = this.ObjectTable.GetObject((ushort)x);
-                var zChars = this.TextDecoder.GetZChars(obj.PropertyTable.shortNameBytres);
-                Console.WriteLine($"{x} {this.TextDecoder.DecodeZChars(zChars)}");
+                if (obj.PropertyTable.shortNameBytes.Length > 0)
+                {
+                    var zChars = this.TextDecoder.GetZChars(obj.PropertyTable.shortNameBytes);
+                    Console.WriteLine($"{x} {this.TextDecoder.DecodeZChars(zChars)}");
+                }
+                else
+                    Console.WriteLine($"{x} {{Empty Description}}");
                 Console.WriteLine($"Parent:{obj.Parent}");               //for(var y=0;y< obj.PropertyTable.Properties.Length; ++y)
                 //{
                 //    Console.WriteLine(obj.PropertyTable.Properties[y]);
@@ -194,5 +199,7 @@ namespace ZMachineTools
             var bytes = this.TextDecoder.EncodeZcharsToWords(zchars);
             return bytes;
         }
+
+        public ZmObject GetObject(ushort objectIdx)=>this.ObjectTable.GetObject(objectIdx);
     }
 }

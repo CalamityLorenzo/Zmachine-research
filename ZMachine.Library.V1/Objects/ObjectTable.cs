@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Net.Mail;
 using ZMachine.Library.V1.Utilities;
 
 namespace ZMachine.Library.V1.Objects
@@ -19,27 +20,32 @@ namespace ZMachine.Library.V1.Objects
         private byte[] memory;
 
         public int TotalObjects { get; set; }
+
+        private int maximumObjects;
+
         public int ObjectSize { get; }
         // Client Side are numbered from 1 to 62
-        public ushort[] PropertyDefaults { get; }
+        public ushort[] PropertyDefaultsTable { get; }
 
 
         public ObjectTable(int objectTableLocation, int version, byte[] memory)
         {
             this.version = version;
             this.memory = memory;
-            int defaultSize = version > 3 ? 63 : 31;
+            int propertyDefaultsSize = version > 3 ? 63 : 31;
 
-            int maximumObjects = version > 3 ? 65535 : 255;
+            this.maximumObjects = version > 3 ? 65535 : 255;
             ObjectSize = version > 3 ? 14 : 9;
+            int objectEntryByteSize = (version > 3 ? 12 : 7); // Width of the table entry minus the property byte
 
             // Byte address of a list of default properties.
-            PropertyDefaults = new ushort[defaultSize];
+            PropertyDefaultsTable = new ushort[propertyDefaultsSize];
             int PropertyHeaderIdx = objectTableLocation;
-            for (var x = 0; x < defaultSize; x++)
+            // Each Property entry is word sized
+            for (var x = 0; x < propertyDefaultsSize; x++)
             {
                 ushort newEntry = memory.Get2ByteValue(PropertyHeaderIdx);
-                PropertyDefaults[x] = newEntry;
+                PropertyDefaultsTable[x] = newEntry;
                 PropertyHeaderIdx += 2;
             }
 
@@ -57,7 +63,7 @@ namespace ZMachine.Library.V1.Objects
                 var objectAddress = ObjectTreeStart + ObjectSize * x;
                 if (x == 0)
                 {
-                    var proprtyTableLocation = objectAddress + (version > 3 ? 12 : 8);
+                    var proprtyTableLocation = objectAddress + objectEntryByteSize;
                     propertyTableStartAddress = memory.Get2ByteValue(proprtyTableLocation);
                 }
                 else
@@ -70,6 +76,7 @@ namespace ZMachine.Library.V1.Objects
             if (totalObjectTableSize == 0) throw new ArgumentOutOfRangeException("Cannnot calculate object table");
 
             TotalObjects = totalObjectTableSize / ObjectSize;
+            if(TotalObjects> maximumObjects) throw new ArgumentOutOfRangeException($"Total Objects count is nonsense. {TotalObjects}/{maximumObjects}");
 
         }
 
@@ -83,16 +90,32 @@ namespace ZMachine.Library.V1.Objects
         public ZmObject GetObject(ushort objectId)
         {
 
+            // 12.3.1
+            // v1->3 object layout
+            //                  4          (3)              7      (2)     9
+            // 32 atribute flags           PArent Sibling Child    properties
+            // 
+            // 12.3.2
+            // v4 object layout
+            //                  6           (6)              12      (2)       14
+            // the 48 attribute flags       Parent Sibling Child     propertyTable
+            // ---48 bits in 6 bytes--- ---3 words, i.e. 6 bytes---- ---2 bytes--
+
+
+            // Size of the flags in bytes
             var attrbFlagsLength = version > 3 ? 6 : 4;
+            // size of the Parent/Sibling/Child entry
+            var paSibChLength = version > 3 ? 6 : 3;
+            // We do a check against the maximum objects in the constructor.
+            if (objectId > this.TotalObjects) throw new ArgumentOutOfRangeException($"object id is nonsense. {objectId} / {TotalObjects}");
+            var startAttributeFlags = ObjectTreeStart + ObjectSize * (objectId-1);
+            var startPaSibCh = startAttributeFlags + attrbFlagsLength;
+            // Extrude the attributes Flags in a range.
+            var attributes = memory[startAttributeFlags..startPaSibCh]; 
 
-            if (objectId > TotalObjects) throw new ArgumentOutOfRangeException("object id is nonsense.");
-            var startAttributes = ObjectTreeStart + ObjectSize * (objectId-1);
-            var startPaSibCh = startAttributes + attrbFlagsLength;
-            var attributes = memory[startAttributes..startPaSibCh]; // First 6 bytes are the attributes (48/32 bits)
-
-
-            // Get the object properties list.
-            var propertyTableAddress = memory.Get2ByteValue(startPaSibCh + attrbFlagsLength);
+            // Get the object properties list address
+            var propertyTableAddress = memory.Get2ByteValue(startPaSibCh + paSibChLength);
+            // Start of the property header table.
             var propertyHeaderLength = memory[propertyTableAddress];
             var headerNameStart = propertyTableAddress + 1;
             var headerNameEnd = headerNameStart + (propertyHeaderLength * 2);
@@ -108,6 +131,7 @@ namespace ZMachine.Library.V1.Objects
             var propertyLength = 0;
 
             var propertySizeByte = memory[propertyStart];
+            // The 
             while (propertySizeByte != 0)
             {
 
@@ -122,7 +146,7 @@ namespace ZMachine.Library.V1.Objects
                 else
                 {
                     propertyNumber = propertySizeByte & 0b1111;
-                    propertyLength = (propertySizeByte >> 4) + 1;
+                    propertyLength = (propertySizeByte >> 5) + 1;
                 }
 
                 var propertyEntryStart = propertyStart += 1;
@@ -134,55 +158,18 @@ namespace ZMachine.Library.V1.Objects
             }
 
             var objectPropertyTable = new ObjectPropertyTable(propertyHeaderLength, propertyHeaderNameBytes, objectProperties.ToArray());
+            // Create an acutal object.
             var objectDetails = new ZmObject(
                 ObjectId: objectId,
                 StartAddress: $"{ObjectTreeStart + ObjectSize * objectId} : ${ObjectTreeStart + ObjectSize * objectId:X}",
                 Attributes: new BitArray(attributes),
-                Parent: memory.Get2ByteValue(startPaSibCh),
-                Sibling: memory.Get2ByteValue(startPaSibCh + 2),
-                Child: memory.Get2ByteValue(startPaSibCh + 4),
-                PropertiesAddress: $"{memory.Get2ByteValue(startPaSibCh + 6)} : {memory.Get2ByteValueHex(startPaSibCh + 6)}",
+                Parent: version > 3 ? memory.Get2ByteValue(startPaSibCh) : memory[startPaSibCh],
+                Sibling: version > 3 ? memory.Get2ByteValue(startPaSibCh + 2) : memory[startPaSibCh+1],
+                Child: version > 3 ? memory.Get2ByteValue(startPaSibCh + 4) : memory[startPaSibCh + 2],
+                PropertiesAddress: version > 3 ? $"{memory.Get2ByteValue(startPaSibCh + 6)} : {memory.Get2ByteValueHex(startPaSibCh + 6)}": $"{memory.Get2ByteValue(startPaSibCh + 3)} : {memory.Get2ByteValueHex(startPaSibCh + 3)}",
                 PropertyTable: objectPropertyTable
               );
             return objectDetails;
         }
-
-        //private string PropertyHeaderName(ushort propertyAddress)
-        //{
-        //    var HeaderLength = memory[propertyAddress]; // This value is 2 bytes words ie 3 = 6.
-        //    var start = propertyAddress + 1;
-        //    var end = propertyAddress + 1 + HeaderLength * 2;
-        //    // the full range of bytes for the name
-        //    byte[] NameBytes = memory[start..end];
-        //    int Address = 0;
-        //    byte[] rawZChars = ZmTextDecoder.GetZChars(NameBytes, ref Address);
-        //    // Find if we have an abbreviation in our midst
-        //    var complete = false;
-        //    var ctr = 0;
-        //    List<byte> completeMessage = new List<byte>();
-        //    while (!complete)
-        //    {
-        //        if (rawZChars[ctr] == 2)
-        //        {
-        //            var abbreviationIdx = rawZChars[ctr + 1];
-        //            var abbreviationAddress = abbreviations[abbreviationIdx];
-
-        //            var abbreviationChars = ZmTextDecoder.GetZChars(memory, ref abbreviationAddress);
-        //            completeMessage.AddRange(abbreviationChars);
-        //            ctr += 2;
-        //        }
-        //        else
-        //        {
-        //            completeMessage.Add(rawZChars[ctr]);
-        //            ctr += 1;
-        //        }
-        //        if (ctr > rawZChars.Length - 1)
-        //            complete = true;
-        //    }
-
-
-        //    return ZmTextDecoder.DecodeZChars(completeMessage.ToArray());
-        //}
-
     }
 }

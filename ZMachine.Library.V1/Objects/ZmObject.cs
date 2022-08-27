@@ -12,7 +12,7 @@ namespace ZMachine.Library.V1.Objects
          string PropertiesAddress,
          ObjectPropertyTable PropertyTable
         );
-    public record ObjectPropertyTable(ushort length, byte[] shortNameBytres, ObjectProperty[] Properties );
+    public record ObjectPropertyTable(ushort length, byte[] shortNameBytes, ObjectProperty[] Properties );
 
     public record ObjectProperty(int Size, int propertyNumber, byte[] PropertyData);
 }

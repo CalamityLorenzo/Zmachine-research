@@ -34,7 +34,7 @@ namespace ZMachine.Library.V1.Utilities
         /// <returns>string</returns>
         public static string Get2ByteValueHex(this byte[] @this, int idx)
         {
-            return $"{LibraryUtilities.Get2ByteValue(@this, idx):X}";
+            return $"{LibraryUtilities.Get2ByteValue(@this, idx):X4}";
         }
 
 
