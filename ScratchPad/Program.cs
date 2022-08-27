@@ -1,4 +1,5 @@
 ﻿using global::System;
+using System.Collections;
 using Zmachine.V2;
 using Zmachine.V2.Machines;
 
@@ -42,7 +43,25 @@ namespace ScratchPath
             //Console.WriteLine(newString);
             //Console.WriteLine(newString2);
 
-            
+
+            //var f = new byte[6]{ 48,49,0,0,0,0};
+            var f = new byte[6] { 0, 0, 0, 0, 49, 48 };
+            var g = f.Reverse().ToArray();
+            var ba = new BitArray(f);
+            var rowLength = 8;
+            var counter = 0;
+            for(var a = ba.Length-1; a >= 0; a--)
+            { 
+                if (rowLength <= 0)
+                {
+                    rowLength = 8;
+                    Console.WriteLine();
+                }
+                Console.Write("{0,4}", ba[a].ToString()[0]);
+                rowLength--;
+            }
+
+            return;
 
             var filename = "curses.z5";
 

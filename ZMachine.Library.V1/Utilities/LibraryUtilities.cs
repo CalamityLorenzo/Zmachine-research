@@ -1,4 +1,5 @@
-﻿using ZMachine.Library.V1.Instructions;
+﻿using System.Collections;
+using ZMachine.Library.V1.Instructions;
 
 namespace ZMachine.Library.V1.Utilities
 {
@@ -185,6 +186,24 @@ namespace ZMachine.Library.V1.Utilities
                 OperandType.SmallConstant => value,
                 OperandType.LargeConstant => value,
             };
+        }
+
+        public static ushort[] ConvertAttributes(this IEnumerable<byte> attributes)
+        {
+            var bitArray = new BitArray(attributes.ToArray());
+            var assignedBits = new List<ushort>();
+            // To all intents and purposes the bitarry is backwards for us
+            // Least significant bits to most l->r. 
+            // Unlike when we eyeball it. msb->lsb.
+            // so count backwards
+            ushort bitOrder = 0;
+            for(var ctr = bitArray.Length-1; ctr >= 0; --ctr)
+            {
+                if (bitArray[ctr])
+                    assignedBits.Add(bitOrder);
+                    bitOrder++;
+            }
+            return assignedBits.ToArray();
         }
 
     }

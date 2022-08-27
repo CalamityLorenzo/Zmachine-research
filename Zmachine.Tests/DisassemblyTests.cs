@@ -217,15 +217,45 @@ namespace Zmachine.Tests
             //Assert.Catch(typeof(ArgumentOutOfRangeException), new TestDelegate(()=> zmachineTools.GetObject(65535)));
             
             ZmObject v3Object1 = zmachineTools.GetObject(1);
+            ZmObject v3Object2 = zmachineTools.GetObject(2);
             ZmObject v3Object21 = zmachineTools.GetObject(21);
-            ZmObject v3Object40 = zmachineTools.GetObject(21);
+            ZmObject v3Object22 = zmachineTools.GetObject(22);
             Assert.IsNotNull(v3Object1);
             Console.WriteLine(zmachineTools.DecodeText(v3Object21.PropertyTable.shortNameBytes));
             Console.WriteLine(v3Object1);
-            Console.WriteLine(v3Object40);
+            Console.WriteLine(v3Object2);
+            Console.WriteLine(v3Object21);
             Assert.IsTrue(true);
 
         }
+
+        [Test(Description = "V5 Validate an object")]
+        public void V5ConfirmObjects()
+        {
+            var filename = "Curses\\curses.z5";
+
+            Console.WriteLine($"==== {filename} ====");
+            using var fileStream = File.Open(filename, FileMode.Open);
+            fileStream.Position = 0;
+
+            var zmachineTools = new Tools(fileStream);
+
+            // Get a ridiculous id for a v3
+            //Assert.Catch(typeof(ArgumentOutOfRangeException), new TestDelegate(()=> zmachineTools.GetObject(65535)));
+
+            ZmObject v5Object1 = zmachineTools.GetObject(1);
+            Console.WriteLine(zmachineTools.DecodeText(v5Object1.PropertyTable.shortNameBytes));
+            Assert.IsNotNull(v5Object1);
+            ZmObject v5Object21 = zmachineTools.GetObject(21);
+            ZmObject v5Object40 = zmachineTools.GetObject(40);
+            ZmObject v5Object39 = zmachineTools.GetObject(39);
+            Console.WriteLine(v5Object1);
+            Console.WriteLine(v5Object40);
+            Assert.IsTrue(true);
+
+        }
+
+
 
         [Test(Description = "Disassemble")]
         public void BasicDisassemble()

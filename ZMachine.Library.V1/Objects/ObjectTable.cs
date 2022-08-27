@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Net.Mail;
+using System.Security;
 using ZMachine.Library.V1.Utilities;
 
 namespace ZMachine.Library.V1.Objects
@@ -113,48 +114,58 @@ namespace ZMachine.Library.V1.Objects
             // Extrude the attributes Flags in a range.
             var attributes = memory[startAttributeFlags..startPaSibCh]; 
 
-            // Get the object properties list address
+            // Get the object properties tableaddress
             var propertyTableAddress = memory.Get2ByteValue(startPaSibCh + paSibChLength);
             // Start of the property header table.
             var propertyHeaderLength = memory[propertyTableAddress];
             var headerNameStart = propertyTableAddress + 1;
             var headerNameEnd = headerNameStart + (propertyHeaderLength * 2);
+            // Short name of property
             var propertyHeaderNameBytes = memory[headerNameStart..headerNameEnd];
 
             // Object properties are stored in descending numnerical do-hickeys
             List<ObjectProperty> objectProperties = new();
-
             // if top bit ==1 two byte size.                
             var propertyHeaderSize = 0;
-            var propertyStart = headerNameEnd + 1;
+            var propertyStart = headerNameEnd;
             var propertyNumber = 0;
             var propertyLength = 0;
 
+            // This has a different layout depending on version.
             var propertySizeByte = memory[propertyStart];
             // The 
             while (propertySizeByte != 0)
             {
 
                 // note we have to ensure the counter (propertyStart) is in the correct position.
+                // 12.4.2.1 ( we have a 2 byte size) 
                 if ((propertySizeByte & 0b10000000) == 0b10000000 && version > 3)
                 {
                     //bits 0 to 5 contain the property number
-                    propertyNumber = (memory[propertyStart] & 0b11111);
-                    propertyLength = (memory[propertyStart += 1] & 0b11111);
+                    propertyNumber = (memory[propertyStart] & 0b111111);
+                    propertyLength = (memory[propertyStart] & 0b111111);
                     propertyHeaderSize = memory[propertyStart] << 8 | memory[propertyStart += 1];
                 }
-                else
+                // 12.4.2.2
+                else if ((propertySizeByte & 0b10000000) == 0b00000000 &&  version > 3)
                 {
-                    propertyNumber = propertySizeByte & 0b1111;
+                    propertyNumber = propertySizeByte & 0b111111;
+                    propertyLength = (propertySizeByte >> 6) + 1;
+
+                }
+                // 12.4.1
+                else if (version<4)
+                {
+                    propertyNumber = propertySizeByte & 0b11111;
                     propertyLength = (propertySizeByte >> 5) + 1;
                 }
 
                 var propertyEntryStart = propertyStart += 1;
-                var propertyEntryEnd = propertyStart += (propertyLength * 2);
+                var propertyEntryEnd = propertyStart += propertyLength;
                 var propertyData = memory[propertyEntryStart..propertyEntryEnd];
                 objectProperties.Add(new(propertyLength, propertyNumber, propertyData));
                 // Beginning of the next property record
-                propertySizeByte = memory[propertyStart += 1];
+                propertySizeByte = memory[propertyStart];
             }
 
             var objectPropertyTable = new ObjectPropertyTable(propertyHeaderLength, propertyHeaderNameBytes, objectProperties.ToArray());
@@ -162,13 +173,17 @@ namespace ZMachine.Library.V1.Objects
             var objectDetails = new ZmObject(
                 ObjectId: objectId,
                 StartAddress: $"{ObjectTreeStart + ObjectSize * objectId} : ${ObjectTreeStart + ObjectSize * objectId:X}",
-                Attributes: new BitArray(attributes),
+                // Bit array stores in LSB->MSB so here give a byte[4] byte 0 = 0->16 and not 33->64
+                // To get that correct we REVERSE!! Also it's off by 1 relatively.
+                Attributes: new AttributesCollection(attributes),
                 Parent: version > 3 ? memory.Get2ByteValue(startPaSibCh) : memory[startPaSibCh],
                 Sibling: version > 3 ? memory.Get2ByteValue(startPaSibCh + 2) : memory[startPaSibCh+1],
                 Child: version > 3 ? memory.Get2ByteValue(startPaSibCh + 4) : memory[startPaSibCh + 2],
-                PropertiesAddress: version > 3 ? $"{memory.Get2ByteValue(startPaSibCh + 6)} : {memory.Get2ByteValueHex(startPaSibCh + 6)}": $"{memory.Get2ByteValue(startPaSibCh + 3)} : {memory.Get2ByteValueHex(startPaSibCh + 3)}",
+                PropertiesAddress: $"{propertyTableAddress} : {propertyTableAddress.ToString("X4")}",
                 PropertyTable: objectPropertyTable
               );
+
+            var arrybits = attributes.Reverse().ToArray().ConvertAttributes();
             return objectDetails;
         }
     }

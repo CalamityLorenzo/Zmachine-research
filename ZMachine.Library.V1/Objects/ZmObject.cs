@@ -1,18 +1,56 @@
 ﻿using System.Collections;
+using System.Reflection.Metadata;
+using System.Text;
+using ZMachine.Library.V1.Utilities;
 
 namespace ZMachine.Library.V1.Objects
 {
     public record ZmObject(
          ushort ObjectId,
          string StartAddress,
-         BitArray Attributes,
+         // Bit array stores in LSB->MSB so here give a byte[4] byte 0 = 0->16 and not 33->64
+         AttributesCollection Attributes,
          ushort Parent,
          ushort Sibling,
          ushort Child,
          string PropertiesAddress,
          ObjectPropertyTable PropertyTable
-        );
-    public record ObjectPropertyTable(ushort length, byte[] shortNameBytes, ObjectProperty[] Properties );
+        )
+    {
+        protected virtual bool PrintMembers(StringBuilder sb)
+        {
+            sb.AppendLine($"ObjectId = {ObjectId}, PropertiesAddress ={PropertiesAddress}, StartAddress={StartAddress}");
+            sb.Append("Attributes=");
+            sb.Append(String.Join(", ", Attributes.Select(a=>$"[{a}]")));
+            sb.AppendLine();
+            sb.AppendLine($"Parent = {Parent}, Sibling={Sibling}, Child={Child}");
+            sb.AppendLine($" ObjectPropertyTable = {PropertyTable}");
+            sb.AppendLine("");
+            return true;
+        }
+    }
+    
+    public record ObjectPropertyTable(ushort nameLength, byte[] shortNameBytes, ObjectProperty[] properties );
 
-    public record ObjectProperty(int Size, int propertyNumber, byte[] PropertyData);
+    public record ObjectProperty(int Size, int propertyNumber, byte[] PropertyData)
+    {
+        protected virtual bool PrintMembers(StringBuilder sb)
+        {
+            sb.AppendLine($"Size = {Size}, PropertyNumber={propertyNumber}");
+            sb.Append("[");
+            sb.Append(String.Join(",", PropertyData.Select(a => a.ToString("X2"))));
+            sb.AppendLine("]");
+
+            return true;
+        }
+    }
+
+    public class AttributesCollection : List<ushort>
+    {
+        
+        public AttributesCollection(byte[] attributes)
+        {
+            this.AddRange(attributes.Reverse().ConvertAttributes());
+        }
+    }
 }
