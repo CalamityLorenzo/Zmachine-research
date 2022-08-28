@@ -105,8 +105,8 @@ namespace Zmachine.Tests
             fileStream.Read(stringBuffer, 0, 20);
 
             var zmachineTools = new Tools(fileStream);
-            //var message = zmachineTools.DecodeText(new byte[] { 17, 52, 79, 32, 122, 154, 3, 45, 58, 112, 3, 45, 42, 234, 3, 13, 83, 81, 36, 7, 40, 18, 82, 234, 2, 139, 3, 45, 27, 37, 212, 165 });
-            var message = zmachineTools.DecodeText(new byte[] { 20, 193, 147 , 106});
+            var message = zmachineTools.DecodeText(new byte[] { 17, 52, 79, 32, 122, 154, 3, 45, 58, 112, 3, 45, 42, 234, 3, 13, 83, 81, 36, 7, 40, 18, 82, 234, 2, 139, 3, 45, 27, 37, 212, 165 });
+            //var message = zmachineTools.DecodeText(new byte[] { 20, 193, 147 , 106});
             Console.WriteLine(message);
             Console.WriteLine("History of the Meldrews (vol. II)");
             Assert.IsTrue("History of the Meldrews (vol. II)" == message);
@@ -116,8 +116,7 @@ namespace Zmachine.Tests
         public void EncodeText()
         {
             var filename = "Curses\\curses.z5";
-
-            //Console.WriteLine($"==== {filename} ====");
+            Console.WriteLine($"==== {filename} ====");
             using var fileStream = File.Open(filename, FileMode.Open);
             fileStream.Position = 0x22AC;
 
@@ -167,10 +166,6 @@ namespace Zmachine.Tests
         }
 
 
-
-
-
-
         [Test(Description = "V5 Object Table")]
         public void V5ObjectTable()
         {
@@ -207,26 +202,23 @@ namespace Zmachine.Tests
         {
             var filename = "Curses\\hollywoo.dat";
 
-            Console.WriteLine($"==== {filename} ====");
+            Console.WriteLine($"==== v3 {filename} ====");
             using var fileStream = File.Open(filename, FileMode.Open);
             fileStream.Position = 0;
 
             var zmachineTools = new Tools(fileStream);
             
             // Get a ridiculous id for a v3
-            //Assert.Catch(typeof(ArgumentOutOfRangeException), new TestDelegate(()=> zmachineTools.GetObject(65535)));
+            Assert.Catch(typeof(ArgumentOutOfRangeException), new TestDelegate(()=> zmachineTools.GetObject(65535)));
             
-            ZmObject v3Object1 = zmachineTools.GetObject(1);
-            ZmObject v3Object2 = zmachineTools.GetObject(2);
-            ZmObject v3Object21 = zmachineTools.GetObject(21);
+            
             ZmObject v3Object22 = zmachineTools.GetObject(22);
-            Assert.IsNotNull(v3Object1);
-            Console.WriteLine(zmachineTools.DecodeText(v3Object21.PropertyTable.shortNameBytes));
-            Console.WriteLine(v3Object1);
-            Console.WriteLine(v3Object2);
-            Console.WriteLine(v3Object21);
-            Assert.IsTrue(true);
-
+            Assert.IsTrue(zmachineTools.DecodeText(v3Object22.PropertyTable.shortNameBytes) == "indigo punch card");
+            Assert.IsTrue(Enumerable.SequenceEqual(v3Object22.Attributes, new ushort[] { 17, 21, 29 }));
+            Assert.IsTrue(Enumerable.SequenceEqual(v3Object22.PropertyTable.properties[1].PropertyData, new byte[] { 0x42, 0x02, 0x42, 0x09}));
+            Assert.IsTrue(v3Object22.Parent == 223 &&
+                          v3Object22.Sibling == 0 &&
+                          v3Object22.Child == 0);
         }
 
         [Test(Description = "V5 Validate an object")]
@@ -234,24 +226,31 @@ namespace Zmachine.Tests
         {
             var filename = "Curses\\curses.z5";
 
-            Console.WriteLine($"==== {filename} ====");
+            Console.WriteLine($"==== V5 {filename} ====");
             using var fileStream = File.Open(filename, FileMode.Open);
             fileStream.Position = 0;
 
             var zmachineTools = new Tools(fileStream);
 
             // Get a ridiculous id for a v3
-            //Assert.Catch(typeof(ArgumentOutOfRangeException), new TestDelegate(()=> zmachineTools.GetObject(65535)));
+            Assert.Catch(typeof(ArgumentOutOfRangeException), new TestDelegate(()=> zmachineTools.GetObject(65535)));
 
             ZmObject v5Object1 = zmachineTools.GetObject(1);
             Console.WriteLine(zmachineTools.DecodeText(v5Object1.PropertyTable.shortNameBytes));
             Assert.IsNotNull(v5Object1);
             ZmObject v5Object21 = zmachineTools.GetObject(21);
-            ZmObject v5Object40 = zmachineTools.GetObject(40);
-            ZmObject v5Object39 = zmachineTools.GetObject(39);
-            Console.WriteLine(v5Object1);
-            Console.WriteLine(v5Object40);
-            Assert.IsTrue(true);
+            Assert.IsTrue((v5Object21.Attributes[0] == 28 &&
+                           v5Object21.Attributes[1] == 34));
+            Assert.IsTrue(zmachineTools.DecodeText(v5Object21.PropertyTable.shortNameBytes) == "Husbandry");
+            var propertyTable = v5Object21.PropertyTable.properties;
+            Assert.IsTrue(propertyTable[0].Size == 2);
+            Assert.IsTrue(propertyTable[0].propertyNumber== 35);
+            Assert.IsTrue(Enumerable.SequenceEqual(propertyTable[0].PropertyData, new byte[] { 0xb6, 0xd8 }));
+            //ZmObject v5Object40 = zmachineTools.GetObject(40);
+            //ZmObject v5Object39 = zmachineTools.GetObject(39);
+            //Console.WriteLine(v5Object1);
+            //Console.WriteLine(v5Object40);
+            //Assert.IsTrue(true);
 
         }
 

@@ -138,13 +138,13 @@ namespace ZMachine.Library.V1.Objects
             {
 
                 // note we have to ensure the counter (propertyStart) is in the correct position.
-                // 12.4.2.1 ( we have a 2 byte size) 
+                // 12.4.2.1 ( we have a 2 byte size entry) 
                 if ((propertySizeByte & 0b10000000) == 0b10000000 && version > 3)
                 {
                     //bits 0 to 5 contain the property number
                     propertyNumber = (memory[propertyStart] & 0b111111);
-                    propertyLength = (memory[propertyStart] & 0b111111);
-                    propertyHeaderSize = memory[propertyStart] << 8 | memory[propertyStart += 1];
+                    propertyLength = (memory[propertyStart+=1] & 0b111111);
+                    //propertyHeaderSize = memory[propertyStart] << 8 | memory[propertyStart += 1];
                 }
                 // 12.4.2.2
                 else if ((propertySizeByte & 0b10000000) == 0b00000000 &&  version > 3)

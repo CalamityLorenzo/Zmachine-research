@@ -271,8 +271,10 @@ namespace ZMachine.Monogame
             }
         }
 
-        // A read collects a command
-        // and terminates when the return key is found.
+        /// <summary>
+        /// A read collects a command
+        /// and terminates when the return/termination key is found.
+        /// </summary>
         private void ProcessRead()
         {
             if (this.input0.Length > 0)
