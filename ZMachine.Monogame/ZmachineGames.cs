@@ -34,6 +34,8 @@ namespace ZMachine.Monogame
         private byte[] terminatingChars; // Which characters can terminate a read command.
         private Dictionary<short, Color> ColorMapper = new Dictionary<short, Color>();
 
+        private bool IsReadingInstruction = false;
+
 
         public ZMachineGamee(Stream input0, Stream input1, Stream outputScreen, Stream outputTranscript, Stream storyData)
         {

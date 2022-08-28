@@ -110,7 +110,7 @@
                 else if (getAbbreviation)
                 {
                     var entryAddress = this.abbreviations.GetEntryAddress(1, currentChar);
-                    allChars.AddRange(this.DecodeAbbreviationEntry(entryAddress));
+                    allChars.AddRange(this.DecodeAbbreviationEntry(entryAddress, abbreviations.Memory));
                     getAbbreviation = false;
                 }
                 else // actual character code work
@@ -181,7 +181,7 @@
                 else if (getAbbreviation > 0)
                 {
                     var entryAddress = abbreviations.GetEntryAddress(getAbbreviation, currentChar);
-                    var abbreviation = this.DecodeAbbreviationEntry(entryAddress,allChars);
+                    var abbreviation = this.DecodeAbbreviationEntry(entryAddress, abbreviations.Memory);
                     allChars.AddRange(abbreviation);
                     // lets just get that sorted    
                     getAbbreviation = 0;

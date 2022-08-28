@@ -18,7 +18,7 @@ namespace Zmachine.Library.V2
                 totalAbbreviations = 96;
         }
         public int StartAddress { get; }
-        public byte[] Memory { get; }
+        internal byte[] Memory { get; }
         /// <summary>
         /// Returns the memory address pointed at by the contents of the Abbreviation table entry.
         /// The Memory address is a Word Address and thus must have it's value multipled by 2. 
