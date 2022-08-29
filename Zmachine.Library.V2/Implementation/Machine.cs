@@ -1,4 +1,5 @@
-﻿using Zmachine.Library.V2.Instructions;
+﻿using System.Diagnostics;
+using Zmachine.Library.V2.Instructions;
 using Zmachine.Library.V2.Objects;
 using Zmachine.Library.V2.Utilities;
 
@@ -136,6 +137,9 @@ namespace Zmachine.Library.V2.Implementation
                     case "div":Div(currentInstr);
                         break;
                     case "store":Store(currentInstr);
+                        break;
+                    default:
+                        Debug.WriteLine(currentInstr.instruction.Name);
                         break;
                 }
                 this.ProgramCounter += 1;

@@ -38,7 +38,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZMachine.Monogame", "ZMachi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZMachine.Monogame.Components", "ZMachine.Monogame.Components\ZMachine.Monogame.Components.csproj", "{59F179E5-D7DC-484B-9E93-31154AF24F26}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zmachine.Library.V2", "Zmachine.Library.V2\Zmachine.Library.V2.csproj", "{433070F7-5FC4-4D17-A136-613FB14EA396}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zmachine.Library.V2", "Zmachine.Library.V2\Zmachine.Library.V2.csproj", "{433070F7-5FC4-4D17-A136-613FB14EA396}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZMachine.Monogame.V2", "ZMachine.Monogame.V2\ZMachine.Monogame.V2.csproj", "{04382D59-A285-411D-BA57-946DBB73B102}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -90,6 +92,10 @@ Global
 		{433070F7-5FC4-4D17-A136-613FB14EA396}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{433070F7-5FC4-4D17-A136-613FB14EA396}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{433070F7-5FC4-4D17-A136-613FB14EA396}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04382D59-A285-411D-BA57-946DBB73B102}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04382D59-A285-411D-BA57-946DBB73B102}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04382D59-A285-411D-BA57-946DBB73B102}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04382D59-A285-411D-BA57-946DBB73B102}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -100,6 +106,7 @@ Global
 		{7C22ADAF-53C6-4685-A571-865348FF5FF5} = {C47B4E5C-5578-4C1F-B8F1-364F7481AC2A}
 		{B7F60677-8B03-4EEB-A9B8-46531261D84A} = {C47B4E5C-5578-4C1F-B8F1-364F7481AC2A}
 		{418D4F84-04C9-4521-B41A-970D219739F9} = {C47B4E5C-5578-4C1F-B8F1-364F7481AC2A}
+		{CE3656B1-1DA5-40DA-8203-945D973FACCE} = {C47B4E5C-5578-4C1F-B8F1-364F7481AC2A}
 		{433070F7-5FC4-4D17-A136-613FB14EA396} = {571C2F25-E543-40F1-9B9D-6460BAD42572}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
