@@ -109,6 +109,9 @@ namespace Zmachine.Library.V2.Implementation
             }
         }
 
+        private ushort GetVariableValue(OperandType type, ushort value) => LibraryUtilities.GetOperandValue(GameData, StoryHeader.GlobalVariables, CallStack.Peek(), type, value);
+        
+
         public void Update()
         {
             if (IsReadingInstruction)

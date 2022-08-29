@@ -196,26 +196,26 @@ namespace Zmachine.Library.V2.Utilities
             }
         }
 
-        public static ushort GetOperandValue(byte[] memory, ActivationRecord stackRecord, OperandType operandType, ushort value)
+        public static ushort GetOperandValue(byte[] memory, ushort globalVariables, ActivationRecord stackRecord, OperandType operandType, ushort value)
         {
             return operandType switch
             {
-                OperandType.Variable => GetVariable(memory, stackRecord, value),
+                OperandType.Variable => GetVariable(memory, globalVariables, stackRecord, value),
                 OperandType.SmallConstant => value,
                 OperandType.LargeConstant => value,
+                OperandType.Omitted=> throw new ArgumentOutOfRangeException("Ommitted nothing to see here")
             };
         }
 
-        public static ushort GetVariable(byte[] memory, ActivationRecord record, ushort variable)
-        => variable  switch 
-            {
-                0=> record.localStack.Peek(), // Stack
-                >=1 and <= 15=> record.locals[variable],
-                > 15 and <= 255=> // Global
-                    //var resultArray = result.ToByteArray();
-                    (Memory[globalVariables + ((variable - 15) * 2)] <<8 | Memory[globalVariables + ((variable - 15) * 2) + 1])
-            }
-        }
+        public static ushort GetVariable(byte[] memory, ushort globalVars, ActivationRecord record, ushort variable)
+        => variable switch
+        {
+            0 => record.localStack.Peek(), // Stack
+            >= 1 and <= 15 => record.locals[variable],
+            > 15 and <= 255 => // Global
+                (ushort)(memory[globalVars + ((variable - 15) * 2)] << 8 | memory[globalVars + ((variable - 15) * 2) + 1])
+        };
+
 
         public static ushort[] ConvertAttributes(this IEnumerable<byte> attributes)
         {
