@@ -131,11 +131,11 @@ namespace Zmachine.Library.V2.Implementation
                 this.currentInstr = InstructionDecoder.Decode(GameData, ref ProgramCounter);
                 switch (currentInstr.instruction.Name)
                 {
-                    case "add":
-                        Add(currentInstr);
+                    case "add":Add(currentInstr);
                         break;
-                    case "call_1n":
-                        Call_1n(currentInstr);
+                    case "call": Call(currentInstr);
+                        break;
+                    case "call_1n": Call_1n(currentInstr);
                         break;
                     case "div":
                         Div(currentInstr);

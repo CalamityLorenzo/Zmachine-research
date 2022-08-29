@@ -184,7 +184,7 @@ namespace Zmachine.Library.V2.Utilities
                 case > 0 and < 16: // Local vars
                     {
                         var localVars = stack.Peek().locals;
-                        localVars[currentInstr.store] = result;
+                        localVars[currentInstr.store-1] = result;
                     }
                     break;
                 case > 15 and <= 255: // Global
@@ -203,12 +203,11 @@ namespace Zmachine.Library.V2.Utilities
                 OperandType.Variable => GetVariable(memory, globalVariables, stackRecord, value),
                 OperandType.SmallConstant => value,
                 OperandType.LargeConstant => value,
-                OperandType.Omitted=> throw new ArgumentOutOfRangeException("Ommitted nothing to see here")
+                OperandType.Omitted => throw new ArgumentOutOfRangeException("Ommitted nothing to see here")
             };
         }
 
-        public static ushort GetVariable(byte[] memory, ushort globalVars, ActivationRecord record, ushort variable)
-        => variable switch
+        public static ushort GetVariable(byte[] memory, ushort globalVars, ActivationRecord record, ushort variable) => variable switch
         {
             0 => record.localStack.Peek(), // Stack
             >= 1 and <= 15 => record.locals[variable],
