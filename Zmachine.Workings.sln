@@ -40,7 +40,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZMachine.Monogame.Component
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zmachine.Library.V2", "Zmachine.Library.V2\Zmachine.Library.V2.csproj", "{433070F7-5FC4-4D17-A136-613FB14EA396}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZMachine.Monogame.V2", "ZMachine.Monogame.V2\ZMachine.Monogame.V2.csproj", "{04382D59-A285-411D-BA57-946DBB73B102}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZMachine.Monogame.V2", "ZMachine.Monogame.V2\ZMachine.Monogame.V2.csproj", "{04382D59-A285-411D-BA57-946DBB73B102}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiscFiles", "MiscFiles\MiscFiles.csproj", "{F4C6D398-CB44-4D5A-A892-4F2117C0FCD9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -96,6 +98,10 @@ Global
 		{04382D59-A285-411D-BA57-946DBB73B102}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04382D59-A285-411D-BA57-946DBB73B102}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04382D59-A285-411D-BA57-946DBB73B102}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4C6D398-CB44-4D5A-A892-4F2117C0FCD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4C6D398-CB44-4D5A-A892-4F2117C0FCD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4C6D398-CB44-4D5A-A892-4F2117C0FCD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4C6D398-CB44-4D5A-A892-4F2117C0FCD9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

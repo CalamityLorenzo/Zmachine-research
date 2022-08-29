@@ -3,10 +3,10 @@
     [Flags]
     public enum OperandType
     {
-        LargeConstant = 0,
-        SmallConstant = 1,
-        Variable = 2,
-        Omitted = 3
+        LargeConstant = 0,  // 0->65535
+        SmallConstant = 1,  // 0->255
+        Variable = 2,       // A Variable eg local/global/stack
+        Omitted = 3         // NOTHING
     }
 
     public record InstructionOperands(

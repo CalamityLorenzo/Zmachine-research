@@ -68,6 +68,18 @@ namespace Zmachine.Library.V2.Implementation
             this.TextDecoder = new TextProcessor(AbbreviationTable, StoryHeader.Version);
             this.ObjectTable = new ObjectTable(this.StoryHeader.ObjectTable, this.StoryHeader.Version, GameData);
             this.InstructionDecoder = new InstructionDecoder(LibraryUtilities.GetVersionInstructions(this.FeaturesVersion), StoryHeader.Version);
+
+            this.ProgramCounter = LibraryUtilities.SetProgramCounterInitialValue(this.StoryHeader.Version, this.StoryHeader.ProgramCounterInitalValue, this.StoryHeader.RoutinesOffset);
+            if (this.StoryHeader.Version <= 3)
+            {
+                this.CallStack.Push(new ActivationRecord
+                (
+                    returnAddress: -1,
+                    startAdress: this.ProgramCounter,
+                    locals: new ushort[0],
+                    localStack: new Stack<ushort>()
+                ));
+            }
         }
 
         /// <summary>
@@ -116,27 +128,47 @@ namespace Zmachine.Library.V2.Implementation
                 this.currentInstr = InstructionDecoder.Decode(GameData, ref ProgramCounter);
                 switch (currentInstr.instruction.Name)
                 {
-                    case "print":Print(currentInstr);
+                    case "add":
+                        Add(currentInstr);
                         break;
-                    case "call_1n":Call_1n(currentInstr);
+                    case "call_1n":
+                        Call_1n(currentInstr);
                         break;
-                    case "new_line":NewLine();
+                    case "div":
+                        Div(currentInstr);
                         break;
-                    case "rtrue":RTrue();
+                    case "je":
+                        Je(currentInstr);
                         break;
-                    case "aread":ARead(currentInstr);
+                    case "jg":
+                        Jg(currentInstr);
                         break;
-                    case "jump":Jump(currentInstr);
+                    case "jump":
+                        Jump(currentInstr);
                         break;
-                    case "mod":Mod(currentInstr);
+                    case "loadb":
+                        LoadB(currentInstr);
                         break;
-                    case "mul":Mul(currentInstr);
+                    case "mod":
+                        Mod(currentInstr);
                         break;
-                    case "add":Add(currentInstr);
+                    case "mul":
+                        Mul(currentInstr);
                         break;
-                    case "div":Div(currentInstr);
+                    case "new_line":
+                        NewLine();
                         break;
-                    case "store":Store(currentInstr);
+                    case "print":
+                        Print(currentInstr);
+                        break;
+                    case "aread":
+                        ARead(currentInstr);
+                        break;
+                    case "rtrue":
+                        RTrue();
+                        break;
+                    case "store":
+                        Store(currentInstr);
                         break;
                     default:
                         Debug.WriteLine(currentInstr.instruction.Name);

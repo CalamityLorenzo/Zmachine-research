@@ -83,6 +83,7 @@ namespace ZMachine.Monogame
             this.TextDecoder = new TextProcessor(Memory, AbbreviationTable, StoryHeader.Version);
             this.ObjectTable = new ObjectTable(this.StoryHeader.ObjectTable, this.StoryHeader.Version, Memory);
             this.InstructionDecoder = new InstructionDecoder(LibraryUtilities.GetVersionInstructions(this.FeaturesVersion), StoryHeader.Version);
+
         }
 
         internal void LoadCustomMemory(byte[] bytes)

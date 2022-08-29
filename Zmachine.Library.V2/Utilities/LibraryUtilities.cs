@@ -141,12 +141,28 @@ namespace Zmachine.Library.V2.Utilities
 
         }
 
-        public static ushort GetShort(this InstructionOperands @this)
+        public static ushort GetUShort(this InstructionOperands @this)
         {
             if (@this.operand.Length > 1)
                 return (ushort)(@this.operand[0] << 8 | @this.operand[1]);
             else
                 return (ushort)@this.operand[0];
+        }
+
+        public static short GetShort(this InstructionOperands @this)
+        {
+            if (@this.operand.Length > 1)
+                return (short)(@this.operand[0] << 8 | @this.operand[1]);
+            else
+                return (short)@this.operand[0];
+        }
+
+        public static ushort GetUShort(this byte[] @this)
+        {
+            if (@this.Length > 1)
+                return (ushort)(@this[0] << 8 | @this[1]);
+            else
+                return (ushort)@this[0];
         }
 
         public static byte[] ToByteArray(this ushort @this) => new byte[]
