@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Zmachine.Library.V2.Instructions;
 
 namespace Zmachine.Library.V2.Utilities
@@ -194,14 +196,25 @@ namespace Zmachine.Library.V2.Utilities
             }
         }
 
-        public static ushort GetOperandValue(ActivationRecord stackRecord,OperandType operandType, ushort value)
+        public static ushort GetOperandValue(byte[] memory, ActivationRecord stackRecord, OperandType operandType, ushort value)
         {
             return operandType switch
             {
-                OperandType.Variable => stackRecord.locals[value],
+                OperandType.Variable => GetVariable(memory, stackRecord, value),
                 OperandType.SmallConstant => value,
                 OperandType.LargeConstant => value,
             };
+        }
+
+        public static ushort GetVariable(byte[] memory, ActivationRecord record, ushort variable)
+        => variable  switch 
+            {
+                0=> record.localStack.Peek(), // Stack
+                >=1 and <= 15=> record.locals[variable],
+                > 15 and <= 255=> // Global
+                    //var resultArray = result.ToByteArray();
+                    (Memory[globalVariables + ((variable - 15) * 2)] <<8 | Memory[globalVariables + ((variable - 15) * 2) + 1])
+            }
         }
 
         public static ushort[] ConvertAttributes(this IEnumerable<byte> attributes)
@@ -213,11 +226,11 @@ namespace Zmachine.Library.V2.Utilities
             // Unlike when we eyeball it. msb->lsb.
             // so count backwards
             ushort bitOrder = 0;
-            for(var ctr = bitArray.Length-1; ctr >= 0; --ctr)
+            for (var ctr = bitArray.Length - 1; ctr >= 0; --ctr)
             {
                 if (bitArray[ctr])
                     assignedBits.Add(bitOrder);
-                    bitOrder++;
+                bitOrder++;
             }
             return assignedBits.ToArray();
         }

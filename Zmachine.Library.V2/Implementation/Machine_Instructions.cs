@@ -16,8 +16,8 @@ namespace Zmachine.Library.V2.Implementation
             var right = instruct.operands[1].GetUShort();
 
             // Depending on the operand types depends if we have a value or pointer to a variable
-            var lValue = LibraryUtilities.GetOperandValue(this.CallStack.Peek(), instruct.operands[0].operandType, left);
-            var rValue = LibraryUtilities.GetOperandValue(this.CallStack.Peek(), instruct.operands[1].operandType, right);
+            var lValue = LibraryUtilities.GetOperandValue(GameData, this.CallStack.Peek(), instruct.operands[0].operandType, left);
+            var rValue = LibraryUtilities.GetOperandValue(GameData,this.CallStack.Peek(), instruct.operands[1].operandType, right);
 
             ushort result = (ushort)(lValue + rValue);
             LibraryUtilities.StoreResult(GameData, CallStack, instruct, StoryHeader.GlobalVariables, result);
@@ -50,10 +50,13 @@ namespace Zmachine.Library.V2.Implementation
         // Jump if a is equal to any of the subsequent operands
         internal void Je(DecodedInstruction instruct)
         {
-            var comparitor = instruct.operands[0].operandType;
+            var comparitor = LibraryUtilities.GetOperandValue(this.CallStack.Peek(), instruct.operands[0].operandType, instruct.operands[0].operand.GetUShort());
+
+            //var comparitor = instruct.operands[0].operandType;
             for(var x = 0; x < instruct.operands.Length - 1; ++x)
             {
-
+                if (comparitor == instruct.operands[1].GetUShort())
+                    this.ProgramCounter = ProgramCounter + instruct.branch.GetUShort() - 2;
             }
         }
 
