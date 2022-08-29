@@ -77,7 +77,7 @@ namespace Zmachine.Library.V2.Implementation
                     returnAddress: -1,
                     startAdress: this.ProgramCounter,
                     locals: new ushort[0],
-                    localStack: new Stack<ushort>()
+                    false
                 ));
             }
         }
@@ -110,7 +110,7 @@ namespace Zmachine.Library.V2.Implementation
         }
 
         private ushort GetVariableValue(OperandType type, ushort value) => LibraryUtilities.GetOperandValue(GameData, StoryHeader.GlobalVariables, CallStack.Peek(), type, value);
-        
+
 
         public void Update()
         {
@@ -131,11 +131,15 @@ namespace Zmachine.Library.V2.Implementation
                 this.currentInstr = InstructionDecoder.Decode(GameData, ref ProgramCounter);
                 switch (currentInstr.instruction.Name)
                 {
-                    case "add":Add(currentInstr);
+                    case "add":
+                        Add(currentInstr);
                         break;
-                    case "call": Call(currentInstr);
+                    case "call":
+                    case "call_vs":
+                        Call(currentInstr);
                         break;
-                    case "call_1n": Call_1n(currentInstr);
+                    case "call_1n":
+                        Call_1n(currentInstr);
                         break;
                     case "div":
                         Div(currentInstr);
@@ -160,6 +164,9 @@ namespace Zmachine.Library.V2.Implementation
                         break;
                     case "new_line":
                         NewLine();
+                        break;
+                    case "or":
+                        Or(currentInstr);
                         break;
                     case "print":
                         Print(currentInstr);

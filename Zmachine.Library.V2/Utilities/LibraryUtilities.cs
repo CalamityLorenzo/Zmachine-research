@@ -183,7 +183,7 @@ namespace Zmachine.Library.V2.Utilities
                     break;
                 case > 0 and < 16: // Local vars
                     {
-                        var localVars = stack.Peek().locals;
+                        var localVars = stack.Peek().Locals;
                         localVars[currentInstr.store-1] = result;
                     }
                     break;
@@ -209,8 +209,8 @@ namespace Zmachine.Library.V2.Utilities
 
         public static ushort GetVariable(byte[] memory, ushort globalVars, ActivationRecord record, ushort variable) => variable switch
         {
-            0 => record.localStack.Peek(), // Stack
-            >= 1 and <= 15 => record.locals[variable],
+            0 => record.localStack.Pop(), // Stack
+            >= 1 and <= 15 => record.Locals[variable],
             > 15 and <= 255 => // Global
                 (ushort)(memory[globalVars + ((variable - 15) * 2)] << 8 | memory[globalVars + ((variable - 15) * 2) + 1])
         };
