@@ -9,9 +9,9 @@
         Omitted = 3         // NOTHING
     }
 
-    public record InstructionOperands(
+    public record Operand(
         OperandType operandType,
-        byte[] operand
+        byte[] value
     );
 
     // Basic layout of an instruction.

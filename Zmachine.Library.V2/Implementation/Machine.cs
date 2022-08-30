@@ -70,7 +70,7 @@ namespace Zmachine.Library.V2.Implementation
             this.InstructionDecoder = new InstructionDecoder(LibraryUtilities.GetVersionInstructions(this.FeaturesVersion), StoryHeader.Version);
 
             this.ProgramCounter = LibraryUtilities.SetProgramCounterInitialValue(this.StoryHeader.Version, this.StoryHeader.ProgramCounterInitalValue, this.StoryHeader.RoutinesOffset);
-            if (this.StoryHeader.Version <= 3)
+            if (this.StoryHeader.Version <= 37)
             {
                 this.CallStack.Push(new ActivationRecord
                 (
@@ -109,7 +109,9 @@ namespace Zmachine.Library.V2.Implementation
             }
         }
 
-        private ushort GetVariableValue(OperandType type, ushort value) => LibraryUtilities.GetOperandValue(GameData, StoryHeader.GlobalVariables, CallStack.Peek(), type, value);
+        private ushort GetVariableValue(Operand operand)
+        =>LibraryUtilities.GetOperandValue(GameData, StoryHeader.GlobalVariables, CallStack.Peek(), operand.operandType, operand.value.GetUShort());
+        
 
 
         public void Update()
@@ -180,6 +182,14 @@ namespace Zmachine.Library.V2.Implementation
                     case "store":
                         Store(currentInstr);
                         break;
+                    case "storew":
+                        StoreW(currentInstr);
+                        break;
+                    case "sub":
+                        Sub(currentInstr);
+                        break;
+                    case "test_attr": Test_Atr(currentInstr);
+                        break;
                     default:
                         Debug.WriteLine(currentInstr.instruction.Name);
                         break;
@@ -187,6 +197,36 @@ namespace Zmachine.Library.V2.Implementation
                 this.ProgramCounter += 1;
             }
         }
+
+
+        private void StoreValue(ushort address, ushort value)
+        {
+            switch (address)
+            {
+
+                case 0:             // Stack
+                    CallStack.Peek().localStack.Push(value);
+                    break;
+                case > 0 and <= 15: // Local vars
+                    {
+                        var localVars = CallStack.Peek().Locals;
+                        localVars[address-1] = value;
+                    }
+                    break;
+                case >= 16 and <= 255: // Global
+                    // 6.2 Storage of global variables
+                    // Convert the varible number into the memort off set from the global vars table.
+                    var variablePosition = (address - 15) * 2;
+                    var resultArray = value.ToByteArray();
+                    var globalVariables = GameData[StoryHeader.GlobalVariables];
+                    // they are words/
+                    GameData[StoryHeader.GlobalVariables + variablePosition] = resultArray[0];
+                    GameData[StoryHeader.GlobalVariables + variablePosition + 1] = resultArray[1];
+                    break;
+            }
+
+        }
+
 
         /// <summary>
         /// A read collects a command

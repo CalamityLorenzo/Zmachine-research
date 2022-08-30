@@ -2,7 +2,7 @@
 {
     // This gives us most of the context requried to decode any instruction.
     public record DecodedInstruction(MachineInstruction instruction
-                                      , InstructionOperands[] operands
+                                      , Operand[] operands
                                       , byte store
                                       , byte[] branch,
                                         int startAddress,

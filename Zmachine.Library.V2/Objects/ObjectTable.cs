@@ -28,6 +28,8 @@ namespace Zmachine.Library.V2.Objects
         // Client Side are numbered from 1 to 62
         public ushort[] PropertyDefaultsTable { get; }
 
+        public ZmObject this[ushort objectId] => this.GetObject(objectId);
+
 
         public ObjectTable(int objectTableLocation, int version, byte[] memory)
         {
@@ -102,13 +104,14 @@ namespace Zmachine.Library.V2.Objects
             // the 48 attribute flags       Parent Sibling Child     propertyTable
             // ---48 bits in 6 bytes--- ---3 words, i.e. 6 bytes---- ---2 bytes--
 
+            if (objectId > this.TotalObjects) throw new ArgumentOutOfRangeException($"object id is nonsense. {objectId} / {TotalObjects}");
+            if (objectId <0 ) throw new ArgumentOutOfRangeException($"Object id must be greater than 0. {objectId}");
 
             // Size of the flags in bytes
             var attrbFlagsLength = version > 3 ? 6 : 4;
             // size of the Parent/Sibling/Child entry
             var paSibChLength = version > 3 ? 6 : 3;
             // We do a check against the maximum objects in the constructor.
-            if (objectId > this.TotalObjects) throw new ArgumentOutOfRangeException($"object id is nonsense. {objectId} / {TotalObjects}");
             var startAttributeFlags = ObjectTreeStart + ObjectSize * (objectId-1);
             var startPaSibCh = startAttributeFlags + attrbFlagsLength;
             // Extrude the attributes Flags in a range.

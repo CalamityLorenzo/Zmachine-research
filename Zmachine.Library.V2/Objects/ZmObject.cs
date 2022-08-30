@@ -45,7 +45,7 @@ namespace Zmachine.Library.V2.Objects
         }
     }
 
-    public class AttributesCollection : List<ushort>
+    public class AttributesCollection : List<byte>
     {
         
         public AttributesCollection(byte[] attributes)

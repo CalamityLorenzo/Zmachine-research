@@ -74,10 +74,10 @@ namespace Zmachine.Library.V2
 
             // Small Constnat Operands (1 byte)
             // Variable Operands (1 byte)
-            var operandInfo = new List<InstructionOperands>
+            var operandInfo = new List<Operand>
             {
-                    new InstructionOperands( operand1Type,  GetOperandFromType(operand1Type, memory, ref address)),
-                    new InstructionOperands(operand2Type, GetOperandFromType(operand2Type, memory, ref address))
+                    new Operand( operand1Type,  GetOperandFromType(operand1Type, memory, ref address)),
+                    new Operand(operand2Type, GetOperandFromType(operand2Type, memory, ref address))
             }.ToArray();
 
             var instruction = instructions[$"2OP:{decimalInstruction}"];
@@ -116,7 +116,7 @@ namespace Zmachine.Library.V2
 
             var allBytes = GetHexAddressRange(instructionStartAddress, address, memory);
 
-            return new DecodedInstruction(instruction, new[] { new InstructionOperands(operand: operand, operandType: operand1Type) }, store, branch, instructionStartAddress, address, $"{allBytes}");
+            return new DecodedInstruction(instruction, new[] { new Operand(value: operand, operandType: operand1Type) }, store, branch, instructionStartAddress, address, $"{allBytes}");
 
         }
 
@@ -177,7 +177,7 @@ namespace Zmachine.Library.V2
             return new DecodedInstruction(instruction, operands.ToArray(), store, branch, instructionStartAddress, address, allBytes);
         }
 
-        private List<InstructionOperands> GetOperandAndType(byte operandTypeByte, byte[] memory, ref int address)
+        private List<Operand> GetOperandAndType(byte operandTypeByte, byte[] memory, ref int address)
         {
             //loop though the operandtypes, until 
             // a. reach the end
@@ -186,7 +186,7 @@ namespace Zmachine.Library.V2
             // types are stored 2 bits and r->l so 6 = op1 4 = op2 etc
             // we also collect the values as we go.
 
-            var instrOperands = new List<InstructionOperands>();
+            var instrOperands = new List<Operand>();
             var shift = 6;
             while (shift >= 0)
             {

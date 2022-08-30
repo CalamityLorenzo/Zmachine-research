@@ -56,10 +56,10 @@ namespace Zmachine.Library.V2.Utilities
         /// <summary>
         /// Takes in a numner and converts into a verion approrpiate address
         /// </summary>
-        /// <param name="version"></param>
-        /// <param name="address"></param>
-        /// <param name="rOffset"></param>
-        /// <param name="sOffset"></param>
+        /// <param name="version">Story version</param>
+        /// <param name="address">Mempry provided address</param>
+        /// <param name="rOffset">Routine offset</param>
+        /// <param name="sOffset">Static String OffSet</param>
         /// <returns></returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static int GetPackedAddress(this int @this, int version, int rOffset, int sOffset)
@@ -143,20 +143,28 @@ namespace Zmachine.Library.V2.Utilities
 
         }
 
-        public static ushort GetUShort(this InstructionOperands @this)
+        public static ushort GetUShort(this Operand @this)
         {
-            if (@this.operand.Length > 1)
-                return (ushort)(@this.operand[0] << 8 | @this.operand[1]);
+            if (@this.value.Length > 1)
+                return (ushort)(@this.value[0] << 8 | @this.value[1]);
             else
-                return (ushort)@this.operand[0];
+                return (ushort)@this.value[0];
         }
 
-        public static short GetShort(this InstructionOperands @this)
+        public static byte GetByte(this Operand @this)
         {
-            if (@this.operand.Length > 1)
-                return (short)(@this.operand[0] << 8 | @this.operand[1]);
+            if (@this.value.Length > 1)
+                throw new IndexOutOfRangeException("GetByte: Operand too big.");
             else
-                return (short)@this.operand[0];
+                return @this.value[0];
+        }
+
+        public static short GetShort(this Operand @this)
+        {
+            if (@this.value.Length > 1)
+                return (short)(@this.value[0] << 8 | @this.value[1]);
+            else
+                return (short)@this.value[0];
         }
 
         public static ushort GetUShort(this byte[] @this)
@@ -188,8 +196,31 @@ namespace Zmachine.Library.V2.Utilities
                     }
                     break;
                 case > 15 and <= 255: // Global
-                    var variable = (currentInstr.store - 15) * 2;
+                    var variable = (currentInstr.store - 16) * 2;
                     var resultArray = result.ToByteArray();
+                    Memory[globalVariables + variable] = resultArray[0];
+                    Memory[globalVariables + variable + 1] = resultArray[1];
+                    break;
+            }
+        }
+
+        public static void StoreSignedResult(byte[] Memory, Stack<ActivationRecord> stack, DecodedInstruction currentInstr, ushort globalVariables, short result)
+        {
+            switch (currentInstr.store)
+            {
+
+                case 0:             // Stack
+                    stack.Peek().localStack.Push((ushort)result);
+                    break;
+                case > 0 and < 16: // Local vars
+                    {
+                        var localVars = stack.Peek().Locals;
+                        localVars[currentInstr.store - 1] = (ushort)result;
+                    }
+                    break;
+                case > 15 and <= 255: // Global
+                    var variable = (currentInstr.store - 15) * 2;
+                    var resultArray = ((ushort)result).ToByteArray();
                     Memory[globalVariables + variable] = resultArray[0];
                     Memory[globalVariables + variable + 1] = resultArray[1];
                     break;
@@ -210,21 +241,21 @@ namespace Zmachine.Library.V2.Utilities
         public static ushort GetVariable(byte[] memory, ushort globalVars, ActivationRecord record, ushort variable) => variable switch
         {
             0 => record.localStack.Pop(), // Stack
-            >= 1 and <= 15 => record.Locals[variable],
+            >= 1 and <= 15 => record.Locals[variable-1],
             > 15 and <= 255 => // Global
                 (ushort)(memory[globalVars + ((variable - 15) * 2)] << 8 | memory[globalVars + ((variable - 15) * 2) + 1])
         };
 
 
-        public static ushort[] ConvertAttributes(this IEnumerable<byte> attributes)
+        public static byte[] ConvertAttributes(this IEnumerable<byte> attributes)
         {
             var bitArray = new BitArray(attributes.ToArray());
-            var assignedBits = new List<ushort>();
+            var assignedBits = new List<byte>();
             // To all intents and purposes the bitarry is backwards for us
             // Least significant bits to most l->r. 
             // Unlike when we eyeball it. msb->lsb.
             // so count backwards
-            ushort bitOrder = 0;
+            byte bitOrder = 0;
             for (var ctr = bitArray.Length - 1; ctr >= 0; --ctr)
             {
                 if (bitArray[ctr])

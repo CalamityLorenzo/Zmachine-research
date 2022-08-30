@@ -44,6 +44,7 @@
   <ItemGroup>
     <Content Include="Curses\curses_infodump.txt" />
     <Content Include="Curses\curses_txd.txt" />
+    <Content Include="HollyWoo\hollywoo_infodump.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
