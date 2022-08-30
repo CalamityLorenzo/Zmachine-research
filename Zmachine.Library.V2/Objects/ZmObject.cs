@@ -47,7 +47,6 @@ namespace Zmachine.Library.V2.Objects
 
     public class AttributesCollection : List<byte>
     {
-        
         public AttributesCollection(byte[] attributes)
         {
             this.AddRange(attributes.Reverse().ConvertAttributes());

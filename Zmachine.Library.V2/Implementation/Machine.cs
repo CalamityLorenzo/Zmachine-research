@@ -74,10 +74,10 @@ namespace Zmachine.Library.V2.Implementation
             {
                 this.CallStack.Push(new ActivationRecord
                 (
-                    returnAddress: -1,
-                    startAdress: this.ProgramCounter,
-                    locals: new ushort[0],
-                    false
+                    ReturnAddress: -1,
+                    StartAdress: this.ProgramCounter,
+                    Locals: new ushort[0],
+                    false, null
                 ));
             }
         }
@@ -152,6 +152,9 @@ namespace Zmachine.Library.V2.Implementation
                     case "jg":
                         Jg(currentInstr);
                         break;
+                    case "insert_obj":
+                        InsertObj(currentInstr);
+                        break;
                     case "jump":
                         Jump(currentInstr);
                         break;
@@ -172,6 +175,9 @@ namespace Zmachine.Library.V2.Implementation
                         break;
                     case "print":
                         Print(currentInstr);
+                        break;
+                    case "ret":
+                        Ret(currentInstr);
                         break;
                     case "aread":
                         ARead(currentInstr);
@@ -205,7 +211,7 @@ namespace Zmachine.Library.V2.Implementation
             {
 
                 case 0:             // Stack
-                    CallStack.Peek().localStack.Push(value);
+                    CallStack.Peek().LocalStack.Push(value);
                     break;
                 case > 0 and <= 15: // Local vars
                     {
@@ -216,7 +222,7 @@ namespace Zmachine.Library.V2.Implementation
                 case >= 16 and <= 255: // Global
                     // 6.2 Storage of global variables
                     // Convert the varible number into the memort off set from the global vars table.
-                    var variablePosition = (address - 15) * 2;
+                    var variablePosition = (address - 16) * 2;
                     var resultArray = value.ToByteArray();
                     var globalVariables = GameData[StoryHeader.GlobalVariables];
                     // they are words/

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Net.Mail;
 using System.Security;
 using Zmachine.Library.V2.Utilities;
@@ -184,6 +185,49 @@ namespace Zmachine.Library.V2.Objects
 
             var arrybits = attributes.Reverse().ToArray().ConvertAttributes();
             return objectDetails;
+        }
+
+        // Wehllllllll fuck.
+        // Having to update the object in memory.
+        internal void Insert_Obj(ushort O_objectId, ushort D_objectId)
+        {
+            var attrbFlagsLength = version > 3 ? 6 : 4;
+            // size of the Parent/Sibling/Child entry
+            var paSibChLength = version > 3 ? 6 : 3;
+
+            var D_StartAddress = ObjectTreeStart + ObjectSize * (D_objectId - 1);
+            var D_PaSibCh = D_StartAddress + attrbFlagsLength;
+            // Update the DChild Value = 
+            ushort D_Old_Child = 0;
+            if (version > 3)
+            {
+                D_Old_Child = (ushort)(this.memory[D_PaSibCh + 4] << 8 | this.memory[D_PaSibCh + 5]);
+                this.memory[D_PaSibCh + 4] = (byte)(O_objectId >> 8);
+                this.memory[D_PaSibCh + 5] = (byte)(O_objectId & 0b11111111);
+            }
+            else
+            {
+                D_Old_Child = this.memory[D_PaSibCh + 2];
+                this.memory[D_PaSibCh + 2] = (byte)O_objectId;
+            }
+
+            var O_StartAddress = ObjectTreeStart + ObjectSize * (D_objectId - 1);
+            var O_PaSibCh = O_StartAddress + attrbFlagsLength;
+
+            if (version > 3)
+            {
+                this.memory[O_PaSibCh] = (byte)(D_objectId >> 8);
+                this.memory[O_PaSibCh+1] = (byte)(D_objectId & 0b11111111);
+
+                this.memory[O_PaSibCh + 2] = (byte)(D_Old_Child >> 8);
+                this.memory[O_PaSibCh + 3] = (byte)(D_Old_Child & 0b11111111);
+            }
+            else
+            {
+                this.memory[O_PaSibCh] = (byte)D_objectId;
+                this.memory[O_PaSibCh + 1] = (byte)D_Old_Child;
+            }
+
         }
     }
 }

@@ -7,6 +7,10 @@
                                       , byte[] branch,
                                         int startAddress,
                                         int endAddress,
-                                        string hexBytes);
+                                        string hexBytes)
+    {
+        public string startAddressHex => this.startAddress.ToString("X4");
+        public string endAddressHex => this.startAddress.ToString("X4");
+    }
 
 }

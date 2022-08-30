@@ -12,9 +12,6 @@ namespace Zmachine.Library.V2.Implementation
     {
         internal void Add(DecodedInstruction instruct)
         {
-            var left = instruct.operands[0].GetUShort();
-            var right = instruct.operands[1].GetUShort();
-
             // Depending on the operand types depends if we have a value or pointer to a variable
             var lValue = GetVariableValue(instruct.operands[0]);
             var rValue = GetVariableValue(instruct.operands[1]);
@@ -71,7 +68,7 @@ namespace Zmachine.Library.V2.Implementation
 
                 this.CallStack.Push(new ActivationRecord(returnAddress, address,
                                           localVars.ToArray(),
-                                          true));
+                                          true, instruct.store));
             }
 
 
@@ -88,7 +85,7 @@ namespace Zmachine.Library.V2.Implementation
             // Create stackframe
             this.CallStack.Push(new ActivationRecord(returnAddress, address,
                                       new ushort[this.GameData[ProgramCounter]],
-                                true));
+                                true, instruct.store));
         }
 
         internal void Call_Vn(DecodedInstruction instruct)
@@ -117,6 +114,15 @@ namespace Zmachine.Library.V2.Implementation
             LibraryUtilities.StoreResult(GameData, CallStack, instruct, StoryHeader.GlobalVariables, result);
         }
 
+        internal void InsertObj(DecodedInstruction instruct)
+        {
+            var O_objectId = GetVariableValue(instruct.operands[0]);
+            var D_objectId = GetVariableValue(instruct.operands[1]);
+
+            this.ObjectTable.Insert_Obj(O_objectId, D_objectId);
+            
+        }
+        
         // Jump if a is equal to any of the subsequent operands
         internal void Je(DecodedInstruction instruct)
         {
@@ -221,6 +227,18 @@ namespace Zmachine.Library.V2.Implementation
             this.readInputText = "";
             //var record = instruct;
             this.IsReadingInstruction = true;
+        }
+
+        internal void Ret(DecodedInstruction instruct)
+        {
+            var valueToReturn = GetVariableValue(instruct.operands[0]);
+            var stackFrame = this.CallStack.Pop();
+            if (stackFrame.StoreResult)
+            {
+                StoreValue(stackFrame.StoreAddress ?? throw new ArgumentException("No Store Adress found in return call.")
+                    , valueToReturn);
+            }
+            this.ProgramCounter = stackFrame.ReturnAddress;
         }
 
         internal void Store(DecodedInstruction instruct)

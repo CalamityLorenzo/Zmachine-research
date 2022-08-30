@@ -76,8 +76,8 @@ namespace Zmachine.Library.V2
             // Variable Operands (1 byte)
             var operandInfo = new List<Operand>
             {
-                    new Operand( operand1Type,  GetOperandFromType(operand1Type, memory, ref address)),
-                    new Operand(operand2Type, GetOperandFromType(operand2Type, memory, ref address))
+               new Operand( operand1Type,  GetOperandFromType(operand1Type, memory, ref address)),
+               new Operand(operand2Type, GetOperandFromType(operand2Type, memory, ref address))
             }.ToArray();
 
             var instruction = instructions[$"2OP:{decimalInstruction}"];

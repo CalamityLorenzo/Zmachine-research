@@ -187,7 +187,7 @@ namespace Zmachine.Library.V2.Utilities
             {
 
                 case 0:             // Stack
-                    stack.Peek().localStack.Push(result);
+                    stack.Peek().LocalStack.Push(result);
                     break;
                 case > 0 and < 16: // Local vars
                     {
@@ -210,7 +210,7 @@ namespace Zmachine.Library.V2.Utilities
             {
 
                 case 0:             // Stack
-                    stack.Peek().localStack.Push((ushort)result);
+                    stack.Peek().LocalStack.Push((ushort)result);
                     break;
                 case > 0 and < 16: // Local vars
                     {
@@ -219,7 +219,7 @@ namespace Zmachine.Library.V2.Utilities
                     }
                     break;
                 case > 15 and <= 255: // Global
-                    var variable = (currentInstr.store - 15) * 2;
+                    var variable = (currentInstr.store - 16) * 2;
                     var resultArray = ((ushort)result).ToByteArray();
                     Memory[globalVariables + variable] = resultArray[0];
                     Memory[globalVariables + variable + 1] = resultArray[1];
@@ -240,10 +240,10 @@ namespace Zmachine.Library.V2.Utilities
 
         public static ushort GetVariable(byte[] memory, ushort globalVars, ActivationRecord record, ushort variable) => variable switch
         {
-            0 => record.localStack.Pop(), // Stack
+            0 => record.LocalStack.Pop(), // Stack
             >= 1 and <= 15 => record.Locals[variable-1],
             > 15 and <= 255 => // Global
-                (ushort)(memory[globalVars + ((variable - 15) * 2)] << 8 | memory[globalVars + ((variable - 15) * 2) + 1])
+                (ushort)(memory[globalVars + ((variable - 16) * 2)] << 8 | memory[globalVars + ((variable - 16) * 2) + 1])
         };
 
 
