@@ -34,10 +34,6 @@
         new MachineInstruction(Store:false, Branch:false,OpCode:"2OP:27", DecCode:27, Version:Five, Name:"set_colour"),
         new MachineInstruction(Store:false, Branch:false,OpCode:"2OP:27", DecCode:0, Version:SixAndUp, Name:"set_colour"),
         new MachineInstruction(Store:false, Branch:false,OpCode:"2OP:28", DecCode:28, Version:FiveAndUp, Name:"throw"),
-
-
-
-
         };
     }
 }
