@@ -185,5 +185,23 @@ namespace Zmachine.Library.V2
         public ZmObject GetObject(ushort objectIdx) => machine.ObjectTable[objectIdx];
 
         public ushort GetGlobalVariable(int globalVariableIdx) => machine.GlobalVariables[globalVariableIdx];
+
+        public void DumpGlobals()
+        {
+            for(var x = 0; x < 240; ++x)
+            {
+                Console.WriteLine(this.machine.GlobalVariables[x]);
+            }
+        }
+
+        public void SetGlobalVariable(int idx, ushort value)
+        {
+            this.machine.GlobalVariables[idx] = value;
+        }
+
+        public ushort GetGlobalVariable(int v1, int v2)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

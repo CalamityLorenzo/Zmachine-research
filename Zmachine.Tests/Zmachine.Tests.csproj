@@ -26,7 +26,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Curses\curses.z5">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Curses\hollywoo.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -34,7 +34,7 @@ namespace Zmachine.Tests
             fileStream.CopyTo(V5MemoryStream);
             V5MemoryStream.Position = 0;
             V5Memory = new byte[V5MemoryStream.Length];
-            V5MemoryStream.Read(V5Memory.AsSpan());
+            V5MemoryStream.Read(V5Memory, 0, V5Memory.Length);
 
          //   fileStream.Write(V5Memory.AsSpan());
 
@@ -42,9 +42,9 @@ namespace Zmachine.Tests
             Console.WriteLine($"==== {filename} ====");
             using var v3FileStream = File.Open(filename, FileMode.Open);
             v3FileStream.Position = 0;
-            var v3Length = fileStream.Length;
+            var v3Length = v3FileStream.Length;
             V3Memory = new byte[v3Length];
-            fileStream.Write(V3Memory.AsSpan());
+            v3FileStream.Read(V3Memory.AsSpan());
 
             this.inputStream0 = new MemoryStream();
             this.inputStream1 = new MemoryStream();
@@ -116,7 +116,7 @@ namespace Zmachine.Tests
         {
             ZmachineTools newTools = new(v5Machine);
 
-            var message = newTools.DecodeZChars(new byte[] { 17, 52, 79, 32, 122, 154, 3, 45, 58, 112, 3, 45, 42, 234, 3, 13, 83, 81, 36, 7, 40, 18, 82, 234, 2, 139, 3, 45, 27, 37, 212, 165 });
+            var message = newTools.DecodeZChars(new byte[] { 4, 13, 14, 24, 25, 20, 23, 30, 0, 20, 11, 0, 25, 13, 10, 0, 4, 18, 10, 17, 9, 23, 10, 28, 24, 0, 5, 30, 27, 20, 17, 5, 18, 0, 4, 14, 4, 14, 5, 31, 5, 5 });
             //var message = zmachineTools.DecodeText(new byte[] { 20, 193, 147 , 106});
             Console.WriteLine(message);
             Console.WriteLine("History of the Meldrews (vol. II)");
@@ -135,13 +135,14 @@ namespace Zmachine.Tests
             ZmachineTools newTools = new(v5Machine);
             //var message2 = zmachineTools.DecodeText(stringBuffer);
             var messageToEncode = "(£$%^&\"\r)";
+            messageToEncode = "History of the Meldrews (vol. II)";
             var encodedBytes = newTools.EncodeToZChars(messageToEncode);
             var message = newTools.DecodeZChars(encodedBytes);
             Console.WriteLine(message);
             Console.WriteLine(messageToEncode);
+            Console.WriteLine(String.Join(",", encodedBytes));
             Assert.IsTrue(messageToEncode == message);
         }
-
 
         [Test(Description = "String tests Encode words")]
         public void EncodeWords()
@@ -155,7 +156,7 @@ namespace Zmachine.Tests
             // Encode into words and then spit into byte array
             var encodedBytes = newTools.EncodeWords(zChars);
             // finally the text
-            var completeDecodedText = newTools.DecodeZChars(encodedBytes);
+            var completeDecodedText = newTools.DecodeEncodedText(encodedBytes);
 
             var i = 0;
             var decodedZChars = TextProcessor.GetZChars(encodedBytes, ref i);
@@ -173,7 +174,6 @@ namespace Zmachine.Tests
             Assert.IsTrue(messageToEncode == completeDecodedText);
         }
 
-
         [Test(Description = "V5 Object Table")]
         public void V5ObjectTable()
         {
@@ -183,7 +183,6 @@ namespace Zmachine.Tests
 
             Assert.IsTrue(true);
         }
-
 
         [Test(Description = "V3 Object Table")]
         public void V3ObjectTable()
@@ -199,14 +198,12 @@ namespace Zmachine.Tests
         {
             ZmachineTools newTools = new(v3Machine);
 
-
-
             // Get a ridiculous id for a v3
             Assert.Catch(typeof(ArgumentOutOfRangeException), new TestDelegate(() => newTools.GetObject(65535)));
 
 
             ZmObject v3Object22 = newTools.GetObject(22);
-            Assert.IsTrue(newTools.DecodeZChars(v3Object22.PropertyTable.shortNameBytes) == "indigo punch card");
+            Assert.IsTrue(newTools.DecodeEncodedText(v3Object22.PropertyTable.shortNameBytes) == "indigo punch card");
             Assert.IsTrue(Enumerable.SequenceEqual(v3Object22.Attributes, new List<byte> { 17, 21, 29 }));
             Assert.IsTrue(Enumerable.SequenceEqual(v3Object22.PropertyTable.properties[1].PropertyData, new byte[] { 0x42, 0x02, 0x42, 0x09 }));
             Assert.IsTrue(v3Object22.Parent == 223 &&
@@ -222,21 +219,53 @@ namespace Zmachine.Tests
             Assert.Catch(typeof(ArgumentOutOfRangeException), new TestDelegate(() => newTools.GetObject(65535)));
 
             ZmObject v5Object1 = newTools.GetObject(1);
-            Console.WriteLine(newTools.DecodeZChars(v5Object1.PropertyTable.shortNameBytes));
+            //Console.WriteLine(newTools.DecodeEncodedText(v5Object1.PropertyTable.shortNameBytes));
             Assert.IsNotNull(v5Object1);
             ZmObject v5Object21 = newTools.GetObject(21);
             Assert.IsTrue((v5Object21.Attributes[0] == 28 &&
                            v5Object21.Attributes[1] == 34));
-            Assert.IsTrue(newTools.DecodeZChars(v5Object21.PropertyTable.shortNameBytes) == "Husbandry");
+            Assert.IsTrue(newTools.DecodeEncodedText(v5Object21.PropertyTable.shortNameBytes) == "Husbandry");
             var propertyTable = v5Object21.PropertyTable.properties;
             Assert.IsTrue(propertyTable[0].Size == 2);
             Assert.IsTrue(propertyTable[0].propertyNumber == 35);
             Assert.IsTrue(Enumerable.SequenceEqual(propertyTable[0].PropertyData, new byte[] { 0xb6, 0xd8 }));
+        }
+        [Test(Description = "V5 Ouputs all the globals available")]
+        public void V5ConfirmGlobals()
+        {
+            ZmachineTools newTools = new(v5Machine);
+            newTools.DumpGlobals();
+            Assert.IsTrue(true);
+        }
 
-
+        [Test(Description = "V3 Ouputs all the globals available")]
+        public void V3ConfirmGlobals()
+        {
+            ZmachineTools newTools = new(v3Machine);
+            newTools.DumpGlobals();
+            Assert.IsTrue(true);
         }
 
 
+        [Test(Description = "V5 Sets a global variable to value and checks it.")]
+        public void V5SetGlobal()
+        {
+            ZmachineTools newTools = new(v5Machine);
+            newTools.SetGlobalVariable(0, 57);
+            var result =  newTools.GetGlobalVariable(0);
+            Assert.IsTrue(result == 57);
+            newTools.DumpGlobals();
+        }
+
+        [Test(Description = "V3 Sets a global variable to value and checks it.")]
+        public void V3SetGlobal()
+        {
+            ZmachineTools newTools = new(v3Machine);
+            newTools.SetGlobalVariable(37, 44);
+            var result = newTools.GetGlobalVariable(37);
+            Assert.IsTrue(result == 44);
+            newTools.DumpGlobals();
+        }
 
     }
 }
