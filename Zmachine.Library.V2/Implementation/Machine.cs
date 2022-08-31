@@ -28,6 +28,8 @@ namespace Zmachine.Library.V2.Implementation
         internal InstructionDecoder InstructionDecoder;
         internal Stack<ActivationRecord> CallStack = new Stack<ActivationRecord>();
         internal DecodedInstruction currentInstr;
+        internal GlobalVariables GlobalVariables;
+
         /// <summary>
         /// complete output from the read methods.
         /// </summary>
@@ -68,7 +70,7 @@ namespace Zmachine.Library.V2.Implementation
             this.TextDecoder = new TextProcessor(AbbreviationTable, StoryHeader.Version);
             this.ObjectTable = new ObjectTable(this.StoryHeader.ObjectTable, this.StoryHeader.Version, GameData);
             this.InstructionDecoder = new InstructionDecoder(LibraryUtilities.GetVersionInstructions(this.FeaturesVersion), StoryHeader.Version);
-
+            this.GlobalVariables = new(this.GameData, this.StoryHeader.GlobalVariables);
             this.ProgramCounter = LibraryUtilities.SetProgramCounterInitialValue(this.StoryHeader.Version, this.StoryHeader.ProgramCounterInitalValue, this.StoryHeader.RoutinesOffset);
             if (this.StoryHeader.Version <= 37)
             {

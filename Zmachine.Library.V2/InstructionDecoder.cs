@@ -128,7 +128,8 @@ namespace Zmachine.Library.V2
             var operandTypes = memory[address += 1];
 
             byte otherOperandTypes = 0;
-            //In the special case of the "double variable" VAR opcodes call_vs2 and call_vn2 (opcode numbers 12 and 26), a second byte of types is given, containing the types for the next four operands. 
+            // In the special case of the "double variable" VAR opcodes call_vs2 and call_vn2 (opcode numbers 12 and 26),
+            // a second byte of types is given, containing the types for the next four operands. 
             if (instruction.Name == "call_vn2" || instruction.Name == "call_vs2")
             {
                 otherOperandTypes = memory[address += 1];
