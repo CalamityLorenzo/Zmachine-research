@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Zmachine.Library.V2.Implementation;
+﻿using Zmachine.Library.V2.Implementation;
 using Zmachine.Library.V2.Objects;
 
 namespace Zmachine.Library.V2
@@ -11,14 +6,11 @@ namespace Zmachine.Library.V2
     public class ZmachineTools
     {
         private readonly Machine machine;
-
         public ZmachineTools(Machine machine)
         {
             // This machine must already be prepped.
             this.machine = machine;
         }
-
-
         public void DumpDictionary()
         {
             for (var x = 0; x < this.machine.DictionaryTable.Length; ++x)
@@ -28,7 +20,6 @@ namespace Zmachine.Library.V2
                 Console.WriteLine(machine.TextDecoder.DecodeDictionaryEntry(dictionaryBytes));
             }
         }
-
         public void DumpAbbreviations()
         {
             for (var x = 0; x < machine.AbbreviationTable.Length; ++x)
@@ -38,7 +29,6 @@ namespace Zmachine.Library.V2
                 Console.WriteLine($"{x}\t:\t'{machine.TextDecoder.DecodeAbbreviationEntry(abbreviationAddress, machine.GameData)}'");
             }
         }
-
         public void DumpObjects()
         {
             Console.WriteLine($"Total Objects : {machine.ObjectTable.TotalObjects}");
@@ -58,7 +48,6 @@ namespace Zmachine.Library.V2
                 Console.WriteLine($"Parent:{obj.Parent}");
             }
         }
-
         public void DumpHeader()
         {
             {
@@ -132,6 +121,13 @@ namespace Zmachine.Library.V2
             }
 
         }
+        public void DumpGlobals()
+        {
+            for(var x = 0; x < 240; ++x)
+            {
+                Console.WriteLine(this.machine.GlobalVariables[x]);
+            }
+        }
 
         /// <summary>
         /// Takes game encoded bytes finds the zchars and retursn the text
@@ -184,24 +180,16 @@ namespace Zmachine.Library.V2
         /// <returns></returns>
         public ZmObject GetObject(ushort objectIdx) => machine.ObjectTable[objectIdx];
 
+        // fetches a global variale value.
         public ushort GetGlobalVariable(int globalVariableIdx) => machine.GlobalVariables[globalVariableIdx];
-
-        public void DumpGlobals()
-        {
-            for(var x = 0; x < 240; ++x)
-            {
-                Console.WriteLine(this.machine.GlobalVariables[x]);
-            }
-        }
-
+        /// <summary>
+        /// Sets a global variable in the current story
+        /// </summary>
+        /// <param name="idx"></param>
+        /// <param name="value"></param>
         public void SetGlobalVariable(int idx, ushort value)
         {
             this.machine.GlobalVariables[idx] = value;
-        }
-
-        public ushort GetGlobalVariable(int v1, int v2)
-        {
-            throw new NotImplementedException();
         }
     }
 }
