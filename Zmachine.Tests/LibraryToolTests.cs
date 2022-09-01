@@ -82,7 +82,6 @@ namespace Zmachine.Tests
             Assert.Pass("Passed!");
         }
 
-
         [Test(Description = "V5 Display all the abbreviations")]
         public void V5AbbreviationTable()
         {
@@ -246,7 +245,6 @@ namespace Zmachine.Tests
             Assert.IsTrue(true);
         }
 
-
         [Test(Description = "V5 Sets a global variable to value and checks it.")]
         public void V5SetGlobal()
         {
@@ -266,6 +264,5 @@ namespace Zmachine.Tests
             Assert.IsTrue(result == 44);
             newTools.DumpGlobals();
         }
-
     }
 }

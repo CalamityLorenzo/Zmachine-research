@@ -18,6 +18,16 @@ namespace Zmachine.Library.V2
             this.machine = machine;
         }
 
+        public void Update()
+        {
+            this.machine.Update();
+        }
+
+        public void PeekNextCommand()
+        {
+            
+        }
+
 
         public void DumpDictionary()
         {
