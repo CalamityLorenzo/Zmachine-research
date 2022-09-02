@@ -6,11 +6,16 @@ namespace Zmachine.Library.V2
     public class ZmachineTools
     {
         private readonly Machine machine;
+        private int routineStartPC;
+        private int routineEndAddress;
+        private byte[] oldRoutineData;
+
         public ZmachineTools(Machine machine)
         {
             // This machine must already be prepped.
             this.machine = machine;
         }
+
         public void DumpDictionary()
         {
             for (var x = 0; x < this.machine.DictionaryTable.Length; ++x)
@@ -123,10 +128,32 @@ namespace Zmachine.Library.V2
         }
         public void DumpGlobals()
         {
-            for(var x = 0; x < 240; ++x)
+            for (var x = 0; x < 240; ++x)
             {
                 Console.WriteLine(this.machine.GlobalVariables[x]);
             }
+        }
+
+        public void Update()
+        {
+            machine.Update();
+        }
+
+        public void RunRoutine(byte[] routine)
+        {
+            if (routine[0] < 0 || routine[0] > 15) throw new ArgumentException("first byte msut be local variables");
+
+            // Take stock of the current PC
+            this.routineStartPC = machine.ProgramCounter;
+            this.routineEndAddress = machine.ProgramCounter + routine.Length;
+            // Copy out and store a chunk of data the same size as the injected
+            this.oldRoutineData = machine.GameData[machine.ProgramCounter..(machine.ProgramCounter + routine.Length)];
+            // Copy in our new routine.
+            var routineHome = machine.GameData[machine.ProgramCounter..(machine.ProgramCounter + routine.Length)].AsSpan();
+            routine.CopyTo(routineHome);
+            // Ensure the PC is at the estaz first entry.
+            // Begin.
+            this.Update();
         }
 
         /// <summary>
@@ -180,8 +207,13 @@ namespace Zmachine.Library.V2
         /// <returns></returns>
         public ZmObject GetObject(ushort objectIdx) => machine.ObjectTable[objectIdx];
 
-        // fetches a global variale value.
+        /// <summary>
+        /// fetches a global variale value.
+        /// </summary>
+        /// <param name="globalVariableIdx"></param>
+        /// <returns></returns>
         public ushort GetGlobalVariable(int globalVariableIdx) => machine.GlobalVariables[globalVariableIdx];
+
         /// <summary>
         /// Sets a global variable in the current story
         /// </summary>
@@ -191,5 +223,6 @@ namespace Zmachine.Library.V2
         {
             this.machine.GlobalVariables[idx] = value;
         }
+
     }
 }
