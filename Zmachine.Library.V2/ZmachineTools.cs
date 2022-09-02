@@ -144,13 +144,28 @@ namespace Zmachine.Library.V2
             if (routine[0] < 0 || routine[0] > 15) throw new ArgumentException("first byte msut be local variables");
 
             // Take stock of the current PC
+            // THe first command we actually run is the call or call_1n (version dependent)
+            // starting the routine at the current position, creates a new stack everything is neat and ordinary.
+            var routineHeader = new byte[]
+            {
+                // Routine start (no local variables
+                0x8f, 00,1, // call_1n x x (4)
+                0xb0,       // return true
+                // Routine end\
+            };
+            var completeRoutineLength = routineHeader.Length + routine.Length;
+            var completeRoutine = new byte[completeRoutineLength];
+
+            routineHeader.CopyTo(completeRoutine, 0);
+            routine.CopyTo(completeRoutine, routineHeader.Length);
+
             this.routineStartPC = machine.ProgramCounter;
-            this.routineEndAddress = machine.ProgramCounter + routine.Length;
+            this.routineEndAddress = machine.ProgramCounter + completeRoutineLength;
             // Copy out and store a chunk of data the same size as the injected
-            this.oldRoutineData = machine.GameData[machine.ProgramCounter..(machine.ProgramCounter + routine.Length)];
+            this.oldRoutineData = machine.GameData[machine.ProgramCounter..(machine.ProgramCounter + completeRoutineLength)];
             // Copy in our new routine.
-            var routineHome = machine.GameData[machine.ProgramCounter..(machine.ProgramCounter + routine.Length)].AsSpan();
-            routine.CopyTo(routineHome);
+            var routineHome = machine.GameData[machine.ProgramCounter..(machine.ProgramCounter + completeRoutineLength)].AsSpan();
+            completeRoutine.CopyTo(routineHome);
             // Ensure the PC is at the estaz first entry.
             // Begin.
             this.Update();
