@@ -1,5 +1,6 @@
 ﻿using Zmachine.Library.V2.Implementation;
 using Zmachine.Library.V2.Objects;
+using Zmachine.Library.V2.Utilities;
 
 namespace Zmachine.Library.V2
 {
@@ -134,7 +135,7 @@ namespace Zmachine.Library.V2
             }
         }
 
-        public void Update()
+        public void Step()
         {
             machine.Update();
         }
@@ -149,26 +150,64 @@ namespace Zmachine.Library.V2
             var routineHeader = new byte[]
             {
                 // Routine start (no local variables
-                0x8f, 00,1, // call_1n x x (4)
+                0x8f, 00, 00, // call_1n x x (4) V 
                 0xb0,       // return true
                 // Routine end\
             };
+
+            this.routineStartPC = machine.ProgramCounter;
+            // replace the address bytes (1, 2) with the correct value from the current program counter
+            var callAddress = routineStartPC + 4;
+            // Ensure the address is actually an addressable address
+            var version = machine.StoryHeader.Version;
+            // can it be divided by 2/4/8
+            var offsetBytes = callAddress % ((version <= 3) ? 2 :
+                                                    version <= 7 ? 4 :
+                                                    version <= 8 ? 8 : -1);
+
+            if (offsetBytes > 0)
+            {
+                // add padding to address
+                callAddress += offsetBytes;
+                // and to array.
+                var r2 = new byte[offsetBytes + routine.Length];
+                routine.CopyTo(r2, offsetBytes);
+                routine = r2;
+            }
+
+
             var completeRoutineLength = routineHeader.Length + routine.Length;
             var completeRoutine = new byte[completeRoutineLength];
 
             routineHeader.CopyTo(completeRoutine, 0);
             routine.CopyTo(completeRoutine, routineHeader.Length);
 
-            this.routineStartPC = machine.ProgramCounter;
+
+            if (version <= 3)
+                callAddress = callAddress / 2;
+            else if (version <= 5)
+                callAddress = callAddress / 4;
+            else if (version <= 7)
+                callAddress = (callAddress - this.machine.StoryHeader.RoutinesOffset) / 4;
+            else if (version <= 8)
+                callAddress = callAddress / 8;
+
+            byte[] getBytes = ((ushort)callAddress).ToByteArray();
+            completeRoutine[1] = getBytes[0];
+            completeRoutine[2] = getBytes[1];
+
             this.routineEndAddress = machine.ProgramCounter + completeRoutineLength;
             // Copy out and store a chunk of data the same size as the injected
-            this.oldRoutineData = machine.GameData[machine.ProgramCounter..(machine.ProgramCounter + completeRoutineLength)];
+            Span<byte> bytes = machine.GameData;
+            var routineSlice = bytes.Slice(machine.ProgramCounter, completeRoutineLength);
+            this.oldRoutineData = new byte[routineSlice.Length];
+            // Copy out the original
+            routineSlice.CopyTo(oldRoutineData);
             // Copy in our new routine.
-            var routineHome = machine.GameData[machine.ProgramCounter..(machine.ProgramCounter + completeRoutineLength)].AsSpan();
-            completeRoutine.CopyTo(routineHome);
-            // Ensure the PC is at the estaz first entry.
-            // Begin.
-            this.Update();
+            completeRoutine.CopyTo(routineSlice);
+
+            // Begin the call
+            this.Step();
         }
 
         /// <summary>

@@ -85,13 +85,12 @@ namespace Zmachine.Library.V2.Implementation
             // Create stackframe
             this.CallStack.Push(new ActivationRecord(returnAddress, address,
                                       new ushort[this.GameData[ProgramCounter]],
-                                true, instruct.store));
+                                false, instruct.store));
         }
 
         internal void Call_Vn(DecodedInstruction instruct)
         {
             Call(instruct);
-
             var stackFrame = this.CallStack.Pop();
             stackFrame = stackFrame with { StoreResult = false };
             this.CallStack.Push(stackFrame);
@@ -127,7 +126,6 @@ namespace Zmachine.Library.V2.Implementation
         internal void Je(DecodedInstruction instruct)
         {
             var comparitor = GetVariableValue(instruct.operands[0]);
-
             //var comparitor = instruct.operands[0].operandType;
             for (var x = 0; x < instruct.operands.Length - 1; ++x)
             {

@@ -15,7 +15,7 @@ namespace Zmachine.Tests
     {
         byte[] V3Memory;
         byte[] V5Memory;
-        private MemoryStream inputStream0, inputStream1, ouputStream;
+        private MemoryStream inputStream0, inputStream1, outputStream;
         private MemoryStream outputTranscript;
         private Machine v5Machine;
         private Machine v3Machine;
@@ -48,11 +48,11 @@ namespace Zmachine.Tests
 
             this.inputStream0 = new MemoryStream();
             this.inputStream1 = new MemoryStream();
-            this.ouputStream = new MemoryStream();
+            this.outputStream = new MemoryStream();
             this.outputTranscript = new MemoryStream();
 
-            this.v3Machine = new Machine(inputStream0, inputStream1, ouputStream, outputTranscript, V3Memory);
-            this.v5Machine = new Machine(inputStream0, inputStream1, ouputStream, outputTranscript, V5Memory);
+            this.v3Machine = new Machine(inputStream0, inputStream1, outputStream, outputTranscript, V3Memory);
+            this.v5Machine = new Machine(inputStream0, inputStream1, outputStream, outputTranscript, V5Memory);
 
         }
 
@@ -271,7 +271,7 @@ namespace Zmachine.Tests
             var routine = new byte[]
             {
                 // Routine start
-                3,              // local variables
+                3,           // local variables
                 0xb2, 18,42,103,0,25,41,3,20,73,64,79,82,29,87,96,180,148,229,  //Print a big fat string.
                 0xbb,
                 0xb2, 17,83,101,87,1,110,95,25,2,122,72,234,92,189,148,229,    // More groovy strings
@@ -291,7 +291,15 @@ namespace Zmachine.Tests
 
             ZmachineTools newTools = new(v5Machine);
             newTools.RunRoutine(routine);
-            
+            newTools.Step();
+            newTools.Step();
+
+            if(this.outputStream.Length > 0)
+            {
+                using var sr = new StreamReader(outputStream);
+                var x = sr.ReadToEnd();
+                Console.WriteLine(x);
+            }
         }
     }
 }
