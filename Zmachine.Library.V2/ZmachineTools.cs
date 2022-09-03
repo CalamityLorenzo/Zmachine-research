@@ -161,17 +161,19 @@ namespace Zmachine.Library.V2
             // Ensure the address is actually an addressable address
             var version = machine.StoryHeader.Version;
             // can it be divided by 2/4/8
-            var offsetBytes = callAddress % ((version <= 3) ? 2 :
+            var versionRange = ((version <= 3) ? 2 :
                                                     version <= 7 ? 4 :
                                                     version <= 8 ? 8 : -1);
+            var modOffset = callAddress % versionRange;
 
-            if (offsetBytes > 0)
+            if (modOffset > 0)
             {
+                var offSetBytes = versionRange - modOffset;
                 // add padding to address
-                callAddress += offsetBytes;
+                callAddress += offSetBytes;
                 // and to array.
-                var r2 = new byte[offsetBytes + routine.Length];
-                routine.CopyTo(r2, offsetBytes);
+                var r2 = new byte[offSetBytes + routine.Length];
+                routine.CopyTo(r2, offSetBytes);
                 routine = r2;
             }
 
@@ -278,5 +280,6 @@ namespace Zmachine.Library.V2
             this.machine.GlobalVariables[idx] = value;
         }
 
+        public Stack<ActivationRecord> GetStack() => this.machine.CallStack;
     }
 }
