@@ -140,32 +140,46 @@ namespace Zmachine.Library.V2
             machine.Update();
         }
 
+        /// <summary>
+        /// Allows you to inject a routine and run it at your leisure.
+        /// Will utterly break the game currently.
+        /// </summary>
+        /// <param name="routine"></param>
+        /// <exception cref="ArgumentException"></exception>
         public void RunRoutine(byte[] routine)
         {
             if (routine[0] < 0 || routine[0] > 15) throw new ArgumentException("first byte msut be local variables");
 
+            // Ensure the address is actually an addressable address
+            var version = machine.StoryHeader.Version;
+
             // Take stock of the current PC
             // THe first command we actually run is the call or call_1n (version dependent)
             // starting the routine at the current position, creates a new stack everything is neat and ordinary.
-            var routineHeader = new byte[]
+            // Diffrent versions of call depending on version...obvs.
+            var routineHeader = version<=3 ? new byte[]
             {
-                // Routine start (no local variables
+                // Call 1 large constant
+                0xe0, 63, 00, 00, // call_1n x x (4) V 
+                0xb0,       // return true
+                // Routine end\
+            }:new byte[]
+            {
+                // call
                 0x8f, 00, 00, // call_1n x x (4) V 
                 0xb0,       // return true
                 // Routine end\
             };
 
             this.routineStartPC = machine.ProgramCounter;
-            // replace the address bytes (1, 2) with the correct value from the current program counter
-            var callAddress = routineStartPC + 4;
-            // Ensure the address is actually an addressable address
-            var version = machine.StoryHeader.Version;
+            // work out the actual call address we need to apply.
+            var callAddress = routineStartPC + routineHeader.Length;
             // can it be divided by 2/4/8
             var versionRange = ((version <= 3) ? 2 :
                                                     version <= 7 ? 4 :
                                                     version <= 8 ? 8 : -1);
             var modOffset = callAddress % versionRange;
-
+            // Adjust callAddress to fit in to the version packed address model
             if (modOffset > 0)
             {
                 var offSetBytes = versionRange - modOffset;
@@ -195,8 +209,12 @@ namespace Zmachine.Library.V2
                 callAddress = callAddress / 8;
 
             byte[] getBytes = ((ushort)callAddress).ToByteArray();
-            completeRoutine[1] = getBytes[0];
-            completeRoutine[2] = getBytes[1];
+            // The two different bootstrap byte arrays use two differeing call methods.
+            // the v3< has an extra byte to descrive the operands (63)
+            // So when we patch in the correct address to jump to, the position is 1 byte differnt in the v3 verion
+            var versionOffset = version <= 3 ? 1 : 0;
+            completeRoutine[1+versionOffset] = getBytes[0];
+            completeRoutine[2+versionOffset] = getBytes[1];
 
             this.routineEndAddress = machine.ProgramCounter + completeRoutineLength;
             // Copy out and store a chunk of data the same size as the injected

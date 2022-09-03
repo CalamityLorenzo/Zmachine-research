@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Zmachine.Library.V2;
+﻿using Zmachine.Library.V2;
 using Zmachine.Library.V2.Implementation;
 using Zmachine.Library.V2.Objects;
-using ZMachineTools;
 
 namespace Zmachine.Tests
 {
@@ -282,7 +275,7 @@ namespace Zmachine.Tests
                 //0xbb,
                 0x0d, 01, 15,     // Store 15 lVar1
                 0x0d, 02, 05,     // Store 05 lVar2
-                0x74, 1, 2, 00,  // Add V, V -> sp
+                0x14, 1, 2, 00,  // Add V, V -> sp
                 
                 0x8c, 255,119,   // Jump, jump back around
                 0xb0,       // return true
@@ -301,7 +294,7 @@ namespace Zmachine.Tests
 
             Assert.IsTrue(callStack.Peek().LocalStack.Peek() == 3);
             Assert.IsTrue(callStack.Peek().Locals[0] == 15);
-            Assert.IsTrue(callStack.Peek().Locals[0] == 05);
+            Assert.IsTrue(callStack.Peek().Locals[1] == 05);
 
             if (this.outputStream.Length > 0)
             {
@@ -309,6 +302,54 @@ namespace Zmachine.Tests
                 using var sr = new StreamReader(outputStream);
                 var x = sr.ReadToEnd();
                 Console.WriteLine(x);
+                Assert.IsTrue("Lets add some numbers!\r".Equals(x));
+            }
+        }
+
+        [Test(Description = "3 Inject and run a custom routine.")]
+        public void V3RunCustomRoutine()
+        {
+            var routine = new byte[]
+            {
+                // Routine start
+                3,                // local variables
+                0,00,00,20,40,40, // local variables
+                0xb2, 18,42,103,0,25,41,3,20,73,64,79,82,29,87,96,180,148,229,  //Print a big fat string.,
+                0x0d, 01, 15,     // Store 15 lVar1
+                0x0d, 02, 05,     // Store 05 lVar2
+                0x14, 1, 2, 00,  // Add V, V -> sp
+                0xb0,       // return true
+            };
+
+
+            ZmachineTools newTools = new(v3Machine);
+            newTools.RunRoutine(routine);
+            newTools.Step();             // Print
+            var callStack = newTools.GetStack();
+            Assert.IsTrue(callStack.Peek().Locals[0] == 0);
+            Assert.IsTrue(callStack.Peek().Locals[2] == 10280);
+
+            newTools.Step();             // Store ->l1
+            newTools.Step();             // Store ->l2
+            newTools.Step();             // Add -> Sp
+
+            callStack = newTools.GetStack();
+
+            var callStackSize = callStack.Count;
+            Assert.IsTrue(callStack.Peek().LocalStack.Peek() == 3);
+            Assert.IsTrue(callStack.Peek().Locals[0] == 15);
+            Assert.IsTrue(callStack.Peek().Locals[1] == 05);
+
+            newTools.Step();              // return true
+            // Call stack is decremented.
+            Assert.IsTrue(callStackSize > newTools.GetStack().Count);
+            if (this.outputStream.Length > 0)
+            {
+                outputStream.Position = 0;
+                using var sr = new StreamReader(outputStream);
+                var x = sr.ReadToEnd();
+                Console.WriteLine(x);
+                Assert.IsTrue("Lets add some numbers!\r".Equals(x));
             }
         }
     }

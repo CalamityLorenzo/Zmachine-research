@@ -52,10 +52,13 @@ namespace Zmachine.Library.V2.Implementation
                 {
                     for (var x = 0; x < localVarCounts; ++x)
                     {
-                        var ushortSegment = this.GameData[ProgramCounter..(ProgramCounter + 1)];
+                        var ushortSegment = this.GameData[ProgramCounter..(ProgramCounter + 2)];
                         localVars.Add(LibraryUtilities.GetUShort(ushortSegment));
                         ProgramCounter += 2;
                     }
+                    // This is a hack  as the PC is in the correct place for a routine to contionue.
+                    // However we increment the PC at the end of the instruction routine.
+                    ProgramCounter -= 1;
                 }
 
                 // Okay so now we write the arguments
