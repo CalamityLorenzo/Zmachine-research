@@ -12,9 +12,9 @@ namespace Zmachine.Library.V2
         private readonly byte[] memory;
         private readonly ushort globalStartAddress;
 
-        public GlobalVariables(Span<byte> memory, ushort globalStartAddress)
+        public GlobalVariables(byte[] memory, ushort globalStartAddress)
         {
-            this.memory = memory.ToArray();
+            this.memory = memory;
             this.globalStartAddress = globalStartAddress;
         }
 
@@ -43,7 +43,8 @@ namespace Zmachine.Library.V2
         {
             if (idx < 0 || idx > 239) throw new ArgumentOutOfRangeException($"Index out of range {idx}");
             var globalVarAddress = globalStartAddress + (idx * 2);
-            return (ushort)(memory[globalVarAddress] << 8 | memory[globalVarAddress + 1]);
+            var result = (ushort)(memory[globalVarAddress] << 8 | memory[globalVarAddress + 1]);
+            return result;
         }
     }
 }

@@ -6,6 +6,7 @@ using ButtonState = Microsoft.Xna.Framework.Input.ButtonState;
 using Color = Microsoft.Xna.Framework.Color;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
 using Zmachine.Library.V2.Implementation;
+using Zmachine.Library.V2;
 
 namespace ZMachine.Monogame.V2
 {
@@ -22,6 +23,7 @@ namespace ZMachine.Monogame.V2
         private MemoryStream kboardStream = new();
 
         private Machine zMachine;
+        private ZmachineTools zMachineTools;
 
         public V2Game1()
         {
@@ -42,7 +44,7 @@ namespace ZMachine.Monogame.V2
 
             // TODO: Add your initialization logic here
             zMachine = new Machine(input0, input1, outputScreen, outputTranscript, spSpan.ToArray());
-
+            this.zMachineTools = new ZmachineTools(zMachine);
             base.Initialize();
         }
 
@@ -59,7 +61,8 @@ namespace ZMachine.Monogame.V2
                 Exit();
 
             // TODO: Add your update logic here
-            zMachine.Update();
+            //zMachine.Update();
+            zMachineTools.Step();
             base.Update(gameTime);
         }
 

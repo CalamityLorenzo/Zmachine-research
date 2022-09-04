@@ -154,6 +154,12 @@ namespace Zmachine.Library.V2.Implementation
                     case "jg":
                         Jg(currentInstr);
                         break;
+                    case "jl":
+                        Jl(currentInstr);
+                        break;
+                    case "jz":
+                        Jz(currentInstr);
+                        break;
                     case "insert_obj":
                         InsertObj(currentInstr);
                         break;
@@ -177,6 +183,9 @@ namespace Zmachine.Library.V2.Implementation
                         break;
                     case "print":
                         Print(currentInstr);
+                        break;
+                    case "print_addr":
+                        PrintAddr(currentInstr);
                         break;
                     case "ret":
                         Ret(currentInstr);
@@ -235,6 +244,10 @@ namespace Zmachine.Library.V2.Implementation
 
         }
 
+        private void Branch(ushort branchOffset)
+        {
+            this.ProgramCounter = ProgramCounter + (branchOffset +1) - 2;
+        }
 
         /// <summary>
         /// A read collects a command

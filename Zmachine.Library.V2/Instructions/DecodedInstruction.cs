@@ -4,7 +4,7 @@
     public record DecodedInstruction(MachineInstruction instruction
                                       , Operand[] operands
                                       , byte store
-                                      , byte[] branch,
+                                      , Branch branch,
                                         int startAddress,
                                         int endAddress,
                                         string hexBytes)

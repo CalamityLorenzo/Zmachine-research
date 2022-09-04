@@ -1,4 +1,5 @@
-﻿using Zmachine.Library.V2.Implementation;
+﻿using System.Diagnostics;
+using Zmachine.Library.V2.Implementation;
 using Zmachine.Library.V2.Objects;
 using Zmachine.Library.V2.Utilities;
 
@@ -138,6 +139,7 @@ namespace Zmachine.Library.V2
         public void Step()
         {
             machine.Update();
+            Debug.WriteLine(machine.currentInstr.ToString());
         }
 
         /// <summary>
@@ -299,5 +301,7 @@ namespace Zmachine.Library.V2
         }
 
         public Stack<ActivationRecord> GetStack() => this.machine.CallStack;
+
+        public byte GetMemoryLocation(ushort idx) => this.machine.GameData[idx];
     }
 }

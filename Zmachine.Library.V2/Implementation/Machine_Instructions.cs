@@ -43,23 +43,29 @@ namespace Zmachine.Library.V2.Implementation
                     routineArguments.Add(variableValue);
                 }
 
-                var localVars = new List<ushort>();
                 var localVarCounts = this.GameData[ProgramCounter++];
+                var localVars = new ushort[localVarCounts];
                 // this is version 1 to 4 That store the initial values for local vars in the header
                 // of a routine
                 // 6.4.4
-                if (StoryHeader.Version <= 4)
+                var version = StoryHeader.Version;
+                for (var x = 0; x < localVarCounts; ++x)
                 {
-                    for (var x = 0; x < localVarCounts; ++x)
+                    if (version <= 4)
                     {
                         var ushortSegment = this.GameData[ProgramCounter..(ProgramCounter + 2)];
-                        localVars.Add(LibraryUtilities.GetUShort(ushortSegment));
+                        localVars[x] = LibraryUtilities.GetUShort(ushortSegment);
                         ProgramCounter += 2;
                     }
-                    // This is a hack  as the PC is in the correct place for a routine to contionue.
-                    // However we increment the PC at the end of the instruction routine.
-                    ProgramCounter -= 1;
+                    else
+                    {
+                        localVars[x] = 0;
+                    }
                 }
+                // Dirty hack..We actually place the program counter in exactly the correct place.
+                // the start of the next command. However at the end of each turn/update we increment the program counter
+                // Thus it is now 1 byte off. This fixes that for earlier machines.
+                if (version <= 4) ProgramCounter -= 1;
 
                 // Okay so now we write the arguments
                 for (var x = 0; x < routineArguments.Count; ++x)
@@ -70,7 +76,7 @@ namespace Zmachine.Library.V2.Implementation
 
 
                 this.CallStack.Push(new ActivationRecord(returnAddress, address,
-                                          localVars.ToArray(),
+                                          localVars,
                                           true, instruct.store));
             }
 
@@ -122,9 +128,9 @@ namespace Zmachine.Library.V2.Implementation
             var D_objectId = GetVariableValue(instruct.operands[1]);
 
             this.ObjectTable.Insert_Obj(O_objectId, D_objectId);
-            
+
         }
-        
+
         // Jump if a is equal to any of the subsequent operands
         internal void Je(DecodedInstruction instruct)
         {
@@ -133,19 +139,38 @@ namespace Zmachine.Library.V2.Implementation
             for (var x = 0; x < instruct.operands.Length - 1; ++x)
             {
                 if (comparitor == instruct.operands[1].GetUShort())
-                    this.ProgramCounter = ProgramCounter + instruct.branch.GetUShort() - 2;
+                    this.Branch(instruct.branch.Offset);
             }
         }
 
         internal void Jg(DecodedInstruction instruct)
         {
             // Compairions are signed
-            var comparitor = instruct.operands[0].GetShort();
-            var comparison = instruct.operands[1].GetShort();
+            var comparitor = GetVariableValue(instruct.operands[0]);
+            var comparison = GetVariableValue(instruct.operands[1]);
             if (comparitor > comparison)
-                ProgramCounter = instruct.branch.GetUShort();
+                this.Branch(instruct.branch.Offset);
+
         }
 
+        internal void Jl(DecodedInstruction instruct)
+        {
+            // Compairions are signed
+            var comparitor = instruct.operands[0].GetShort();
+            var comparison = instruct.operands[1].GetShort();
+            if (comparitor < comparison)
+                    this.Branch(instruct.branch.Offset);
+        }
+
+        internal void Jz(DecodedInstruction instruct)
+        {
+            var val = GetVariableValue(instruct.operands[0]);
+
+            if (val == 0)
+            {
+                this.Branch(instruct.branch.Offset);
+            }
+        }
         internal void Jump(DecodedInstruction instruct)
         {
             // address are unsigned
@@ -162,7 +187,7 @@ namespace Zmachine.Library.V2.Implementation
 
             var data = GameData[array + idx];
 
-            LibraryUtilities.StoreResult(this.GameData, this.CallStack, instruct, this.StoryHeader.GlobalVariables, data );
+            LibraryUtilities.StoreResult(this.GameData, this.CallStack, instruct, this.StoryHeader.GlobalVariables, data);
         }
         internal void Mod(DecodedInstruction instruct)
         {
@@ -214,6 +239,18 @@ namespace Zmachine.Library.V2.Implementation
             sw.Close();
         }
 
+        internal void PrintAddr(DecodedInstruction instruct)
+        {
+            int memoryLocation= GetVariableValue(instruct.operands[0]);
+            
+
+            var chars = TextProcessor.GetZChars(this.GameData, ref memoryLocation);
+            var literal = this.TextDecoder.DecodeZChars(chars);
+            using StreamWriter sw = new StreamWriter(this.outputScreen, System.Text.Encoding.UTF8, bufferSize: literal.Length, leaveOpen: true);
+            sw.Write(literal);
+            sw.Close();
+        }
+
         internal void RTrue()
         {
             var record = this.CallStack.Pop();
@@ -253,7 +290,7 @@ namespace Zmachine.Library.V2.Implementation
 
         internal void StoreW(DecodedInstruction instruct)
         {
-            var array = GetVariableValue(instruct.operands[0]); 
+            var array = GetVariableValue(instruct.operands[0]);
             var idx = instruct.operands[1].GetUShort();
             var value = GetVariableValue(instruct.operands[2]);
 
@@ -280,7 +317,7 @@ namespace Zmachine.Library.V2.Implementation
 
             var obj = this.ObjectTable[objectId];
             if (obj.Attributes.Contains(attribute))
-                this.ProgramCounter = ((int)instruct.branch.GetUShort())
+                this.ProgramCounter = ((int)instruct.branch.Offset)
                         .GetPackedAddress(this.StoryHeader.Version, this.StoryHeader.RoutinesOffset, this.StoryHeader.StaticStringsOffset);
         }
     }

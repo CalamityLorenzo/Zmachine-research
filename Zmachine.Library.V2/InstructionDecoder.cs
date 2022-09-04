@@ -147,7 +147,7 @@ namespace Zmachine.Library.V2
             // remember we are not dealing with the offset at all here
             var branch = GetBranch(memory, ref address, instruction.Branch);
             var allBytes = GetHexAddressRange(instructionStartAddress, address, memory);
-            return new DecodedInstruction(instruction, operands.ToArray(), store, branch , instructionStartAddress, address, allBytes);
+            return new DecodedInstruction(instruction, operands.ToArray(), store, branch, instructionStartAddress, address, allBytes);
 
         }
 
@@ -215,7 +215,7 @@ namespace Zmachine.Library.V2
             return instrOperands;
         }
 
-        private byte[] GetBranch(byte[] memory, ref int address, bool hasBranch)
+        private Branch GetBranch(byte[] memory, ref int address, bool hasBranch)
         {
 
             if (hasBranch)
@@ -225,11 +225,16 @@ namespace Zmachine.Library.V2
                 var branchByte = memory[address += 1];
                 if ((branchByte >> 6 & 1) == 1) branch = new[] { branchByte };
                 else branch = new[] { branchByte, memory[address += 1] };
-                return branch;
+
+                Branch branchObj = new(branch, ((branchByte >> 7 & 1) == 1));
+
+                return branchObj;
             }
             else
             {
-                return new byte[0];
+                // So technicallly...techincally this is 'false' return, but we know in each instruction what we are storing/returning 
+                // so this is safe.
+                return Branch.Empty;
             }
 
         }
