@@ -21,6 +21,12 @@
     <ProjectReference Include="..\ZMachine.Monogame.Components\ZMachine.Monogame.Components.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="Content\cupcake.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\cupcake_small.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Curses\curses.z5">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

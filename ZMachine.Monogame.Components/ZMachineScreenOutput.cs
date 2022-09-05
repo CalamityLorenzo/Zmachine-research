@@ -27,25 +27,31 @@ namespace ZMachine.Monogame.Component
         private float HorizontalStart = 0;
         private float RowHeight = 0;
 
+        public int ScreenWidth { get; }
+        public int ScreenWidthChars { get; }
+
         private Vector2 OffSet = Vector2.Zero;
         private string statusLine;
-        private MemoryStream kboardStream;
 
-        public ZMachineScreenOutput(Game game, SpriteFont font, Color foreground, Color background, Vector2 startPosition, Stream input,  Stream output, Stream kboardStream) : base(game)
+        public ZMachineScreenOutput(Game game, SpriteFont font, Color foreground, Color background, Vector2 startPosition, Stream input, Stream output, Stream kboardStream) : base(game)
         {
             this.batch = new SpriteBatch(game.GraphicsDevice);
             this.font = font;
             this.foreground = foreground;
             this.background = background;
-            
-            
+
+
             // This is actually our input on the application output stream.
             this.output = output;
             currentLine = "";
             this.currentDrawingPosition = startPosition;
 
             this.HorizontalStart = startPosition.X;
-            this.RowHeight = font.MeasureString("W").Y + 2;
+            var fontMeasure = font.MeasureString("W");
+            this.RowHeight = fontMeasure.Y + 2;
+            this.ScreenWidth = game.GraphicsDevice.Adapter.CurrentDisplayMode.Width;
+            this.ScreenWidthChars = (int)Math.Abs( ScreenWidth / fontMeasure.X);
+
             this.backgroundDisplay = this.batch.CreateFilledRectTexture(this.ContentDimensions(), this.background);
             this.reverseBackground = this.batch.CreateFilledRectTexture(this.ContentDimensions(), this.foreground);
             // Notice this outputs into the read input stream.
@@ -88,6 +94,8 @@ namespace ZMachine.Monogame.Component
                     displayLines = streamLine.Split(new char[] { '\r' });
                     for (var x = 0; x < displayLines.Length; ++x)
                     {
+                        // Now we need to ensure all these lines fit on the screen.
+
                         // These all had new lines, and so go to the history table.
                         if (x < displayLines.Length - 1)
                         {
@@ -120,7 +128,7 @@ namespace ZMachine.Monogame.Component
         // +3 =1 Status line 2 lines after prompt
         public Rectangle ContentDimensions() => new Rectangle(0, 0, this.Game.Window.ClientBounds.Width, ((int)this.RowHeight * (this.history.Count + 5)));
 
-        
+
 
         public void DrawPanel(GameTime time)
         {
@@ -134,7 +142,7 @@ namespace ZMachine.Monogame.Component
             else
                 row = StartRow;
 
-            var cPosAccumulator = new Vector2(0,0);
+            var cPosAccumulator = new Vector2(0, 0);
             // Colour in the background 
             foreach (var lineData in history)
             {
@@ -146,7 +154,7 @@ namespace ZMachine.Monogame.Component
                 }
             }
 
-            textControl.SetPosition(new Vector2(HorizontalStart, cPosAccumulator.Y+row));
+            textControl.SetPosition(new Vector2(HorizontalStart, cPosAccumulator.Y + row));
 
             textControl.Draw(time);
 
