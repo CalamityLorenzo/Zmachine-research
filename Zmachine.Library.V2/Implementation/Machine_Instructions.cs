@@ -172,8 +172,9 @@ namespace Zmachine.Library.V2.Implementation
             var variableResult = (variableId switch
             {
                 00 => this.CallStack.Peek().LocalStack.Peek(),
-                >= 1 and <= 15 => this.CallStack.Peek().Locals[variableId],
-                >= 16 and <= 256 => this.GlobalVariables[variableId]
+                >= 1 and <= 15 => this.CallStack.Peek().Locals[variableId-1],
+                >= 15 and <= 255 => // Global
+    (ushort)(GameData[StoryHeader.GlobalVariables + ((variableId - 16) * 2)] << 8 | GameData[StoryHeader.GlobalVariables + ((variableId - 16) * 2) + 1])
             });
 
             variableResult++;
@@ -181,9 +182,10 @@ namespace Zmachine.Library.V2.Implementation
             if (variableId == 0)
             {
                 _ = this.CallStack.Peek().LocalStack.Pop();
+                this.CallStack.Peek().LocalStack.Push(variableResult);
             }
             else if (variableId >= 1 && variableId <= 15)
-                this.CallStack.Peek().Locals[variableId] = variableResult;
+                this.CallStack.Peek().Locals[variableId-1] = variableResult;
             else if (variableId >= 16 && variableId <= 256)
                 this.GlobalVariables[variableId] = variableResult;
 
@@ -243,7 +245,7 @@ namespace Zmachine.Library.V2.Implementation
         {
             // address are unsigned
             ushort offSet = GetVariableValue(instruct.operands[0]);
-            this.ProgramCounter = ProgramCounter + offSet - 2;
+            this.ProgramCounter = ProgramCounter + (short)offSet - 2;
         }
 
         //2OP:16 10 loadb array byte-index → (result)
@@ -265,9 +267,9 @@ namespace Zmachine.Library.V2.Implementation
             var array = GetVariableValue(instruct.operands[0]);
             var idx = GetVariableValue(instruct.operands[1]);
 
-            var data = GameData[array + 2 * idx];
+            var data = GameData.Get2ByteValue(array + 2 * idx);
 
-            LibraryUtilities.StoreResult(this.GameData, this.CallStack, instruct, this.StoryHeader.GlobalVariables, data);
+            StoreVariableValue(instruct.store, data);
         }
 
         internal void Mod(DecodedInstruction instruct)

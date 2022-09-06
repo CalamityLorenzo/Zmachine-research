@@ -325,7 +325,7 @@ namespace Zmachine.Library.V2.Implementation
             }
             else
             {
-                this.ProgramCounter = ProgramCounter + branchOffset - 2;
+                this.ProgramCounter = ProgramCounter + (short)branchOffset - 2;
             }
         }
 
