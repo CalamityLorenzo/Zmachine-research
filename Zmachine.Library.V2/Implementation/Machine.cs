@@ -202,6 +202,12 @@ namespace Zmachine.Library.V2.Implementation
                     case "print_num":
                         PrintNum(currentInstr);
                         break;
+                    case "print_ret":
+                        PrintRet(currentInstr);
+                        break;
+                    case "push":
+                        Push(currentInstr);
+                        break;
                     case "ret":
                         Ret(currentInstr);
                         break;
@@ -238,6 +244,19 @@ namespace Zmachine.Library.V2.Implementation
         }
 
 
+        private void SimpleReturn(ActivationRecord callingRecord, ushort value)
+        {
+            this.ProgramCounter = callingRecord.ReturnAddress;
+            if (callingRecord.StoreResult)
+            {
+                ushort? t = callingRecord.StoreAddress;
+                if (t.HasValue)
+                    StoreVariableValue(t.Value, value);
+                else throw new ArgumentOutOfRangeException("Cannot find Storage return address for call.");
+            }
+
+        }
+
         private void StoreVariableValue(ushort address, ushort value)
         {
             switch (address)
@@ -270,8 +289,8 @@ namespace Zmachine.Library.V2.Implementation
         {
             if (branchOffset == 0 || branchOffset == 1)
             {
-                var record = this.CallStack.Pop();
-                var callingRecord = this.CallStack.Peek();
+                var callingRecord = this.CallStack.Pop();
+                this.ProgramCounter = callingRecord.ReturnAddress;
                 if (callingRecord.StoreResult)
                 {
                     ushort? t = callingRecord.StoreAddress;
@@ -282,7 +301,7 @@ namespace Zmachine.Library.V2.Implementation
             }
             else
             {
-                this.ProgramCounter = 1 + ProgramCounter + branchOffset - 2;
+                this.ProgramCounter =ProgramCounter + branchOffset - 2;
             }
         }
 
