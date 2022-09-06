@@ -154,6 +154,9 @@ namespace Zmachine.Library.V2.Implementation
                     case "get_child":
                         GetChild(currentInstr);
                         break;
+                    case "get_prop":
+                        GetProp(currentInstr);
+                        break;
                     case "inc_chk":
                         IncChk(currentInstr);
                         break;
@@ -220,6 +223,9 @@ namespace Zmachine.Library.V2.Implementation
                     case "rfalse":
                         RFalse();
                         break;
+                    case "set_attr":
+                        SetAttr(currentInstr);
+                        break;
                     case "store":
                         Store(currentInstr);
                         break;
@@ -285,7 +291,7 @@ namespace Zmachine.Library.V2.Implementation
 
         }
 
-        private void Branch(ushort branchOffset)
+        private void Branch(short branchOffset)
         {
             if (branchOffset == 0 || branchOffset == 1)
             {
@@ -295,7 +301,7 @@ namespace Zmachine.Library.V2.Implementation
                 {
                     ushort? t = callingRecord.StoreAddress;
                     if (t.HasValue)
-                        StoreVariableValue(t.Value, branchOffset);
+                        StoreVariableValue(t.Value, (ushort)branchOffset);
                     else throw new ArgumentOutOfRangeException("Cannot find Storage return address for call.");
                 }
             }

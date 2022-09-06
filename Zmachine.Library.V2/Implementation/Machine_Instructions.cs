@@ -127,7 +127,16 @@ namespace Zmachine.Library.V2.Implementation
             var zObject = this.ObjectTable[objectId];
             this.StoreVariableValue(instruct.store, zObject.Parent);
         }
+        internal void GetProp(DecodedInstruction instruct)
+        {
+            var objectId = GetVariableValue(instruct.operands[0]);
+            var property = GetVariableValue(instruct.operands[1]);
 
+            var propertyData = this.ObjectTable.GetProperty(objectId, property);
+            var value = propertyData.GetUShort();
+
+            StoreVariableValue(instruct.store, value);
+        }
         internal void GetChild(DecodedInstruction instruct)
         {
             var objectId = GetVariableValue(instruct.operands[0]);
@@ -177,7 +186,7 @@ namespace Zmachine.Library.V2.Implementation
             //var comparitor = instruct.operands[0].operandType;
             for (var x = 0; x < instruct.operands.Length - 1; ++x)
             {
-                if (comparitor == GetVariableValue(instruct.operands[1]))
+                if (comparitor == GetVariableValue(instruct.operands[1]) && instruct.branch.BranchIfTrue)
                     this.Branch(instruct.branch.Offset);
             }
         }
@@ -187,7 +196,7 @@ namespace Zmachine.Library.V2.Implementation
             // Compairions are signed
             var comparitor = GetVariableValue(instruct.operands[0]);
             var comparison = GetVariableValue(instruct.operands[1]);
-            if (comparitor > comparison)
+            if ((comparitor > comparison) == instruct.branch.BranchIfTrue)
                 this.Branch(instruct.branch.Offset);
 
         }
@@ -197,7 +206,7 @@ namespace Zmachine.Library.V2.Implementation
             // Compairions are signed
             var comparitor = instruct.operands[0].GetShort();
             var comparison = instruct.operands[1].GetShort();
-            if (comparitor < comparison)
+            if ((comparitor < comparison) == instruct.branch.BranchIfTrue)
                 this.Branch(instruct.branch.Offset);
         }
 
@@ -205,7 +214,7 @@ namespace Zmachine.Library.V2.Implementation
         {
             var val = GetVariableValue(instruct.operands[0]);
 
-            if (val == 0)
+            if ((val == 0) == instruct.branch.BranchIfTrue)
             {
                 this.Branch(instruct.branch.Offset);
             }
@@ -312,19 +321,13 @@ namespace Zmachine.Library.V2.Implementation
 
         internal void PrintRet(DecodedInstruction instruct)
         {
-            string literal = "";
-            if (instruct.operands[0].operandType == OperandType.Omitted)
-            {
-                var chars = TextProcessor.GetZChars(this.GameData, ref ProgramCounter);
-                literal = this.TextDecoder.DecodeZChars(chars);
+            //string literal = "";
+            //if (instruct.operands[0].operandType == OperandType.Omitted)
+            //{
 
-            }
-            else
-            {
-                var chars = this.TextDecoder.GetZChars(instruct.operands[0].value);
-                literal = this.TextDecoder.DecodeZChars(chars);
-
-            }
+            var slice = this.GameData.AsSpan().Slice(start: instruct.startAddress + 1);
+            var achars = this.TextDecoder.GetZChars(slice.ToArray());
+            var literal = this.TextDecoder.DecodeZChars(achars);
             PrintToScreen(literal + '\r');
             SimpleReturn(CallStack.Pop(), 1);
         }
@@ -336,6 +339,14 @@ namespace Zmachine.Library.V2.Implementation
             CallStack.Peek().LocalStack.Push(value);
         }
 
+        internal void PutProp(DecodedInstruction instruct)
+        {
+            var objectId = GetVariableValue(instruct.operands[0]);
+            var property = GetVariableValue(instruct.operands[1]);
+            var value = GetVariableValue(instruct.operands[2]);
+            this.ObjectTable.SetProperty(objectId, property, value);
+
+        }
         internal void RTrue() => SimpleReturn(this.CallStack.Pop(), 1);
 
         internal void RFalse() => SimpleReturn(this.CallStack.Pop(), 0);
@@ -362,6 +373,13 @@ namespace Zmachine.Library.V2.Implementation
             this.ProgramCounter = stackFrame.ReturnAddress;
         }
 
+        internal void SetAttr(DecodedInstruction instruct)
+        {
+            var objectId = GetVariableValue(instruct.operands[0]);
+            var attribute = GetVariableValue(instruct.operands[1]);
+
+            this.ObjectTable.Set_Attribute(objectId, attribute);
+        }
         internal void Store(DecodedInstruction instruct)
         {
             // set the var(l) to value

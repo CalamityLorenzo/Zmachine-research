@@ -303,5 +303,7 @@ namespace Zmachine.Library.V2
         public Stack<ActivationRecord> GetStack() => this.machine.CallStack;
 
         public byte GetMemoryLocation(ushort idx) => this.machine.GameData[idx];
+
+        public byte[] GetMemoryRange(ushort start, ushort length) => this.machine.GameData[start..(start + length)];
     }
 }

@@ -1,4 +1,5 @@
-﻿using Zmachine.Library.V2.Instructions;
+﻿using System.Diagnostics;
+using Zmachine.Library.V2.Instructions;
 
 namespace Zmachine.Library.V2
 {
@@ -54,7 +55,7 @@ namespace Zmachine.Library.V2
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception : " + hexAddress);
+                Debug.WriteLine("Exception : " + hexAddress);
                 throw;
             }
 
@@ -105,7 +106,7 @@ namespace Zmachine.Library.V2
             // remember we are not dealing with the offset at all here
             var branch = GetBranch(memory, ref address, instruction.Branch);
 
-            if (instruction.Name == "print")
+            if (instruction.Name == "print" || instruction.Name == "print_ret")
             {
                 address += 1;
                 //address == 0xd5f1
