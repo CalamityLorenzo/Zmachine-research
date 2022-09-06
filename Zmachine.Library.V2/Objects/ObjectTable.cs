@@ -264,19 +264,30 @@ namespace Zmachine.Library.V2.Objects
 
 
         }
-        internal byte[] GetProperty(ushort objectId, ushort property)
+        internal ushort GetProperty(ushort objectId, ushort property)
         {
-            var propertyTableAddress = memory[this.GetObjectStartAddress(objectId) + paSibChLength + attrbFlagsLength];
+            var propertyTableAddress = memory.Get2ByteValue(this.GetObjectStartAddress(objectId) + paSibChLength + attrbFlagsLength);
 
             var objectPropertyTable = GetObjectPropertyTable(propertyTableAddress);
+            
+            
+            var obj = this.GetObject(objectId).PropertyTable;
+
             var getProperty = objectPropertyTable.properties.FirstOrDefault(a => a.propertyNumber == property);
             if (getProperty != null)
-                return getProperty.PropertyData;
+                return getProperty.PropertyData.GetUShort();
             else
             {
-
+                return this.PropertyDefaultsTable[property];
             }
-            return 
+            
+        }
+
+
+        internal ushort GetSibling(ushort objectId)
+        {
+            var obj= GetObject(objectId);
+            return obj.Sibling;
         }
 
         private int GetObjectStartAddress(ushort objectId)

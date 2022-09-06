@@ -13,7 +13,7 @@
         new MachineInstruction(Store:false, Branch:true,OpCode:"2OP:6", DecCode:6, Version:All, Name:"jin"),
         new MachineInstruction(Store:false, Branch:true,OpCode:"2OP:7", DecCode:7, Version:All, Name:"test"),
         new MachineInstruction(Store:true, Branch:false,OpCode:"2OP:8", DecCode:8, Version:All, Name:"or"),
-        new MachineInstruction(Store:true, Branch:false,OpCode:"2OP:9", DecCode:9, Version:All, Name:"add"),
+        new MachineInstruction(Store:true, Branch:false,OpCode:"2OP:9", DecCode:9, Version:All, Name:"and"),
         new MachineInstruction(Store:false, Branch:true,OpCode:"2OP:10", DecCode:10, Version:All, Name:"test_attr"),
         new MachineInstruction(Store:false, Branch:false,OpCode:"2OP:11", DecCode:11, Version:All, Name:"set_attr"),
         new MachineInstruction(Store:false, Branch:false,OpCode:"2OP:12", DecCode:12, Version:All, Name:"clear_attr"),

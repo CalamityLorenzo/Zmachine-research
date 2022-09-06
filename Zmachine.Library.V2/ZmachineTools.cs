@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using Zmachine.Library.V2.Implementation;
 using Zmachine.Library.V2.Objects;
 using Zmachine.Library.V2.Utilities;
@@ -140,6 +141,19 @@ namespace Zmachine.Library.V2
         {
             machine.Update();
             Debug.WriteLine(machine.currentInstr.ToString());
+            //if (machine.outputScreen.Length > 0)
+            //{
+            //    var pos = machine.outputScreen.Position;
+            //    machine.outputScreen.Position = 0;
+            //    using StreamReader sr = new StreamReader(machine.outputScreen, Encoding.UTF8, bufferSize: (int)machine.outputScreen.Length, leaveOpen: true);
+            //    var theChars = new char[machine.outputScreen.Length];
+            //    Span<char> sp = theChars;
+            //    sr.Read(sp);
+            //    sr.Close();
+            //    machine.outputScreen.Position = pos;
+            //    Debug.Print(new string(sp));
+            //}
+                
         }
 
         /// <summary>

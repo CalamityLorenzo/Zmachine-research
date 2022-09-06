@@ -369,5 +369,17 @@ namespace Zmachine.Tests
                 Assert.IsTrue("Lets add some numbers!\r".Equals(x));
             }
         }
+
+
+        [Test(Description = "v3 Print object property name")]
+        public void V3PrintObjectShortName()
+        {
+            ZmachineTools newTools = new(v3Machine);
+            var obj = newTools.GetObject(2);
+
+            var buytes = obj.PropertyTable.shortNameBytes;
+            var stri  = newTools.DecodeEncodedText(buytes);
+            Assert.IsTrue(true);
+        }
     }
 }
