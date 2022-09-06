@@ -216,10 +216,8 @@ namespace Zmachine.Library.V2.Implementation
             this.ProgramCounter = ProgramCounter + offSet - 2;
         }
 
-
         //2OP:16 10 loadb array byte-index → (result)
         // Stores array→_byte-index_(i.e., the byte at address array+byte-index, which must lie in static or dynamic memory).
-
         internal void LoadB(DecodedInstruction instruct)
         {
             var array = instruct.operands[0].GetUShort();
@@ -241,8 +239,6 @@ namespace Zmachine.Library.V2.Implementation
 
             LibraryUtilities.StoreResult(this.GameData, this.CallStack, instruct, this.StoryHeader.GlobalVariables, data);
         }
-
-
 
         internal void Mod(DecodedInstruction instruct)
         {
@@ -316,7 +312,6 @@ namespace Zmachine.Library.V2.Implementation
             sw.Close();
         }
 
-
         internal void RTrue()
         {
             var record = this.CallStack.Pop();
@@ -373,7 +368,6 @@ namespace Zmachine.Library.V2.Implementation
             // Store is NOT itself a store md.
             StoreVariableValue(left, right);
         }
-
         internal void StoreW(DecodedInstruction instruct)
         {
             var array = GetVariableValue(instruct.operands[0]);
@@ -383,7 +377,6 @@ namespace Zmachine.Library.V2.Implementation
             ushort address = (ushort)(array + (2 * idx));
             StoreVariableValue(address, value);
         }
-
         internal void Sub(DecodedInstruction instruct)
         {
             var left = GetVariableValue(instruct.operands[0]);
@@ -394,7 +387,6 @@ namespace Zmachine.Library.V2.Implementation
             short result = (short)(left - right);
             LibraryUtilities.StoreResult(GameData, CallStack, instruct, StoryHeader.GlobalVariables, (ushort)result);
         }
-
         internal void Test(DecodedInstruction instruct)
         {
             var bitMap = GetVariableValue(instruct.operands[0]);
