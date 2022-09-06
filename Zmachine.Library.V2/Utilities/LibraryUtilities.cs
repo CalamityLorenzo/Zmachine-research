@@ -250,7 +250,7 @@ namespace Zmachine.Library.V2.Utilities
         public static byte[] ConvertAttributes(this IEnumerable<byte> attributes)
         {
             var bitArray = new BitArray(attributes.ToArray());
-            var assignedBits = new List<byte>();
+                var assignedBits = new List<byte>();
             // To all intents and purposes the bitarry is backwards for us
             // Least significant bits to most l->r. 
             // Unlike when we eyeball it. msb->lsb.

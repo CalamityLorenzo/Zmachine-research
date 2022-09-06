@@ -112,8 +112,8 @@ namespace Zmachine.Library.V2.Implementation
         }
 
         private ushort GetVariableValue(Operand operand)
-        =>LibraryUtilities.GetOperandValue(GameData, StoryHeader.GlobalVariables, CallStack.Peek(), operand.operandType, operand.value.GetUShort());
-        
+        => LibraryUtilities.GetOperandValue(GameData, StoryHeader.GlobalVariables, CallStack.Peek(), operand.operandType, operand.value.GetUShort());
+
 
 
         public void Update()
@@ -148,6 +148,15 @@ namespace Zmachine.Library.V2.Implementation
                     case "div":
                         Div(currentInstr);
                         break;
+                    case "get_parent":
+                        GetParent(currentInstr);
+                        break;
+                    case "get_child":
+                        GetChild(currentInstr);
+                        break;
+                    case "inc_chk":
+                        IncChk(currentInstr);
+                        break;
                     case "je":
                         Je(currentInstr);
                         break;
@@ -169,6 +178,9 @@ namespace Zmachine.Library.V2.Implementation
                     case "loadb":
                         LoadB(currentInstr);
                         break;
+                    case "loadw":
+                        LoadW(currentInstr);
+                        break;
                     case "mod":
                         Mod(currentInstr);
                         break;
@@ -187,6 +199,9 @@ namespace Zmachine.Library.V2.Implementation
                     case "print_addr":
                         PrintAddr(currentInstr);
                         break;
+                    case "print_num":
+                        PrintNum(currentInstr);
+                        break;
                     case "ret":
                         Ret(currentInstr);
                         break;
@@ -195,6 +210,9 @@ namespace Zmachine.Library.V2.Implementation
                         break;
                     case "rtrue":
                         RTrue();
+                        break;
+                    case "rfalse":
+                        RFalse();
                         break;
                     case "store":
                         Store(currentInstr);
@@ -205,7 +223,11 @@ namespace Zmachine.Library.V2.Implementation
                     case "sub":
                         Sub(currentInstr);
                         break;
-                    case "test_attr": Test_Atr(currentInstr);
+                    case "test":
+                        Test(currentInstr);
+                        break;
+                    case "test_attr":
+                        Test_Attr(currentInstr);
                         break;
                     default:
                         Debug.WriteLine(currentInstr.instruction.Name);
@@ -216,7 +238,7 @@ namespace Zmachine.Library.V2.Implementation
         }
 
 
-        private void StoreValue(ushort address, ushort value)
+        private void StoreVariableValue(ushort address, ushort value)
         {
             switch (address)
             {
@@ -227,7 +249,7 @@ namespace Zmachine.Library.V2.Implementation
                 case > 0 and <= 15: // Local vars
                     {
                         var localVars = CallStack.Peek().Locals;
-                        localVars[address-1] = value;
+                        localVars[address - 1] = value;
                     }
                     break;
                 case >= 16 and <= 255: // Global
@@ -246,7 +268,22 @@ namespace Zmachine.Library.V2.Implementation
 
         private void Branch(ushort branchOffset)
         {
-            this.ProgramCounter = ProgramCounter + (branchOffset +1) - 2;
+            if (branchOffset == 0 || branchOffset == 1)
+            {
+                var record = this.CallStack.Pop();
+                var callingRecord = this.CallStack.Peek();
+                if (callingRecord.StoreResult)
+                {
+                    ushort? t = callingRecord.StoreAddress;
+                    if (t.HasValue)
+                        StoreVariableValue(t.Value, branchOffset);
+                    else throw new ArgumentOutOfRangeException("Cannot find Storage return address for call.");
+                }
+            }
+            else
+            {
+                this.ProgramCounter = 1 + ProgramCounter + branchOffset - 2;
+            }
         }
 
         /// <summary>

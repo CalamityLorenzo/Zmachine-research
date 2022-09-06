@@ -438,6 +438,35 @@ namespace Zmachine.Tests
             Assert.IsTrue(glob == 60);
         }
 
+        [Test(Description = "V5 Add two numbers and put on the result on the stack")]
+        public void V5SubNumbersStack()
+        {
+
+            var routine = new byte[]
+           {
+                // Routine start
+                1,                // local variables
+                0x15, 90, 80, 00,  // sub S,S-> sp
+                0x35, 90, 00, 01,  // sub S,S-> sp
+                0x55, 01, 20, 16,  // sub V,S-> sp
+                0xb0,       // return true
+           };
+
+            ZmachineTools newTools = new(V5Machine);
+            newTools.RunRoutine(routine);
+            newTools.Step();             // Sub
+            var stack = newTools.GetStack();
+            Assert.IsTrue(stack.Peek().LocalStack.Peek() == 10);
+            newTools.Step();             // Sub
+            stack = newTools.GetStack();
+            Assert.IsTrue(stack.Peek().Locals[0] == 80);
+            newTools.Step();             // Sub
+            stack = newTools.GetStack();
+            var s = (newTools.GetMemoryLocation(8866) << 8 | newTools.GetMemoryLocation(8867));
+            var glob = newTools.GetGlobalVariable(16 - 16);
+            Assert.IsTrue(glob == 60);
+        }
+
         #endregion
     }
 }
