@@ -30,7 +30,7 @@
             else if (branchValue.Length == 1)
                 this.Offset = (ushort) (branchValue[0] & 0b00111111); 
             else
-                this.Offset = (ushort)( branchValue[0] & 0b11111 | branchValue[1]);
+                this.Offset = (ushort)( (branchValue[0] & 0b11111) << 8 | branchValue[1]);
             BranchIfTrue = branchIfTrue;
         }
     }
