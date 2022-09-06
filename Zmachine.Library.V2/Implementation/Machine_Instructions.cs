@@ -24,6 +24,7 @@ namespace Zmachine.Library.V2.Implementation
         /// <param name="instruct"></param>
         internal void Call(DecodedInstruction instruct)
         {
+
             var address = (instruct.operands[0].value[0] << 8 | instruct.operands[0].value[1])
                                         .GetPackedAddress(StoryHeader.Version, 0, 0);
             if (address == 0)
@@ -36,19 +37,20 @@ namespace Zmachine.Library.V2.Implementation
                 List<ushort> routineArguments = new List<ushort>();
                 for (var x = 1; x < instruct.operands.Length; ++x)
                 {
-                    var opVal = instruct.operands[x].GetUShort();
+                    //var opVal = instruct.operands[x].GetUShort();
                     var variableValue = GetVariableValue(instruct.operands[x]);
                     routineArguments.Add(variableValue);
                 }
-
+                // Local variables counted and created
                 var localVarCounts = this.GameData[ProgramCounter++];
                 var localVars = new ushort[localVarCounts];
-                // this is version 1 to 4 That store the initial values for local vars in the header
-                // of a routine
-                // 6.4.4
+
                 var version = StoryHeader.Version;
                 for (var x = 0; x < localVarCounts; ++x)
                 {
+                    // this is version 1 to 4 That store the initial values for local vars in the header
+                    // of a routine
+                    // 6.4.4
                     if (version <= 4)
                     {
                         var ushortSegment = this.GameData[ProgramCounter..(ProgramCounter + 2)];
@@ -56,10 +58,11 @@ namespace Zmachine.Library.V2.Implementation
                         ProgramCounter += 2;
                     }
                     else
-                    {
+                    {  // v5+ everything is0
                         localVars[x] = 0;
                     }
                 }
+
                 // Dirty hack..We actually place the program counter in exactly the correct place.
                 // the start of the next command. However at the end of each turn/update we increment the program counter
                 // Thus it is now 1 byte off. This fixes that for earlier machines.
@@ -71,8 +74,6 @@ namespace Zmachine.Library.V2.Implementation
                     if (x > localVarCounts) break;
                     localVars[x] = routineArguments[x];
                 }
-
-
                 this.CallStack.Push(new ActivationRecord(returnAddress, address,
                                           localVars,
                                           true, instruct.store));
@@ -176,7 +177,7 @@ namespace Zmachine.Library.V2.Implementation
             //var comparitor = instruct.operands[0].operandType;
             for (var x = 0; x < instruct.operands.Length - 1; ++x)
             {
-                if (comparitor == instruct.operands[1].GetUShort())
+                if (comparitor == GetVariableValue(instruct.operands[1]))
                     this.Branch(instruct.branch.Offset);
             }
         }
@@ -285,58 +286,59 @@ namespace Zmachine.Library.V2.Implementation
         {
             var chars = this.TextDecoder.GetZChars(instruct.operands[0].value);
             var literal = this.TextDecoder.DecodeZChars(chars);
-            using StreamWriter sw = new StreamWriter(this.outputScreen, System.Text.Encoding.UTF8, bufferSize: literal.Length, leaveOpen: true);
-            sw.Write(literal);
+            PrintToScreen(literal);
+        }
+
+        internal void PrintToScreen(string outputLiteral)
+        {
+            using StreamWriter sw = new StreamWriter(this.outputScreen, System.Text.Encoding.UTF8, bufferSize: outputLiteral.Length, leaveOpen: true);
+            sw.Write(outputLiteral);
             sw.Close();
         }
 
         internal void PrintAddr(DecodedInstruction instruct)
         {
             int memoryLocation = GetVariableValue(instruct.operands[0]);
-
-
             var chars = TextProcessor.GetZChars(this.GameData, ref memoryLocation);
             var literal = this.TextDecoder.DecodeZChars(chars);
-            using StreamWriter sw = new StreamWriter(this.outputScreen, System.Text.Encoding.UTF8, bufferSize: literal.Length, leaveOpen: true);
-            sw.Write(literal);
-            sw.Close();
+            PrintToScreen(literal);
         }
 
         internal void PrintNum(DecodedInstruction instruct)
         {
             string number = GetVariableValue(instruct.operands[0]).ToString("0.##");
-
-
-            using StreamWriter sw = new StreamWriter(this.outputScreen, System.Text.Encoding.UTF8, bufferSize: number.Length, leaveOpen: true);
-            sw.Write(number);
-            sw.Close();
+            PrintToScreen(number);
         }
 
-        internal void RTrue()
+        internal void PrintRet(DecodedInstruction instruct)
         {
-            var record = this.CallStack.Pop();
-            this.ProgramCounter = record.ReturnAddress;
-
-            var callingRecord = this.CallStack.Peek();
-            if (callingRecord.StoreResult)
-                callingRecord = callingRecord with { StoreAddress = 1 };
-        }
-
-        internal void RFalse()
-        {
-            var record = this.CallStack.Pop();
-            this.ProgramCounter = record.ReturnAddress;
-
-            var callingRecord = this.CallStack.Peek();
-            if (callingRecord.StoreResult)
+            string literal = "";
+            if (instruct.operands[0].operandType == OperandType.Omitted)
             {
-                ushort? t = callingRecord.StoreAddress;
-                if (t.HasValue)
-                    StoreVariableValue(t.Value, 0);
-                else throw new ArgumentOutOfRangeException("Cannot find Storage return address for call.");
-                //callingRecord = callingRecord with { StoreAddress = 0 };
+                var chars = TextProcessor.GetZChars(this.GameData, ref ProgramCounter);
+                literal = this.TextDecoder.DecodeZChars(chars);
+
             }
+            else
+            {
+                var chars = this.TextDecoder.GetZChars(instruct.operands[0].value);
+                literal = this.TextDecoder.DecodeZChars(chars);
+
+            }
+            PrintToScreen(literal + '\r');
+            SimpleReturn(CallStack.Pop(), 1);
         }
+
+        internal void Push(DecodedInstruction instruct)
+        {
+            var value = GetVariableValue(instruct.operands[0]);
+
+            CallStack.Peek().LocalStack.Push(value);
+        }
+
+        internal void RTrue() => SimpleReturn(this.CallStack.Pop(), 1);
+
+        internal void RFalse() => SimpleReturn(this.CallStack.Pop(), 0);
 
         internal void ARead(DecodedInstruction instruct)
         {
@@ -402,8 +404,8 @@ namespace Zmachine.Library.V2.Implementation
             var obj = this.ObjectTable[objectId];
             if (obj.Attributes.Contains((byte)attribute))
                 Branch(instruct.branch.Offset);
-                //this.ProgramCounter = ((int)instruct.branch.Offset)
-                //        .GetPackedAddress(this.StoryHeader.Version, this.StoryHeader.RoutinesOffset, this.StoryHeader.StaticStringsOffset);
+            //this.ProgramCounter = ((int)instruct.branch.Offset)
+            //        .GetPackedAddress(this.StoryHeader.Version, this.StoryHeader.RoutinesOffset, this.StoryHeader.StaticStringsOffset);
         }
     }
 }
