@@ -255,6 +255,7 @@ namespace Zmachine.Library.V2.Implementation
             ushort result = (ushort)(lValue % rValue);
             LibraryUtilities.StoreResult(GameData, CallStack, instruct, StoryHeader.GlobalVariables, result);
         }
+
         internal void Mul(DecodedInstruction instruct)
         {
             var left = instruct.operands[0].GetUShort();
