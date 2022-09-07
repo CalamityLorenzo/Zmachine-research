@@ -59,9 +59,6 @@ namespace ZMachine.Monogame.V2
 
         protected override void Initialize()
         {
-
-
-
             // TODO: Add your initialization logic here
             base.Initialize();
         }
@@ -105,7 +102,6 @@ namespace ZMachine.Monogame.V2
             // TODO: Add your update logic here
             //zMachine.Update();
             zMachineTools.Step();
-
             this.hostPanel.Update(gameTime);
 
             // TODO: Add your update logic here

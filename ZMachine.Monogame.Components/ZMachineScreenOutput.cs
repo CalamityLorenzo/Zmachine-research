@@ -95,18 +95,20 @@ namespace ZMachine.Monogame.Component
                     for (var x = 0; x < displayLines.Length; ++x)
                     {
                         // Now we need to ensure all these lines fit on the screen.
+                        this.history.Add(Tuple.Create(currentDrawingPosition.Y, displayLines[x]));
+                        this.currentDrawingPosition.Y += RowHeight;
 
                         // These all had new lines, and so go to the history table.
-                        if (x < displayLines.Length - 1)
-                        {
-                            this.history.Add(Tuple.Create(currentDrawingPosition.Y, displayLines[x]));
-                            this.currentDrawingPosition.Y += RowHeight;
-                        }
-                        // must be the last entry (cos otherwise there would be a blank entry after)
-                        if (x == displayLines.Length - 1 && displayLines[x].Length > 0)
-                        {
-                            this.currentLine = displayLines[x];
-                        }
+                        //if (x < displayLines.Length - )
+                        //{
+                        //    this.history.Add(Tuple.Create(currentDrawingPosition.Y, displayLines[x]));
+                        //    this.currentDrawingPosition.Y += RowHeight;
+                        //}
+                        //// must be the last entry (cos otherwise there would be a blank entry after)
+                        //if (x == displayLines.Length - 1 && displayLines[x].Length > 0)
+                        //{
+                        //    this.currentLine = displayLines[x];
+                        //}
                     }
                 }
                 output.SetLength(0);

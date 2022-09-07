@@ -10,7 +10,7 @@
                                         string hexBytes)
     {
         public string startAddressHex => this.startAddress.ToString("X4");
-        public string endAddressHex => this.startAddress.ToString("X4");
+        public string endAddressHex => this.endAddress.ToString("X4");
     }
 
 }

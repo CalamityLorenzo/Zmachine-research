@@ -19,7 +19,7 @@
 
     public record Branch
     {
-        public ushort Offset { get; init; }
+        public short Offset { get; init; }
         public bool BranchIfTrue { get; }
         public static Branch Empty => new Branch(new byte[] { }, false);
 
@@ -28,9 +28,9 @@
             if (branchValue.Length == 0)
                 this.Offset = 0;
             else if (branchValue.Length == 1)
-                this.Offset = (ushort) (branchValue[0] & 0b00111111); 
+                this.Offset = (short) (branchValue[0] & 0b00111111); 
             else
-                this.Offset = (ushort)( (branchValue[0] & 0b11111) << 8 | branchValue[1]);
+                this.Offset = (short)((branchValue[0] & 0b0011111) << 8 | branchValue[1]);
             BranchIfTrue = branchIfTrue;
         }
     }

@@ -11,11 +11,11 @@ namespace Zmachine.Library.V2.Implementation
         /// 10.2 Input streams
         /// 10.1 Keyboard only in V1
         /// </summary>
-        private Stream input0;
-        private Stream input1;
+        internal Stream input0;
+        internal Stream input1;
 
-        private readonly Stream outputScreen;
-        private readonly Stream outputTranscript;
+        internal readonly Stream outputScreen;
+        internal readonly Stream outputTranscript;
         internal byte[] GameData;
         internal int ProgramCounter;
         internal StoryHeader StoryHeader;
@@ -138,12 +138,18 @@ namespace Zmachine.Library.V2.Implementation
                     case "add":
                         Add(currentInstr);
                         break;
+                    case "and":
+                        And(currentInstr);
+                        break;
                     case "call":
                     case "call_vs":
                         Call(currentInstr);
                         break;
                     case "call_1n":
                         Call_1n(currentInstr);
+                        break;
+                    case "dec":
+                        Dec(currentInstr);
                         break;
                     case "div":
                         Div(currentInstr);
@@ -153,6 +159,12 @@ namespace Zmachine.Library.V2.Implementation
                         break;
                     case "get_child":
                         GetChild(currentInstr);
+                        break;
+                    case "get_prop":
+                        GetProp(currentInstr);
+                        break;
+                    case "get_sibling":
+                        GetSibling(currentInstr);
                         break;
                     case "inc_chk":
                         IncChk(currentInstr);
@@ -199,11 +211,17 @@ namespace Zmachine.Library.V2.Implementation
                     case "print_addr":
                         PrintAddr(currentInstr);
                         break;
+                    case "print_char":
+                        PrintChar(currentInstr);
+                        break;
                     case "print_num":
                         PrintNum(currentInstr);
                         break;
                     case "print_ret":
                         PrintRet(currentInstr);
+                        break;
+                    case "print_obj":
+                        PrintObj(currentInstr);
                         break;
                     case "push":
                         Push(currentInstr);
@@ -214,11 +232,17 @@ namespace Zmachine.Library.V2.Implementation
                     case "aread":
                         ARead(currentInstr);
                         break;
+                    case "ret_popped":
+                        RetPopped();
+                        break;
                     case "rtrue":
                         RTrue();
                         break;
                     case "rfalse":
                         RFalse();
+                        break;
+                    case "set_attr":
+                        SetAttr(currentInstr);
                         break;
                     case "store":
                         Store(currentInstr);
@@ -257,9 +281,9 @@ namespace Zmachine.Library.V2.Implementation
 
         }
 
-        private void StoreVariableValue(ushort address, ushort value)
+        private void StoreVariableValue(ushort variableId, ushort value)
         {
-            switch (address)
+            switch (variableId)
             {
 
                 case 0:             // Stack
@@ -268,13 +292,13 @@ namespace Zmachine.Library.V2.Implementation
                 case > 0 and <= 15: // Local vars
                     {
                         var localVars = CallStack.Peek().Locals;
-                        localVars[address - 1] = value;
+                        localVars[variableId - 1] = value;
                     }
                     break;
                 case >= 16 and <= 255: // Global
                     // 6.2 Storage of global variables
                     // Convert the varible number into the memort off set from the global vars table.
-                    var variablePosition = (address - 16) * 2;
+                    var variablePosition = (variableId - 16) * 2;
                     var resultArray = value.ToByteArray();
                     var globalVariables = GameData[StoryHeader.GlobalVariables];
                     // they are words/
@@ -285,7 +309,7 @@ namespace Zmachine.Library.V2.Implementation
 
         }
 
-        private void Branch(ushort branchOffset)
+        private void Branch(short branchOffset)
         {
             if (branchOffset == 0 || branchOffset == 1)
             {
@@ -295,13 +319,13 @@ namespace Zmachine.Library.V2.Implementation
                 {
                     ushort? t = callingRecord.StoreAddress;
                     if (t.HasValue)
-                        StoreVariableValue(t.Value, branchOffset);
+                        StoreVariableValue(t.Value, (ushort)branchOffset);
                     else throw new ArgumentOutOfRangeException("Cannot find Storage return address for call.");
                 }
             }
             else
             {
-                this.ProgramCounter =ProgramCounter + branchOffset - 2;
+                this.ProgramCounter = ProgramCounter + (short)branchOffset - 2;
             }
         }
 

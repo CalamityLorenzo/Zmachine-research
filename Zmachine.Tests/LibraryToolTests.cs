@@ -103,12 +103,29 @@ namespace Zmachine.Tests
             Assert.Pass("Passed!");
         }
 
-        [Test(Description = "String tests")]
-        public void DecodeText()
+        [Test(Description = "V5 Decode Provided Text")]
+        public void V5DecodeText()
         {
             ZmachineTools newTools = new(v5Machine);
 
             var message = newTools.DecodeZChars(new byte[] { 4, 13, 14, 24, 25, 20, 23, 30, 0, 20, 11, 0, 25, 13, 10, 0, 4, 18, 10, 17, 9, 23, 10, 28, 24, 0, 5, 30, 27, 20, 17, 5, 18, 0, 4, 14, 4, 14, 5, 31, 5, 5 });
+            //var message = zmachineTools.DecodeText(new byte[] { 20, 193, 147 , 106});
+            Console.WriteLine(message);
+            Console.WriteLine("History of the Meldrews (vol. II)");
+            Assert.IsTrue("History of the Meldrews (vol. II)" == message);
+        }
+
+        [Test(Description = "V3 Decode Provided Text")]
+        public void V3DecodeText()
+        {
+            ZmachineTools newTools = new(v3Machine);
+            var leChars = newTools.GetMemoryRange(0xB273, 0xB27D - 0xb273);
+            var refInt = 0;
+            var leZChars = TextProcessor.GetZChars(leChars, ref refInt);
+            var chars = newTools.EncodeToZChars("It's too dark to see!");
+            var message = newTools.DecodeZChars(leZChars);
+
+            //var message = newTools.DecodeZChars(new byte[] { 4, 13, 14, 24, 25, 20, 23, 30, 0, 20, 11, 0, 25, 13, 10, 0, 4, 18, 10, 17, 9, 23, 10, 28, 24, 0, 5, 30, 27, 20, 17, 5, 18, 0, 4, 14, 4, 14, 5, 31, 5, 5 });
             //var message = zmachineTools.DecodeText(new byte[] { 20, 193, 147 , 106});
             Console.WriteLine(message);
             Console.WriteLine("History of the Meldrews (vol. II)");
@@ -351,6 +368,18 @@ namespace Zmachine.Tests
                 Console.WriteLine(x);
                 Assert.IsTrue("Lets add some numbers!\r".Equals(x));
             }
+        }
+
+
+        [Test(Description = "v3 Print object property name")]
+        public void V3PrintObjectShortName()
+        {
+            ZmachineTools newTools = new(v3Machine);
+            var obj = newTools.GetObject(2);
+
+            var buytes = obj.PropertyTable.shortNameBytes;
+            var stri  = newTools.DecodeEncodedText(buytes);
+            Assert.IsTrue(true);
         }
     }
 }
