@@ -231,6 +231,9 @@ namespace Zmachine.Library.V2.Implementation
                     case "aread":
                         ARead(currentInstr);
                         break;
+                    case "sread":
+                        SRead(currentInstr);
+                        break;
                     case "ret_popped":
                         RetPopped();
                         break;
@@ -245,6 +248,9 @@ namespace Zmachine.Library.V2.Implementation
                         break;
                     case "store":
                         Store(currentInstr);
+                        break;
+                    case "storeb":
+                        StoreB(currentInstr);
                         break;
                     case "storew":
                         StoreW(currentInstr);

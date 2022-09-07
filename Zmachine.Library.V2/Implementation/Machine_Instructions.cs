@@ -1,4 +1,5 @@
-﻿using Zmachine.Library.V2.Instructions;
+﻿using System.Data;
+using Zmachine.Library.V2.Instructions;
 using Zmachine.Library.V2.Utilities;
 
 namespace Zmachine.Library.V2.Implementation
@@ -142,14 +143,14 @@ namespace Zmachine.Library.V2.Implementation
             var objectId = GetVariableValue(instruct.operands[0]);
             var zObject = this.ObjectTable[objectId];
             //this.StoreVariableValue(instruct.store, zObject.Child);
-            if (zObject.Child != 0)
+            if ((zObject.Child != 0) == instruct.branch.BranchIfTrue)
                 Branch(instruct.branch.Offset);
 
         }
         internal void GetParent(DecodedInstruction instruct)
         {
             var objectId = GetVariableValue(instruct.operands[0]);
-            var zObject = this.ObjectTable[objectId];
+            var zObject = this.ObjectTable[objectId];   
             this.StoreVariableValue(instruct.store, zObject.Parent);
         }
         internal void GetProp(DecodedInstruction instruct)
@@ -164,7 +165,7 @@ namespace Zmachine.Library.V2.Implementation
         {
             var objectId = GetVariableValue(instruct.operands[0]);
             var siblingId = this.ObjectTable.GetSibling(objectId);
-            if (siblingId != 0)
+            if ((siblingId != 0) == instruct.branch.BranchIfTrue)
                 Branch(instruct.branch.Offset);
         }
         internal void IncChk(DecodedInstruction instruct)
@@ -191,10 +192,10 @@ namespace Zmachine.Library.V2.Implementation
             else if (variableId >= 16 && variableId <= 256)
                 this.GlobalVariables[variableId] = variableResult;
 
-            if (variableResult > valueToCompaire)
+            if ((variableResult > valueToCompaire) == instruct.branch.BranchIfTrue)
                 Branch(instruct.branch.Offset);
-            //            if()
         }
+
         internal void InsertObj(DecodedInstruction instruct)
         {
             var O_objectId = GetVariableValue(instruct.operands[0]);
@@ -209,15 +210,22 @@ namespace Zmachine.Library.V2.Implementation
             var comparitor = GetVariableValue(instruct.operands[0]);
             for (var x = 0; x < instruct.operands.Length - 1; ++x)
             {
-                if (comparitor == GetVariableValue(instruct.operands[1]) && instruct.branch.BranchIfTrue)
-                    this.Branch(instruct.branch.Offset);
+                var comparison = GetVariableValue(instruct.operands[1]);
+                if (comparitor == comparison)
+                {
+                    if (instruct.branch.BranchIfTrue)
+                    {
+                        this.Branch(instruct.branch.Offset);
+                    }
+                    break;
+                }
             }
         }
         internal void Jg(DecodedInstruction instruct)
         {
             // Compairions are signed
-            var comparitor = GetVariableValue(instruct.operands[0]);
-            var comparison = GetVariableValue(instruct.operands[1]);
+            var comparitor = (short)GetVariableValue(instruct.operands[0]);
+            var comparison = (short)GetVariableValue(instruct.operands[1]);
             if ((comparitor > comparison) == instruct.branch.BranchIfTrue)
                 this.Branch(instruct.branch.Offset);
 
@@ -396,6 +404,16 @@ namespace Zmachine.Library.V2.Implementation
             this.IsReadingInstruction = true;
         }
 
+        internal void SRead(DecodedInstruction instruct)
+        {
+            // Kill the current stream
+            this.input0.SetLength(0);
+            // reset the input
+            this.readInputText = "";
+            //var record = instruct;
+            this.IsReadingInstruction = true;
+        }
+
         internal void Ret(DecodedInstruction instruct)
         {
             var valueToReturn = GetVariableValue(instruct.operands[0]);
@@ -419,14 +437,24 @@ namespace Zmachine.Library.V2.Implementation
             // Store is NOT itself a store md.
             StoreVariableValue(left, right);
         }
-        internal void StoreW(DecodedInstruction instruct)
+        internal void StoreB(DecodedInstruction instruct)
         {
             var array = GetVariableValue(instruct.operands[0]);
-            var idx = instruct.operands[1].GetUShort();
+            var idx = GetVariableValue(instruct.operands[1]);
             var value = GetVariableValue(instruct.operands[2]);
 
             ushort address = (ushort)(array + (2 * idx));
-            StoreVariableValue(address, value);
+            this.GameData[address] = (byte)value;
+        }
+        internal void StoreW(DecodedInstruction instruct)
+        {
+            var array = GetVariableValue(instruct.operands[0]);
+            var idx = GetVariableValue(instruct.operands[1]);
+            var value = GetVariableValue(instruct.operands[2]);
+
+            ushort address = (ushort)(array + (2 * idx));
+            GameData[address] = (byte)(value >> 8);
+            GameData[address + 1] = (byte)(value & 0b11111111);
         }
         internal void Sub(DecodedInstruction instruct)
         {
@@ -442,7 +470,7 @@ namespace Zmachine.Library.V2.Implementation
         {
             var bitMap = GetVariableValue(instruct.operands[0]);
             var flags = GetVariableValue(instruct.operands[1]);
-            if ((bitMap & flags) == flags)
+            if (((bitMap & flags) == flags) == instruct.branch.BranchIfTrue)
                 Branch(instruct.branch.Offset);
         }
         internal void Test_Attr(DecodedInstruction instruct)
@@ -451,10 +479,8 @@ namespace Zmachine.Library.V2.Implementation
             var attribute = GetVariableValue(instruct.operands[1]);
 
             var obj = this.ObjectTable[objectId];
-            if (obj.Attributes.Contains((byte)attribute))
+            if ((obj.Attributes.Contains((byte)attribute)) == instruct.branch.BranchIfTrue)
                 Branch(instruct.branch.Offset);
-            //this.ProgramCounter = ((int)instruct.branch.Offset)
-            //        .GetPackedAddress(this.StoryHeader.Version, this.StoryHeader.RoutinesOffset, this.StoryHeader.StaticStringsOffset);
         }
     }
 }
