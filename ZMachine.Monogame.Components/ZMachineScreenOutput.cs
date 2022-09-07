@@ -18,7 +18,7 @@ namespace ZMachine.Monogame.Component
 
         private readonly List<Tuple<float, string>> history =
                                            new List<Tuple<float, string>>(); // Everything displayed until now.
-        private string currentLine;                        // The line last loaded from the stream
+        private string currentLine = "";                        // The line last loaded from the stream
         private string[] displayLines;                     // What gets displayed this time.
         private Vector2 currentDrawingPosition;
         private Texture2D backgroundDisplay;
@@ -43,14 +43,14 @@ namespace ZMachine.Monogame.Component
 
             // This is actually our input on the application output stream.
             this.output = output;
-            currentLine = "";
+            //currentLine = "";
             this.currentDrawingPosition = startPosition;
 
             this.HorizontalStart = startPosition.X;
             var fontMeasure = font.MeasureString("W");
             this.RowHeight = fontMeasure.Y + 2;
             this.ScreenWidth = game.GraphicsDevice.Adapter.CurrentDisplayMode.Width;
-            this.ScreenWidthChars = (int)Math.Abs( ScreenWidth / fontMeasure.X);
+            this.ScreenWidthChars = (int)Math.Abs(ScreenWidth / fontMeasure.X);
 
             this.backgroundDisplay = this.batch.CreateFilledRectTexture(this.ContentDimensions(), this.background);
             this.reverseBackground = this.batch.CreateFilledRectTexture(this.ContentDimensions(), this.foreground);
@@ -69,7 +69,6 @@ namespace ZMachine.Monogame.Component
         {
             if (output.Length > 0)
             {
-                currentLine = "";
                 output.Position = 0;
                 using StreamReader sr = new StreamReader(output, Encoding.UTF8, bufferSize: (int)output.Length, leaveOpen: true);
                 var theChars = new char[output.Length];
@@ -90,25 +89,42 @@ namespace ZMachine.Monogame.Component
                 }
                 else // normal stream text.
                 {
+
+                    var lastCharEndLine = streamLine.EndsWith("\r");
                     // need to discover the newlines, and split out accordingly.
                     displayLines = streamLine.Split(new char[] { '\r' });
                     for (var x = 0; x < displayLines.Length; ++x)
                     {
-                        // Now we need to ensure all these lines fit on the screen.
-                        this.history.Add(Tuple.Create(currentDrawingPosition.Y, displayLines[x]));
-                        this.currentDrawingPosition.Y += RowHeight;
-
                         // These all had new lines, and so go to the history table.
                         //if (x < displayLines.Length - )
                         //{
                         //    this.history.Add(Tuple.Create(currentDrawingPosition.Y, displayLines[x]));
                         //    this.currentDrawingPosition.Y += RowHeight;
                         //}
-                        //// must be the last entry (cos otherwise there would be a blank entry after)
-                        //if (x == displayLines.Length - 1 && displayLines[x].Length > 0)
-                        //{
-                        //    this.currentLine = displayLines[x];
-                        //}
+                        // must be the last entry (cos otherwise there would be a blank entry after)
+                        // is it the last line and does it not end with a new line char?
+                        // this is then the assumed current line, until a line break is sent.
+
+                        if (x == displayLines.Length - 1 && !lastCharEndLine)
+                        {
+                            this.currentLine += displayLines[x];
+                        }
+                        else
+                        {
+                            // add data to the current line first
+                            // (Someone had better be managing the line widths)
+                            if (this.currentLine.Length > 0)
+                            {
+                                this.history.Add(Tuple.Create(currentDrawingPosition.Y, currentLine + displayLines[x]));
+                                this.currentLine = "";
+                            }
+                            else
+                            {
+                                // Now we need to ensure all these lines fit on the screen.
+                                this.history.Add(Tuple.Create(currentDrawingPosition.Y, displayLines[x]));
+                            }
+                            this.currentDrawingPosition.Y += RowHeight;
+                        }
                     }
                 }
                 output.SetLength(0);
@@ -129,7 +145,6 @@ namespace ZMachine.Monogame.Component
         }
         // +3 =1 Status line 2 lines after prompt
         public Rectangle ContentDimensions() => new Rectangle(0, 0, this.Game.Window.ClientBounds.Width, ((int)this.RowHeight * (this.history.Count + 5)));
-
 
 
         public void DrawPanel(GameTime time)
@@ -155,6 +170,8 @@ namespace ZMachine.Monogame.Component
                     batch.DrawString(font, line, cPosAccumulator, foreground);
                 }
             }
+            cPosAccumulator = new Vector2(HorizontalStart, cPosAccumulator.Y + this.RowHeight);
+            batch.DrawString(font, currentLine, cPosAccumulator, foreground);
 
             textControl.SetPosition(new Vector2(HorizontalStart, cPosAccumulator.Y + row));
 
