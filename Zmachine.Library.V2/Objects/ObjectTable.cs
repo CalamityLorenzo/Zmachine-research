@@ -197,11 +197,8 @@ namespace Zmachine.Library.V2.Objects
         // Having to update the object in memory.
         internal void Insert_Obj(ushort O_objectId, ushort D_objectId)
         {
-            var attrbFlagsLength = version > 3 ? 6 : 4;
-            // size of the Parent/Sibling/Child entry
-            var paSibChLength = version > 3 ? 6 : 3;
-
-            var D_StartAddress = ObjectTreeStart + ObjectSize * (D_objectId - 1);
+            
+            var D_StartAddress = this.GetObjectStartAddress(D_objectId);
             var D_PaSibCh = D_StartAddress + attrbFlagsLength;
             // Update the DChild Value = 
             ushort D_Old_Child = 0;
@@ -217,7 +214,7 @@ namespace Zmachine.Library.V2.Objects
                 this.memory[D_PaSibCh + 2] = (byte)O_objectId;
             }
 
-            var O_StartAddress = ObjectTreeStart + ObjectSize * (D_objectId - 1);
+            var O_StartAddress = this.GetObjectStartAddress(O_objectId);
             var O_PaSibCh = O_StartAddress + attrbFlagsLength;
 
             if (version > 3)
@@ -253,7 +250,6 @@ namespace Zmachine.Library.V2.Objects
                 }
 
             }
-
         }
 
         internal void SetProperty(ushort objectId, ushort property, ushort value)

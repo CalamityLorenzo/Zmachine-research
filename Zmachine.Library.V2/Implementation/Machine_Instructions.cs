@@ -105,7 +105,7 @@ namespace Zmachine.Library.V2.Implementation
             this.CallStack.Push(new ActivationRecord(returnAddress, address,
                                       new ushort[this.GameData[ProgramCounter]],
                                 false, instruct.store));
-        }
+        } 
         internal void Call_Vn(DecodedInstruction instruct)
         {
             Call(instruct);
@@ -137,6 +137,15 @@ namespace Zmachine.Library.V2.Implementation
             LibraryUtilities.StoreResult(GameData, CallStack, instruct, StoryHeader.GlobalVariables, result);
         }
 
+        internal void GetChild(DecodedInstruction instruct)
+        {
+            var objectId = GetVariableValue(instruct.operands[0]);
+            var zObject = this.ObjectTable[objectId];
+            //this.StoreVariableValue(instruct.store, zObject.Child);
+            if (zObject.Child != 0)
+                Branch(instruct.branch.Offset);
+
+        }
         internal void GetParent(DecodedInstruction instruct)
         {
             var objectId = GetVariableValue(instruct.operands[0]);
@@ -157,13 +166,6 @@ namespace Zmachine.Library.V2.Implementation
             var siblingId = this.ObjectTable.GetSibling(objectId);
             if (siblingId != 0)
                 Branch(instruct.branch.Offset);
-        }
-        internal void GetChild(DecodedInstruction instruct)
-        {
-            var objectId = GetVariableValue(instruct.operands[0]);
-            var zObject = this.ObjectTable[objectId];
-            this.StoreVariableValue(instruct.store, zObject.Child);
-
         }
         internal void IncChk(DecodedInstruction instruct)
         {
@@ -201,7 +203,6 @@ namespace Zmachine.Library.V2.Implementation
             this.ObjectTable.Insert_Obj(O_objectId, D_objectId);
 
         }
-
         // Jump if a is equal to any of the subsequent operands
         internal void Je(DecodedInstruction instruct)
         {
@@ -212,7 +213,6 @@ namespace Zmachine.Library.V2.Implementation
                     this.Branch(instruct.branch.Offset);
             }
         }
-
         internal void Jg(DecodedInstruction instruct)
         {
             // Compairions are signed
@@ -222,7 +222,6 @@ namespace Zmachine.Library.V2.Implementation
                 this.Branch(instruct.branch.Offset);
 
         }
-
         internal void Jl(DecodedInstruction instruct)
         {
             // Compairions are signed
@@ -231,7 +230,6 @@ namespace Zmachine.Library.V2.Implementation
             if (((short)comparitor < (short)comparison) == instruct.branch.BranchIfTrue)
                 this.Branch(instruct.branch.Offset);
         }
-
         internal void Jz(DecodedInstruction instruct)
         {
             var val = GetVariableValue(instruct.operands[0]);
@@ -318,13 +316,6 @@ namespace Zmachine.Library.V2.Implementation
             PrintToScreen(literal);
         }
 
-        internal void PrintToScreen(string outputLiteral)
-        {
-            using StreamWriter sw = new StreamWriter(this.outputScreen, System.Text.Encoding.UTF8, bufferSize: outputLiteral.Length, leaveOpen: true);
-            sw.Write(outputLiteral);
-            sw.Close();
-        }
-
         internal void PrintAddr(DecodedInstruction instruct)
         {
             int memoryLocation = GetVariableValue(instruct.operands[0]);
@@ -409,12 +400,8 @@ namespace Zmachine.Library.V2.Implementation
         {
             var valueToReturn = GetVariableValue(instruct.operands[0]);
             var stackFrame = this.CallStack.Pop();
-            if (stackFrame.StoreResult)
-            {
-                StoreVariableValue(stackFrame.StoreAddress ?? throw new ArgumentException("No Store Adress found in return call.")
-                    , valueToReturn);
-            }
             this.ProgramCounter = stackFrame.ReturnAddress;
+            this.StoreVariableValue(this.GameData[ProgramCounter], valueToReturn);
         }
 
         internal void SetAttr(DecodedInstruction instruct)

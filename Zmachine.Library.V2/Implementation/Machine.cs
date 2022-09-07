@@ -115,7 +115,6 @@ namespace Zmachine.Library.V2.Implementation
         => LibraryUtilities.GetOperandValue(GameData, StoryHeader.GlobalVariables, CallStack.Peek(), operand.operandType, operand.value.GetUShort());
 
 
-
         public void Update()
         {
             if (IsReadingInstruction)
@@ -267,7 +266,6 @@ namespace Zmachine.Library.V2.Implementation
             }
         }
 
-
         private void SimpleReturn(ActivationRecord callingRecord, ushort value)
         {
             this.ProgramCounter = callingRecord.ReturnAddress;
@@ -393,5 +391,13 @@ namespace Zmachine.Library.V2.Implementation
             }
 
         }
+
+        internal void PrintToScreen(string outputLiteral)
+        {
+            using StreamWriter sw = new StreamWriter(this.outputScreen, System.Text.Encoding.UTF8, bufferSize: outputLiteral.Length, leaveOpen: true);
+            sw.Write(outputLiteral);
+            sw.Close();
+        }
+
     }
 }
