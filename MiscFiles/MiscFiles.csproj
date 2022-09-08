@@ -40,6 +40,7 @@
     <None Include="Curses\curses.z5" />
     <None Include="Curses\Curses.zblorb" />
     <None Include="HollyWoo\hollywoo.dat" />
+    <None Include="zmachine-master.zip" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Curses\curses_infodump.txt" />
