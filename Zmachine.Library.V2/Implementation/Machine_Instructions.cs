@@ -18,7 +18,6 @@ namespace Zmachine.Library.V2.Implementation
             ushort result = (ushort)(lValue + rValue);
             LibraryUtilities.StoreResult(GameData, CallStack, instruct, StoryHeader.GlobalVariables, result);
         }
-
         internal void And(DecodedInstruction instruct)
         {
             var a = GetVariableValue(instruct.operands[0]);
@@ -106,7 +105,7 @@ namespace Zmachine.Library.V2.Implementation
             this.CallStack.Push(new ActivationRecord(returnAddress, address,
                                       new ushort[this.GameData[ProgramCounter]],
                                 false, instruct.store));
-        } 
+        }
         internal void Call_Vn(DecodedInstruction instruct)
         {
             Call(instruct);
@@ -137,7 +136,6 @@ namespace Zmachine.Library.V2.Implementation
             ushort result = (ushort)(lValue / rValue);
             LibraryUtilities.StoreResult(GameData, CallStack, instruct, StoryHeader.GlobalVariables, result);
         }
-
         internal void GetChild(DecodedInstruction instruct)
         {
             var objectId = GetVariableValue(instruct.operands[0]);
@@ -150,7 +148,7 @@ namespace Zmachine.Library.V2.Implementation
         internal void GetParent(DecodedInstruction instruct)
         {
             var objectId = GetVariableValue(instruct.operands[0]);
-            var zObject = this.ObjectTable[objectId];   
+            var zObject = this.ObjectTable[objectId];
             this.StoreVariableValue(instruct.store, zObject.Parent);
         }
         internal void GetProp(DecodedInstruction instruct)
@@ -175,9 +173,8 @@ namespace Zmachine.Library.V2.Implementation
             var variableResult = (variableId switch
             {
                 00 => this.CallStack.Peek().LocalStack.Peek(),
-                >= 1 and <= 15 => this.CallStack.Peek().Locals[variableId-1],
-                >= 15 and <= 255 => // Global
-    (ushort)(GameData[StoryHeader.GlobalVariables + ((variableId - 16) * 2)] << 8 | GameData[StoryHeader.GlobalVariables + ((variableId - 16) * 2) + 1])
+                >= 1 and <= 15 => this.CallStack.Peek().Locals[variableId - 1],
+                >= 15 and <= 255 => (ushort)(GameData[StoryHeader.GlobalVariables + ((variableId - 16) * 2)] << 8 | GameData[StoryHeader.GlobalVariables + ((variableId - 16) * 2) + 1])
             });
 
             variableResult++;
@@ -188,14 +185,13 @@ namespace Zmachine.Library.V2.Implementation
                 this.CallStack.Peek().LocalStack.Push(variableResult);
             }
             else if (variableId >= 1 && variableId <= 15)
-                this.CallStack.Peek().Locals[variableId-1] = variableResult;
+                this.CallStack.Peek().Locals[variableId - 1] = variableResult;
             else if (variableId >= 16 && variableId <= 256)
                 this.GlobalVariables[variableId] = variableResult;
 
             if ((variableResult > valueToCompaire) == instruct.branch.BranchIfTrue)
                 Branch(instruct.branch.Offset);
         }
-
         internal void InsertObj(DecodedInstruction instruct)
         {
             var O_objectId = GetVariableValue(instruct.operands[0]);
@@ -226,7 +222,7 @@ namespace Zmachine.Library.V2.Implementation
             // Compairions are signed
             var comparitor = (short)GetVariableValue(instruct.operands[0]);
             var comparison = (short)GetVariableValue(instruct.operands[1]);
-            if ((comparitor > comparison) == instruct.branch.BranchIfTrue)
+            if (((short)comparitor > (short)comparison) == instruct.branch.BranchIfTrue)
                 this.Branch(instruct.branch.Offset);
 
         }
@@ -263,7 +259,7 @@ namespace Zmachine.Library.V2.Implementation
 
             var data = GameData[array + idx];
 
-            LibraryUtilities.StoreResult(this.GameData, this.CallStack, instruct, this.StoryHeader.GlobalVariables, data);
+            StoreVariableValue(instruct.store, data);
         }
 
         //2OP:15 F loadw array word-index → (result)
@@ -280,15 +276,13 @@ namespace Zmachine.Library.V2.Implementation
 
         internal void Mod(DecodedInstruction instruct)
         {
-            var left = GetVariableValue(instruct.operands[0]);
-            var right = GetVariableValue(instruct.operands[1]);
-            if (left == 0 || right == 0) throw new DivideByZeroException("Mod division by 0 error");
             // Depending on the operand types depends if we have a value or pointer to a variable
             var lValue = GetVariableValue(instruct.operands[0]);
             var rValue = GetVariableValue(instruct.operands[1]);
+            if (lValue == 0 || rValue == 0) throw new DivideByZeroException("Mod division by 0 error");
 
-            ushort result = (ushort)(lValue % rValue);
-            LibraryUtilities.StoreResult(GameData, CallStack, instruct, StoryHeader.GlobalVariables, result);
+            var result = (short)(lValue % rValue);
+            StoreVariableValue(instruct.store, (ushort)result);
         }
 
         internal void Mul(DecodedInstruction instruct)
@@ -297,24 +291,24 @@ namespace Zmachine.Library.V2.Implementation
             var lValue = GetVariableValue(instruct.operands[0]);
             var rValue = GetVariableValue(instruct.operands[1]);
 
-            ushort result = (ushort)(lValue * rValue);
-            LibraryUtilities.StoreResult(GameData, CallStack, instruct, StoryHeader.GlobalVariables, result);
+            short result = (short)(lValue * rValue);
+            StoreVariableValue(instruct.store, (ushort)result);
         }
 
         // TODO more stream experiments required for speed.
         internal void NewLine()
         {
-            using StreamWriter sw = new StreamWriter(this.outputScreen, System.Text.Encoding.UTF8, bufferSize: 1, leaveOpen: true);
-            sw.Write((char)13);
-            sw.Close();
-            sw.Dispose();
+            this.PrintToScreen(new string('\r', 1));
+
         }
 
         internal void Or(DecodedInstruction instruct)
         {
             var a = GetVariableValue(instruct.operands[0]);
             var b = GetVariableValue(instruct.operands[1]);
-            LibraryUtilities.StoreResult(GameData, this.CallStack, instruct, StoryHeader.GlobalVariables, (ushort)(a | b));
+
+            StoreVariableValue(instruct.store, (ushort)(a | b));
+
         }
 
         internal void Print(DecodedInstruction instruct)
@@ -370,10 +364,8 @@ namespace Zmachine.Library.V2.Implementation
         internal void Push(DecodedInstruction instruct)
         {
             var value = GetVariableValue(instruct.operands[0]);
-
             CallStack.Peek().LocalStack.Push(value);
         }
-
         internal void PutProp(DecodedInstruction instruct)
         {
             var objectId = GetVariableValue(instruct.operands[0]);
@@ -381,13 +373,22 @@ namespace Zmachine.Library.V2.Implementation
             var value = GetVariableValue(instruct.operands[2]);
             this.ObjectTable.SetProperty(objectId, property, value);
 
+            var obj = this.ObjectTable[objectId];
+//           obj.PropertyTable.properties.Contains(p=>p)
+        }
+
+        internal void Ret(DecodedInstruction instruct)
+        {
+            var valueToReturn = GetVariableValue(instruct.operands[0]);
+            var stackFrame = this.CallStack.Pop();
+            SimpleReturn(stackFrame, valueToReturn);
+
         }
 
         internal void RetPopped()
         {
-            var callReturn = this.CallStack.Pop();
-
-            SimpleReturn(callReturn, callReturn.LocalStack.Pop());
+            var pk = this.CallStack.Pop();
+            SimpleReturn(pk,pk.LocalStack.Pop());
         }
 
         internal void RTrue() => SimpleReturn(this.CallStack.Pop(), 1);
@@ -414,13 +415,7 @@ namespace Zmachine.Library.V2.Implementation
             this.IsReadingInstruction = true;
         }
 
-        internal void Ret(DecodedInstruction instruct)
-        {
-            var valueToReturn = GetVariableValue(instruct.operands[0]);
-            var stackFrame = this.CallStack.Pop();
-            this.ProgramCounter = stackFrame.ReturnAddress;
-            this.StoreVariableValue(this.GameData[ProgramCounter], valueToReturn);
-        }
+
 
         internal void SetAttr(DecodedInstruction instruct)
         {
@@ -428,6 +423,7 @@ namespace Zmachine.Library.V2.Implementation
             var attribute = GetVariableValue(instruct.operands[1]);
 
             this.ObjectTable.Set_Attribute(objectId, attribute);
+            var obj = this.ObjectTable[objectId];
         }
         internal void Store(DecodedInstruction instruct)
         {
@@ -443,7 +439,7 @@ namespace Zmachine.Library.V2.Implementation
             var idx = GetVariableValue(instruct.operands[1]);
             var value = GetVariableValue(instruct.operands[2]);
 
-            ushort address = (ushort)(array + (2 * idx));
+            ushort address = (ushort)(array + idx);
             this.GameData[address] = (byte)value;
         }
         internal void StoreW(DecodedInstruction instruct)
