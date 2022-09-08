@@ -1,4 +1,7 @@
 ﻿using System.Data;
+using System.Runtime.CompilerServices;
+using System.Security.AccessControl;
+using System.Text;
 using Zmachine.Library.V2.Instructions;
 using Zmachine.Library.V2.Utilities;
 
@@ -9,6 +12,9 @@ namespace Zmachine.Library.V2.Implementation
     /// </summary>
     public partial class Machine
     {
+
+
+
         internal void Add(DecodedInstruction instruct)
         {
             // Depending on the operand types depends if we have a value or pointer to a variable
@@ -299,7 +305,6 @@ namespace Zmachine.Library.V2.Implementation
         internal void NewLine()
         {
             this.PrintToScreen(new string('\r', 1));
-
         }
 
         internal void Or(DecodedInstruction instruct)
@@ -315,7 +320,8 @@ namespace Zmachine.Library.V2.Implementation
         {
             var chars = this.TextDecoder.GetZChars(instruct.operands[0].value);
             var literal = this.TextDecoder.DecodeZChars(chars);
-            PrintToScreen(literal);
+            var screenChar = PrepareForScreen(literal);
+            PrintToScreen(screenChar);
         }
 
         internal void PrintAddr(DecodedInstruction instruct)
@@ -337,8 +343,71 @@ namespace Zmachine.Library.V2.Implementation
             var slice = this.GameData.AsSpan().Slice(start: instruct.startAddress + 1);
             var achars = this.TextDecoder.GetZChars(slice.ToArray());
             var literal = this.TextDecoder.DecodeZChars(achars);
-            PrintToScreen(literal + '\r');
+            var screenReady = PrepareForScreen(literal);
+            PrintToScreen(screenReady + '\r');
             SimpleReturn(CallStack.Pop(), 1);
+        }
+        /// <summary>
+        /// Ensures a sttring can actually fit on the fookin screen
+        /// </summary>
+        /// <param name="literal"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        private string PrepareForScreen(string literal)
+        {
+            if (literal.Length > this.screenWidthInChars)
+            {
+                var lineBreaker = true;
+                var currentRow = literal;
+                var currentRowStartIndex = 0;
+                StringBuilder splitter = new StringBuilder();
+
+                var cutOffMarker = this.screenWidthInChars;
+                var createLine = true;
+                while (lineBreaker)
+                {
+                    while (createLine)
+                    {
+                        if (currentRow[currentRowStartIndex + cutOffMarker] != ' ')
+                            cutOffMarker -= 1;
+                        else if (currentRow[currentRowStartIndex + cutOffMarker] == '\r')
+                        {
+                            createLine = false;
+                            // Append new chunk
+                            var newRow = currentRow.Substring(currentRowStartIndex, cutOffMarker+1);
+                            splitter.Append(newRow);
+                        }
+                        else 
+                        {
+                            createLine = false;
+                            // Append new chunk
+                            var newRow = currentRow.Substring(currentRowStartIndex, cutOffMarker);
+                            splitter.Append(newRow + '\r');
+                        }
+                    }
+                    // Prepare for the next go.
+                    createLine = true;
+                    currentRowStartIndex = cutOffMarker + currentRowStartIndex+1;
+                    // Assign the next thunk.
+                    //currentRow = currentRow.Substring(currentRowStartIndex);
+                    if (literal.Length - currentRowStartIndex < this.screenWidthInChars)
+                    {
+                        splitter.Append(currentRow.Substring(currentRowStartIndex));
+                        lineBreaker = false;
+                    }
+                    else
+                    {
+                        cutOffMarker = this.screenWidthInChars;
+                    }
+                }
+
+                return splitter.ToString();
+
+            }
+            else
+            {
+                return literal;
+            }
         }
 
         internal void PrintObj(DecodedInstruction instruct)
@@ -374,7 +443,7 @@ namespace Zmachine.Library.V2.Implementation
             this.ObjectTable.SetProperty(objectId, property, value);
 
             var obj = this.ObjectTable[objectId];
-//           obj.PropertyTable.properties.Contains(p=>p)
+            //           obj.PropertyTable.properties.Contains(p=>p)
         }
 
         internal void Ret(DecodedInstruction instruct)
@@ -388,7 +457,7 @@ namespace Zmachine.Library.V2.Implementation
         internal void RetPopped()
         {
             var pk = this.CallStack.Pop();
-            SimpleReturn(pk,pk.LocalStack.Pop());
+            SimpleReturn(pk, pk.LocalStack.Pop());
         }
 
         internal void RTrue() => SimpleReturn(this.CallStack.Pop(), 1);

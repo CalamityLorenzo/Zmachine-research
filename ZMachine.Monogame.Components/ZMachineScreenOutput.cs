@@ -25,9 +25,9 @@ namespace ZMachine.Monogame.Component
         private Texture2D reverseBackground;
         private TextControl textControl;
         private float HorizontalStart = 0;
-        private float RowHeight = 0;
+        public float RowHeight { get; init; }
 
-        public int ScreenWidth { get; }
+        public int CharWidth { get; }
         public int ScreenWidthChars { get; }
 
         private Vector2 OffSet = Vector2.Zero;
@@ -49,8 +49,8 @@ namespace ZMachine.Monogame.Component
             this.HorizontalStart = startPosition.X;
             var fontMeasure = font.MeasureString("W");
             this.RowHeight = fontMeasure.Y + 2;
-            this.ScreenWidth = game.GraphicsDevice.Adapter.CurrentDisplayMode.Width;
-            this.ScreenWidthChars = (int)Math.Abs(ScreenWidth / fontMeasure.X);
+            this.CharWidth = (int)fontMeasure.X; // game.GraphicsDevice.Adapter.CurrentDisplayMode.Width;
+          //  this.ScreenWidthChars = (int)Math.Abs(ScreenWidth / fontMeasure.X);
 
             this.backgroundDisplay = this.batch.CreateFilledRectTexture(this.ContentDimensions(), this.background);
             this.reverseBackground = this.batch.CreateFilledRectTexture(this.ContentDimensions(), this.foreground);

@@ -10,6 +10,7 @@ using Zmachine.Library.V2;
 using System.Drawing;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 using System;
+using System.Diagnostics;
 
 namespace ZMachine.Monogame.V2
 {
@@ -86,11 +87,10 @@ namespace ZMachine.Monogame.V2
             //     this._testContent = new TestPanelContentextt(this);
             hostPanel.AddContent(screenOutput);
 
-
-            zMachine = new Machine(input0, input1, outputScreen, outputTranscript, spSpan.ToArray());
+            var screenWidth = this._graphics.PreferredBackBufferWidth / screenOutput.CharWidth;
+            var screenHeight = (int)this._graphics.PreferredBackBufferHeight / (int)screenOutput.RowHeight;
+            zMachine = new Machine(input0, input1, outputScreen, outputTranscript, screenWidth, screenHeight, spSpan.ToArray());
             this.zMachineTools = new ZmachineTools(zMachine);
-
-
             // TODO: use this.Content to load your game content here
         }
 

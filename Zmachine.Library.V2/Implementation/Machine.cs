@@ -18,6 +18,11 @@ namespace Zmachine.Library.V2.Implementation
         internal readonly Stream outputTranscript;
         internal byte[] GameData;
         internal int ProgramCounter;
+
+        private int screenWidthInChars;
+        private int screenHeightInChars;
+
+
         internal StoryHeader StoryHeader;
         internal HeaderExtensionTable? HeaderExtensions;
         public FeaturesVersion FeaturesVersion;
@@ -41,17 +46,17 @@ namespace Zmachine.Library.V2.Implementation
         internal byte[] terminatingChars;
         internal Dictionary<short, byte[]> ColorMapper = new Dictionary<short, byte[]>();
 
-
         ///has aread or sread been set
         public bool IsReadingInstruction { get; private set; }
 
-        public Machine(Stream input0, Stream input1, Stream outputScreen, Stream outputTranscript, byte[] storyData)
+        public Machine(Stream input0, Stream input1, Stream outputScreen, Stream outputTranscript, int screenWidthInChars, int screenHeightInChars, byte[] storyData)
         {
             this.input0 = input0;
             this.input1 = input1;
             this.outputScreen = outputScreen;
             this.outputTranscript = outputTranscript;
-
+            this.screenHeightInChars = screenHeightInChars;
+            this.screenWidthInChars = screenWidthInChars;
             // Nom, nom nom game data.            
             GameData = new byte[storyData.Length];
             storyData.CopyTo(GameData, 0);
