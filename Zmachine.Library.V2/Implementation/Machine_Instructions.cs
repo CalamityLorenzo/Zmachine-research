@@ -362,11 +362,12 @@ namespace Zmachine.Library.V2.Implementation
                 var currentRow = literal;
                 var currentRowStartIndex = 0;
                 StringBuilder splitter = new StringBuilder();
-
-                var cutOffMarker = this.screenWidthInChars;
+            
                 var createLine = true;
+                var lastLineRemainder = 0;
                 while (lineBreaker)
                 {
+                    var cutOffMarker = this.screenWidthInChars - lastLineRemainder;
                     // Very naive: find where the nearest space is an get all those characters leading up to it.
                     var newRow = "";
                     while (createLine)
@@ -405,7 +406,7 @@ namespace Zmachine.Library.V2.Implementation
                                 else
                                 {
                                     splitter.Append(entry);
-                                    leftOverChars = 1;
+                                    lastLineRemainder = entry.Length;
                                 }
                             }
                             else
@@ -430,10 +431,10 @@ namespace Zmachine.Library.V2.Implementation
                         splitter.Append(currentRow.Substring(currentRowStartIndex));
                         lineBreaker = false;
                     }
-                    else
-                    {
-                        cutOffMarker = this.screenWidthInChars;
-                    }
+                    //else
+                    //{
+                    //    cutOffMarker = this.screenWidthInChars;
+                    //}
                 }
 
                 return splitter.ToString();
