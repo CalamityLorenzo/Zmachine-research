@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
 using System.Security.AccessControl;
 using System.Text;
@@ -366,6 +367,8 @@ namespace Zmachine.Library.V2.Implementation
                 var createLine = true;
                 while (lineBreaker)
                 {
+                    // Very naive: find where the nearest space is an get all those characters leading up to it.
+                    var newRow = "";
                     while (createLine)
                     {
                         if (currentRow[currentRowStartIndex + cutOffMarker] != ' ')
@@ -376,22 +379,50 @@ namespace Zmachine.Library.V2.Implementation
                         {
                             createLine = false;
                             // Append new chunk
-                            var newRow = currentRow.Substring(currentRowStartIndex, cutOffMarker);
                             // newRow assumes the lines does not contain a break in it.
-                            // If a break(s) has happened, we have to seperate them out.
-                            // And if there are any left over chars, move the currentRowStartIndex back.
-                            if (newRow.Contains('\r'))
-                            {
-                                var t = newRow.Split(new char[] { '\r' }, StringSplitOptions.);
-
-
-                            }
-                            splitter.Append(newRow + '\r');
                         }
                     }
                     // Prepare for the next go.
                     createLine = true;
-                    currentRowStartIndex = cutOffMarker + currentRowStartIndex + 1;
+                    // If a break(s) has happened, we have to seperate them out.
+                    // And if there are any left over chars, move the currentRowStartIndex back.
+                    var leftOverChars = 0;
+                    if (newRow.Contains('\r'))
+                    {
+                        // do we end with a n '\r'?
+                        var endOnNewLine = newRow.EndsWith('\r');
+                        var splitsVille = newRow.Split('\r');
+                        for (var x = 0; x < splitsVille.Length; ++x)
+                        {
+                            var entry = splitsVille[x];
+
+                            if (x == splitsVille.Length - 1)
+                            {
+                                if (endOnNewLine)
+                                {
+                                    splitter.Append(entry+'\r');
+                                }
+                                else
+                                {
+                                    splitter.Append(entry);
+                                    leftOverChars = 1;
+                                }
+                            }
+                            else
+                            {
+                                splitter.Append(entry + '\r');
+                            }
+                                
+                        }
+
+                    }
+                    else
+                    {
+                        splitter.Append(newRow + '\r');
+                    }
+
+
+                    currentRowStartIndex = (cutOffMarker + currentRowStartIndex + 1)-leftOverChars;
                     // Assign the next thunk.
                     //currentRow = currentRow.Substring(currentRowStartIndex);
                     if (literal.Length - currentRowStartIndex < this.screenWidthInChars)
