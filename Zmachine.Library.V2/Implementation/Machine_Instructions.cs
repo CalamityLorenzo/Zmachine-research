@@ -369,25 +369,29 @@ namespace Zmachine.Library.V2.Implementation
                     while (createLine)
                     {
                         if (currentRow[currentRowStartIndex + cutOffMarker] != ' ')
-                            cutOffMarker -= 1;
-                        else if (currentRow[currentRowStartIndex + cutOffMarker] == '\r')
                         {
-                            createLine = false;
-                            // Append new chunk
-                            var newRow = currentRow.Substring(currentRowStartIndex, cutOffMarker+1);
-                            splitter.Append(newRow);
+                            cutOffMarker -= 1;
                         }
-                        else 
+                        else
                         {
                             createLine = false;
                             // Append new chunk
                             var newRow = currentRow.Substring(currentRowStartIndex, cutOffMarker);
+                            // newRow assumes the lines does not contain a break in it.
+                            // If a break(s) has happened, we have to seperate them out.
+                            // And if there are any left over chars, move the currentRowStartIndex back.
+                            if (newRow.Contains('\r'))
+                            {
+                                var t = newRow.Split(new char[] { '\r' }, StringSplitOptions.);
+
+
+                            }
                             splitter.Append(newRow + '\r');
                         }
                     }
                     // Prepare for the next go.
                     createLine = true;
-                    currentRowStartIndex = cutOffMarker + currentRowStartIndex+1;
+                    currentRowStartIndex = cutOffMarker + currentRowStartIndex + 1;
                     // Assign the next thunk.
                     //currentRow = currentRow.Substring(currentRowStartIndex);
                     if (literal.Length - currentRowStartIndex < this.screenWidthInChars)
@@ -483,8 +487,6 @@ namespace Zmachine.Library.V2.Implementation
             //var record = instruct;
             this.IsReadingInstruction = true;
         }
-
-
 
         internal void SetAttr(DecodedInstruction instruct)
         {

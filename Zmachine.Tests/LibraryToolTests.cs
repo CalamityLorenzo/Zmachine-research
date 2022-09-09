@@ -44,8 +44,8 @@ namespace Zmachine.Tests
             this.outputStream = new MemoryStream();
             this.outputTranscript = new MemoryStream();
 
-            this.v3Machine = new Machine(inputStream0, inputStream1, outputStream, outputTranscript, V3Memory);
-            this.v5Machine = new Machine(inputStream0, inputStream1, outputStream, outputTranscript, V5Memory);
+            this.v3Machine = new Machine(inputStream0, inputStream1, outputStream, outputTranscript, 60, 14, V3Memory);
+            this.v5Machine = new Machine(inputStream0, inputStream1, outputStream, outputTranscript, 60, 14, V5Memory);
 
         }
 
