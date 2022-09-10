@@ -1,6 +1,7 @@
 ﻿using Zmachine.Library.V2;
 using Zmachine.Library.V2.Implementation;
 using Zmachine.Library.V2.Objects;
+using ZMachineTools;
 
 namespace Zmachine.Tests
 {
@@ -371,6 +372,18 @@ namespace Zmachine.Tests
             }
         }
 
+        [Test(Description = "v3 Print object property name")]
+        public void V3PrintObjectShortName()
+        {
+            ZmachineTools newTools = new(v3Machine);
+            var obj = newTools.GetObject(2);
+
+            var buytes = obj.PropertyTable.shortNameBytes;
+            var stri = newTools.DecodeEncodedText(buytes);
+            Assert.IsTrue(true);
+        }
+
+
         [Test(Description = "3 Display an object tree.")]
         public void V3ObjectTree()
         {
@@ -385,22 +398,91 @@ namespace Zmachine.Tests
             Console.WriteLine(obj2);
             var obj52 = ztools.GetObject(52);
 
-            ZmObject[] children = ztools.GetChildObjects(2);
-            ZmObject[] siblings = ztools.GetSiblingObjects(2);
-            ZmObject parent = ztools.GetParentObject(2);
+            ZmObject[] children = ztools.GetChildObjects(obj2.ObjectId);
+            ZmObject[] siblings = ztools.GetSiblingObjects(obj2.ObjectId);
+            ZmObject parent = ztools.GetParentObject(obj2.ObjectId);
+            Console.WriteLine("Children: " + children.Length);
+            // display all their names
+            foreach (var item in children)
+            {
+                Console.WriteLine(item.ObjectId);
+                Console.WriteLine(ztools.DecodeEncodedText(item.PropertyTable.shortNameBytes));
+            }
 
+            Console.WriteLine("Siblings: " + siblings.Length);
+            foreach (var item in siblings)
+            {
+                Console.WriteLine($"{item.ObjectId} {(item.PropertyTable.nameLength > 0 ? ztools.DecodeEncodedText(item.PropertyTable.shortNameBytes) : "{{No Name}}")}");
+            }
+
+            var parentName = (parent.PropertyTable.nameLength > 0 ? ztools.DecodeEncodedText(parent.PropertyTable.shortNameBytes) : "{{No Name}}");
+            Console.WriteLine("\n" + parentName);
+            Console.WriteLine("========");
+            Console.WriteLine(parent);
 
         }
 
-        [Test(Description = "v3 Print object property name")]
-        public void V3PrintObjectShortName()
+        [Test(Description = "5 Display an object tree.")]
+        public void V5ObjectTree()
         {
-            ZmachineTools newTools = new(v3Machine);
-            var obj = newTools.GetObject(2);
+            var ztools = new ZmachineTools(v5Machine);
 
-            var buytes = obj.PropertyTable.shortNameBytes;
-            var stri = newTools.DecodeEncodedText(buytes);
-            Assert.IsTrue(true);
+            var obj = ztools.GetObject(242);
+
+
+            var objName = ztools.DecodeEncodedText(obj.PropertyTable.shortNameBytes);
+            Console.WriteLine(objName);
+            Console.WriteLine("===========");
+            Console.WriteLine(obj);
+
+            ZmObject[] children = ztools.GetChildObjects(obj.ObjectId);
+            ZmObject[] siblings = ztools.GetSiblingObjects(obj.ObjectId);
+            ZmObject parent = ztools.GetParentObject(obj.ObjectId);
+            Console.WriteLine("Children: " + children.Length);
+            // display all their names
+            foreach (var item in children)
+            {
+                Console.WriteLine(item.ObjectId);
+                Console.WriteLine(ztools.DecodeEncodedText(item.PropertyTable.shortNameBytes));
+            }
+
+            Console.WriteLine("Siblings: " + siblings.Length);
+            foreach (var item in siblings)
+            {
+                Console.WriteLine($"{item.ObjectId} {(item.PropertyTable.nameLength > 0 ? ztools.DecodeEncodedText(item.PropertyTable.shortNameBytes) : "{{No Name}}")}");
+            }
+
+            var parentName = (parent.PropertyTable.nameLength > 0 ? ztools.DecodeEncodedText(parent.PropertyTable.shortNameBytes) : "{{No Name}}");
+            Console.WriteLine("\n" + parentName);
+            Console.WriteLine("========");
+            Console.WriteLine(parent);
+
+        }
+
+        [Test(Description = "3 Change an objects parent.")]
+        public void V3InsertObject()
+        {
+            var ztools = new ZmachineTools(v3Machine);
+
+            var obj2 = ztools.GetObjectDebug(2);
+            var obj52 = ztools.GetObjectDebug(52);
+
+            Console.WriteLine($"Object {obj52.ObjectId} {(obj52.PropertyTable.shortNameBytes.Length > 0 ? ztools.DecodeEncodedText(obj52.PropertyTable.shortNameBytes) : "{{No Name}}")}");
+            Console.WriteLine($"Destination {obj2.ObjectId} {(obj2.PropertyTable.shortNameBytes.Length > 0 ? ztools.DecodeEncodedText(obj2.PropertyTable.shortNameBytes) : "{{No Name}}")}");
+            Console.WriteLine($"Object Parent ={obj52.Parent}");
+            Console.WriteLine($"Object Sibling ={obj52.Sibling}");
+            Console.WriteLine($"Dest Child ={obj2.Child}");
+
+            ztools.InsertObjectDebug(52, 2);
+
+            var obj2a = ztools.GetObjectDebug(2);
+            var obj52a = ztools.GetObjectDebug(52);
+            Console.WriteLine($"Object {obj52a.ObjectId} {(obj52a.PropertyTable.shortNameBytes.Length > 0 ? ztools.DecodeEncodedText(obj52a.PropertyTable.shortNameBytes) : "{{No Name}}")}");
+            Console.WriteLine($"Destination {obj2a.ObjectId} {(obj2a.PropertyTable.shortNameBytes.Length > 0 ? ztools.DecodeEncodedText(obj2a.PropertyTable.shortNameBytes) : "{{No Name}}")}");
+            Console.WriteLine($"Object Parent ={obj52a.Parent}");
+            Console.WriteLine($"Object Sibling ={obj52a.Sibling}");
+            Console.WriteLine($"Dest Child ={obj2a.Child}");
+
         }
     }
 }

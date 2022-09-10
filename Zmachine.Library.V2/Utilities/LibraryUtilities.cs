@@ -246,7 +246,6 @@ namespace Zmachine.Library.V2.Utilities
                 (ushort)(memory[globalVars + ((variable - 16) * 2)] << 8 | memory[globalVars + ((variable - 16) * 2) + 1])
         };
 
-
         public static byte[] ConvertAttributes(this IEnumerable<byte> attributes)
         {
             var bitArray = new BitArray(attributes.ToArray());

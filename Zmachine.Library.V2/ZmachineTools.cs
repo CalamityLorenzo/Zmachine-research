@@ -180,13 +180,13 @@ namespace Zmachine.Library.V2
             // THe first command we actually run is the call or call_1n (version dependent)
             // starting the routine at the current position, creates a new stack everything is neat and ordinary.
             // Diffrent versions of call depending on version...obvs.
-            var routineHeader = version<=3 ? new byte[]
+            var routineHeader = version <= 3 ? new byte[]
             {
                 // Call 1 large constant
                 0xe0, 63, 00, 00, // call_1n x x (4) V 
                 0xb0,       // return true
                 // Routine end\
-            }:new byte[]
+            } : new byte[]
             {
                 // call
                 0x8f, 00, 00, // call_1n x x (4) V 
@@ -236,8 +236,8 @@ namespace Zmachine.Library.V2
             // the v3< has an extra byte to descrive the operands (63)
             // So when we patch in the correct address to jump to, the position is 1 byte differnt in the v3 verion
             var versionOffset = version <= 3 ? 1 : 0;
-            completeRoutine[1+versionOffset] = getBytes[0];
-            completeRoutine[2+versionOffset] = getBytes[1];
+            completeRoutine[1 + versionOffset] = getBytes[0];
+            completeRoutine[2 + versionOffset] = getBytes[1];
 
             this.routineEndAddress = machine.ProgramCounter + completeRoutineLength;
             // Copy out and store a chunk of data the same size as the injected
@@ -303,6 +303,7 @@ namespace Zmachine.Library.V2
         /// <param name="objectIdx"></param>
         /// <returns></returns>
         public ZmObject GetObject(ushort objectIdx) => machine.ObjectTable[objectIdx];
+        public ZmObject GetObjectDebug(ushort objectIdx) => this.debugObjects[objectIdx];
 
         /// <summary>
         /// fetches a global variale value.
@@ -332,6 +333,9 @@ namespace Zmachine.Library.V2
         public ZmObject[] GetSiblingObjects(ushort parentIdx) => this.debugObjects.GetSiblings(parentIdx);
 
 
-        public ZmObject GetParentObject(ushort parentIdx) => this.debugObjects.GetObject(parentIdx);
+        public ZmObject GetParentObject(ushort objectId) => this.debugObjects.GetParent(objectId);
+
+        public void InsertObjectDebug(ushort objId, ushort destId) => this.debugObjects.Insert_Obj(objId, destId);
+
     }
 }
