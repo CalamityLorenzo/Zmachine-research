@@ -358,85 +358,71 @@ namespace Zmachine.Library.V2.Implementation
         {
             if (literal.Length > this.screenWidthInChars)
             {
-                var lineBreaker = true;
-                var currentRow = literal;
-                var currentRowStartIndex = 0;
-                StringBuilder splitter = new StringBuilder();
-
-                var cutOffMarker = this.screenWidthInChars;
-                var createLine = true;
-                while (lineBreaker)
+                var splitLiteral = new StringBuilder();
+                // Is the currently string over the limit to fit on the screen.
+                // This is the rows loop. 1 loop per row.
+                bool overTheLimit = true;
+                // The position in the string that starts this row
+                string AllData = literal;
+                // You can end up with a dangling part of text dependiong on how the text split.
+                int leftOverChars = 0;
+                var RowStart = 0;
+                while (overTheLimit)
                 {
-                    // Very naive: find where the nearest space is an get all those characters leading up to it.
-                    var newRow = "";
-                    while (createLine)
+                    var CurrentRowLength = this.screenWidthInChars - leftOverChars;
+                    var GetCurrentRow = true;
+                    var rowLiteral = "";
+                    while (GetCurrentRow)
                     {
-                        if (currentRow[currentRowStartIndex + cutOffMarker] != ' ')
+                        // COunting from the limit (screenWidthInChars) downwards find the first space character
+                        if (AllData[RowStart + CurrentRowLength] != ' ')
                         {
-                            cutOffMarker -= 1;
+                            CurrentRowLength -= 1;
                         }
                         else
                         {
-                            createLine = false;
-                            // Append new chunk
-                            // newRow assumes the lines does not contain a break in it.
+                            // We have found a complete row.
+                            GetCurrentRow = false;
+                            rowLiteral = AllData.Substring(RowStart, CurrentRowLength);
                         }
                     }
-                    // Prepare for the next go.
-                    createLine = true;
-                    // If a break(s) has happened, we have to seperate them out.
-                    // And if there are any left over chars, move the currentRowStartIndex back.
-                    var leftOverChars = 0;
-                    if (newRow.Contains('\r'))
-                    {
-                        // do we end with a n '\r'?
-                        var endOnNewLine = newRow.EndsWith('\r');
-                        var splitsVille = newRow.Split('\r');
-                        for (var x = 0; x < splitsVille.Length; ++x)
-                        {
-                            var entry = splitsVille[x];
 
-                            if (x == splitsVille.Length - 1)
+                    // We now have a full line, but it may contain newline chars so.
+                    // Now it just needs a little cleaning up.
+                    if (!rowLiteral.Contains('\r'))
+                    {
+                        splitLiteral.Append(rowLiteral + '\r');
+                        // Set the next row start position.
+                        RowStart = RowStart + CurrentRowLength;
+                    }
+                    else // if we have new lines, we need to isolate those segments and append them
+                    {
+                        var startScan = 0;
+                        for (var x = 0; x < rowLiteral.Length; ++x)
+                        {
+                            if (rowLiteral[x] == '\r')
                             {
-                                if (endOnNewLine)
-                                {
-                                    splitter.Append(entry+'\r');
-                                }
-                                else
-                                {
-                                    splitter.Append(entry);
-                                    leftOverChars = 1;
-                                }
+                                splitLiteral.Append(rowLiteral.Substring(startScan, startScan==0? x : x-startScan) + '\r');
+                                startScan = x + 1;
+                            }
+
+                            if (x == rowLiteral.Length - 1 && rowLiteral[x]!='\r')
+                            {
+                                splitLiteral.Append(rowLiteral.Substring(startScan));
+                                leftOverChars = rowLiteral.Length - startScan;
                             }
                             else
                             {
-                                splitter.Append(entry + '\r');
+                                leftOverChars = 0;
                             }
-                                
                         }
 
-                    }
-                    else
-                    {
-                        splitter.Append(newRow + '\r');
-                    }
-
-
-                    currentRowStartIndex = (cutOffMarker + currentRowStartIndex + 1)-leftOverChars;
-                    // Assign the next thunk.
-                    //currentRow = currentRow.Substring(currentRowStartIndex);
-                    if (literal.Length - currentRowStartIndex < this.screenWidthInChars)
-                    {
-                        splitter.Append(currentRow.Substring(currentRowStartIndex));
-                        lineBreaker = false;
-                    }
-                    else
-                    {
-                        cutOffMarker = this.screenWidthInChars;
+                        RowStart = RowStart + CurrentRowLength;
                     }
                 }
 
-                return splitter.ToString();
+
+                return splitLiteral.ToString();
 
             }
             else
