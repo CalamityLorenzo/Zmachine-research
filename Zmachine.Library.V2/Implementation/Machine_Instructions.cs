@@ -14,8 +14,6 @@ namespace Zmachine.Library.V2.Implementation
     public partial class Machine
     {
 
-
-
         internal void Add(DecodedInstruction instruct)
         {
             // Depending on the operand types depends if we have a value or pointer to a variable

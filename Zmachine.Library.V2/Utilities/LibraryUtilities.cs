@@ -243,7 +243,7 @@ namespace Zmachine.Library.V2.Utilities
             0 => record.LocalStack.Pop(), // Stack
             >= 1 and <= 15 => record.Locals[variable-1],
             > 15 and <= 255 => // Global
-                (ushort)(memory[globalVars + ((variable - 16) * 2)] << 8 | memory[globalVars + ((variable - 16) * 2) + 1])
+                (ushort)(memory.Get2ByteValue(globalVars + ((variable - 16) * 2)))
         };
 
         public static byte[] ConvertAttributes(this IEnumerable<byte> attributes)
