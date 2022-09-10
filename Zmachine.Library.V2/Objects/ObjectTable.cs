@@ -296,7 +296,18 @@ namespace Zmachine.Library.V2.Objects
 
         internal ZmObject[] GetChildren(ushort parentIdx)
         {
-            throw new NotImplementedException();
+            // We don't need to hydrate every object, 
+            // They are all fixed width so we are literally readting a byte or a word from memory
+            var startObjectAddress = this.GetObjectStartAddress(0);
+            // Size in bytes
+            var objectTotalSize = this.version < 4 ? 9 : 14;
+            var parentAddress = this.version < 4 ? 0 : 0;
+            for(var x = 0; x < this.maximumObjects; ++x) {
+                var parentId =version>4 ? 
+                        (this.memory[startObjectAddress + parentAddress]<<8 | this.memory[startObjectAddress + parentAddress+1])
+                        : this.memory[startObjectAddress + parentAddress];
+                
+            }
         }
 
         internal ZmObject[] GetSiblings(ushort parentIdx)

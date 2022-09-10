@@ -9,7 +9,7 @@ namespace Zmachine.Library.V2
     public class ZmachineTools
     {
         private readonly Machine machine;
-        private readonly ushort[] machineGameData;
+        private readonly byte[] machineGameData;
         private int routineStartPC;
         private int routineEndAddress;
         private byte[] oldRoutineData;
@@ -19,7 +19,7 @@ namespace Zmachine.Library.V2
         {
             // This machine must already be prepped.
             this.machine = machine;
-            this.machineGameData = new ushort[machine.GameData.Length];
+            this.machineGameData = new byte[machine.GameData.Length];
             machine.GameData.CopyTo(machineGameData, 0);
 
             // local objects bother for debugging
