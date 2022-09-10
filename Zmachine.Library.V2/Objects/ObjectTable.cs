@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Net.Mail;
-using System.Reflection.Metadata.Ecma335;
-using System.Security;
-using Zmachine.Library.V2.Utilities;
+﻿using Zmachine.Library.V2.Utilities;
 
 namespace Zmachine.Library.V2.Objects
 {
@@ -127,56 +122,9 @@ namespace Zmachine.Library.V2.Objects
             // Get the object properties tableaddress
             var propertyTableAddress = memory.Get2ByteValue(startPaSibCh + paSibChLength);
             // Start of the property header table.
-            var propertyHeaderLength = memory[propertyTableAddress];
-            var headerNameStart = propertyTableAddress + 1;
-            var headerNameEnd = headerNameStart + (propertyHeaderLength * 2);
-            // Short name of property
-            var propertyHeaderNameBytes = memory[headerNameStart..headerNameEnd];
 
-            // Object properties are stored in descending numnerical do-hickeys
-            //12.4 Property tables
-            List<ObjectProperty> objectProperties = new();
-            var propertyStart = headerNameEnd;
-            var propertyNumber = 0;
-            var propertyLength = 0;
-            // This has a different layout depending on version.
-            var propertySizeByte = memory[propertyStart];
-            // The 
-            while (propertySizeByte != 0)
-            {
 
-                // note we have to ensure the counter (propertyStart) is in the correct position.
-                // 12.4.2.1 ( we have a 2 byte size entry) 
-                if ((propertySizeByte & 0b10000000) == 0b10000000 && version > 3)
-                {
-                    //bits 0 to 5 contain the property number
-                    propertyNumber = (memory[propertyStart] & 0b111111);
-                    propertyLength = (memory[propertyStart += 1] & 0b111111);
-                    //propertyHeaderSize = memory[propertyStart] << 8 | memory[propertyStart += 1];
-                }
-                // 12.4.2.2
-                else if ((propertySizeByte & 0b10000000) == 0b00000000 && version > 3)
-                {
-                    propertyNumber = propertySizeByte & 0b111111;
-                    propertyLength = (propertySizeByte >> 6) + 1;
-
-                }
-                // 12.4.1
-                else if (version < 4)
-                {
-                    propertyNumber = propertySizeByte & 0b11111;
-                    propertyLength = (propertySizeByte >> 5) + 1;
-                }
-
-                var propertyEntryStart = propertyStart += 1;
-                var propertyEntryEnd = propertyStart += propertyLength;
-                var propertyData = memory[propertyEntryStart..propertyEntryEnd];
-                objectProperties.Add(new(propertyLength, propertyNumber, propertyData));
-                // Beginning of the next property record
-                propertySizeByte = memory[propertyStart];
-            }
-
-            var objectPropertyTable = new ObjectPropertyTable(propertyHeaderLength, propertyHeaderNameBytes, objectProperties.ToArray());
+            var objectPropertyTable = GetObjectPropertyTable(propertyTableAddress); // new ObjectPropertyTable(propertyHeaderLength, propertyHeaderNameBytes, objectProperties.ToArray());
             // Create an acutal object.
             var objectDetails = new ZmObject(
                 ObjectId: objectId,
@@ -346,5 +294,14 @@ namespace Zmachine.Library.V2.Objects
             return new ObjectPropertyTable(propertyHeaderLength, propertyHeaderNameBytes, objectProperties.ToArray());
         }
 
+        internal ZmObject[] GetChildren(ushort parentIdx)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal ZmObject[] GetSiblings(ushort parentIdx)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

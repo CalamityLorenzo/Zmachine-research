@@ -29,7 +29,7 @@ namespace Zmachine.Tests
             V5Memory = new byte[V5MemoryStream.Length];
             V5MemoryStream.Read(V5Memory, 0, V5Memory.Length);
 
-         //   fileStream.Write(V5Memory.AsSpan());
+            //   fileStream.Write(V5Memory.AsSpan());
 
             filename = "Curses\\hollywoo.dat";
             Console.WriteLine($"==== {filename} ====");
@@ -239,6 +239,7 @@ namespace Zmachine.Tests
             Assert.IsTrue(propertyTable[0].propertyNumber == 35);
             Assert.IsTrue(Enumerable.SequenceEqual(propertyTable[0].PropertyData, new byte[] { 0xb6, 0xd8 }));
         }
+
         [Test(Description = "V5 Ouputs all the globals available")]
         public void V5ConfirmGlobals()
         {
@@ -260,7 +261,7 @@ namespace Zmachine.Tests
         {
             ZmachineTools newTools = new(v5Machine);
             newTools.SetGlobalVariable(0, 57);
-            var result =  newTools.GetGlobalVariable(0);
+            var result = newTools.GetGlobalVariable(0);
             Assert.IsTrue(result == 57);
             newTools.DumpGlobals();
         }
@@ -370,6 +371,26 @@ namespace Zmachine.Tests
             }
         }
 
+        [Test(Description = "3 Display an object tree.")]
+        public void V3ObjectTree()
+        {
+            var ztools = new ZmachineTools(v3Machine);
+
+            var obj2 = ztools.GetObject(2);
+
+
+            var objName = ztools.DecodeEncodedText(obj2.PropertyTable.shortNameBytes);
+            Console.WriteLine(objName);
+            Console.WriteLine("===========");
+            Console.WriteLine(obj2);
+            var obj52 = ztools.GetObject(52);
+
+            ZmObject[] children = ztools.GetChildObjects(2);
+            ZmObject[] siblings = ztools.GetSiblingObjects(2);
+            ZmObject parent = ztools.GetParentObject(2);
+
+
+        }
 
         [Test(Description = "v3 Print object property name")]
         public void V3PrintObjectShortName()
@@ -378,7 +399,7 @@ namespace Zmachine.Tests
             var obj = newTools.GetObject(2);
 
             var buytes = obj.PropertyTable.shortNameBytes;
-            var stri  = newTools.DecodeEncodedText(buytes);
+            var stri = newTools.DecodeEncodedText(buytes);
             Assert.IsTrue(true);
         }
     }

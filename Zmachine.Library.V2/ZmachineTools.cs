@@ -9,14 +9,21 @@ namespace Zmachine.Library.V2
     public class ZmachineTools
     {
         private readonly Machine machine;
+        private readonly ushort[] machineGameData;
         private int routineStartPC;
         private int routineEndAddress;
         private byte[] oldRoutineData;
+        private ObjectTable debugObjects;
 
         public ZmachineTools(Machine machine)
         {
             // This machine must already be prepped.
             this.machine = machine;
+            this.machineGameData = new ushort[machine.GameData.Length];
+            machine.GameData.CopyTo(machineGameData, 0);
+
+            // local objects bother for debugging
+            this.debugObjects = new ObjectTable(this.machine.StoryHeader.ObjectTable, this.machine.StoryHeader.Version, this.machineGameData);
         }
 
         public void DumpDictionary()
@@ -319,5 +326,12 @@ namespace Zmachine.Library.V2
         public byte GetMemoryLocation(ushort idx) => this.machine.GameData[idx];
 
         public byte[] GetMemoryRange(ushort start, ushort length) => this.machine.GameData[start..(start + length)];
+
+        public ZmObject[] GetChildObjects(ushort parentIdx) => this.debugObjects.GetChildren(parentIdx);
+
+        public ZmObject[] GetSiblingObjects(ushort parentIdx) => this.debugObjects.GetSiblings(parentIdx);
+
+
+        public ZmObject GetParentObject(ushort parentIdx) => this.debugObjects.GetObject(parentIdx);
     }
 }

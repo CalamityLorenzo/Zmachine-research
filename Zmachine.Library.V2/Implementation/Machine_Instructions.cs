@@ -361,66 +361,74 @@ namespace Zmachine.Library.V2.Implementation
                 var splitLiteral = new StringBuilder();
                 // Is the currently string over the limit to fit on the screen.
                 // This is the rows loop. 1 loop per row.
-                bool overTheLimit = true;
+                bool widerTheScreen = true;
                 // The position in the string that starts this row
                 string AllData = literal;
                 // You can end up with a dangling part of text dependiong on how the text split.
-                int leftOverChars = 0;
+                int rowLengthOffset = 0;
                 var RowStart = 0;
-                while (overTheLimit)
+                while (widerTheScreen)
                 {
-                    var CurrentRowLength = this.screenWidthInChars - leftOverChars;
-                    var GetCurrentRow = true;
+                    var CurrentRowLength = this.screenWidthInChars - rowLengthOffset;
+                    var CreateRows = true;
                     var rowLiteral = "";
-                    while (GetCurrentRow)
+                    if (rowLengthOffset > 0) rowLengthOffset = 0;
+                    while (CreateRows)
                     {
-                        // COunting from the limit (screenWidthInChars) downwards find the first space character
-                        if (AllData[RowStart + CurrentRowLength] != ' ')
+                        if (RowStart + CurrentRowLength > AllData.Length)
                         {
-                            CurrentRowLength -= 1;
+                            CreateRows = false;
+                            CurrentRowLength = (AllData.Length - 1) - RowStart;
+                            rowLiteral = AllData.Substring(RowStart, CurrentRowLength);
                         }
                         else
                         {
-                            // We have found a complete row.
-                            GetCurrentRow = false;
-                            rowLiteral = AllData.Substring(RowStart, CurrentRowLength);
-                        }
-                    }
-
-                    // We now have a full line, but it may contain newline chars so.
-                    // Now it just needs a little cleaning up.
-                    if (!rowLiteral.Contains('\r'))
-                    {
-                        splitLiteral.Append(rowLiteral + '\r');
-                        // Set the next row start position.
-                        RowStart = RowStart + CurrentRowLength;
-                    }
-                    else // if we have new lines, we need to isolate those segments and append them
-                    {
-                        var startScan = 0;
-                        for (var x = 0; x < rowLiteral.Length; ++x)
-                        {
-                            if (rowLiteral[x] == '\r')
+                            // COunting from the limitz (screenWidthInChars) downwards find the first space character
+                            if (AllData[RowStart + CurrentRowLength] != ' ')
                             {
-                                splitLiteral.Append(rowLiteral.Substring(startScan, startScan==0? x : x-startScan) + '\r');
-                                startScan = x + 1;
-                            }
-
-                            if (x == rowLiteral.Length - 1 && rowLiteral[x]!='\r')
-                            {
-                                splitLiteral.Append(rowLiteral.Substring(startScan));
-                                leftOverChars = rowLiteral.Length - startScan;
+                                CurrentRowLength -= 1;
                             }
                             else
                             {
-                                leftOverChars = 0;
+                                // We have found a complete row.
+                                CreateRows = false;
+                                rowLiteral = AllData.Substring(RowStart, CurrentRowLength + 1); // grabs the space
                             }
                         }
-
-                        RowStart = RowStart + CurrentRowLength;
                     }
-                }
 
+                    if (!rowLiteral.Contains('\r'))
+                    {
+                        splitLiteral.Append(rowLiteral + '\r');
+                        RowStart += CurrentRowLength + 1; // Ensures the space char is on the previous line.
+                    }
+                    else
+                    {
+                        // okay the row has line breaks in it.
+                        // quantize them into discrete units.
+                        // The last entry will *not* end on a '\r' (The loops above split on a new line)
+                        // So now we print this partial line, with no line break, this is now an offset
+                        // That must be carried throught to the next run of text being processed.
+                        // (three attempts two days for this fucking algo and I KNOW I've written it before)
+                        // Who fucks up an accumulator?
+                        var rows = rowLiteral.Split('\r');
+                        for (var x = 0; x < rows.Length; ++x)
+                        {
+                            if (x == rows.Length - 1)
+                            {
+                                RowStart += CurrentRowLength + 1;
+                                splitLiteral.Append(rows[x]);
+                                rowLengthOffset = rows[x].Length;
+                            }
+                            else
+                            {
+                                splitLiteral.Append(rows[x] + '\r');
+                            }
+                        }
+                    }
+                    if (RowStart >= AllData.Length - 1)
+                        widerTheScreen = false;
+                }
 
                 return splitLiteral.ToString();
 
