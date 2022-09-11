@@ -331,6 +331,15 @@ namespace Zmachine.Library.V2.Implementation
             PrintToScreen(literal);
         }
 
+        internal void PrintPAddr(DecodedInstruction instruct)
+        {
+            int memoryLocation = ((int)GetVariableValue(instruct.operands[0])).GetPackedAddress(this.StoryHeader.Version, this.StoryHeader.RoutinesOffset, this.StoryHeader.StaticStringsOffset);
+            var chars = TextProcessor.GetZChars(this.GameData, ref memoryLocation);
+            var literal = this.TextDecoder.DecodeZChars(chars);
+            PrintToScreen(literal);
+        }
+
+
         internal void PrintNum(DecodedInstruction instruct)
         {
             string number = GetVariableValue(instruct.operands[0]).ToString(); //.ToString("0.##");
@@ -519,6 +528,19 @@ namespace Zmachine.Library.V2.Implementation
             this.ObjectTable.Set_Attribute(objectId, attribute);
             var obj = this.ObjectTable[objectId];
         }
+
+        internal void ShowStatus(DecodedInstruction instruct)
+        {
+            var objectId = this.GlobalVariables[0];
+            var properties = this.ObjectTable[objectId].PropertyTable;
+
+            var objcetName = this.TextDecoder.DecodeZChars(
+                 this.TextDecoder.GetZChars(properties.shortNameBytes)
+                 );
+
+            this.PrintToScreen($"@@STATUS_LINE@@:{objcetName}");
+        }
+
         internal void Store(DecodedInstruction instruct)
         {
             // set the var(l) to value
