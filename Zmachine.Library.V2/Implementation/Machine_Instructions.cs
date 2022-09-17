@@ -263,8 +263,9 @@ namespace Zmachine.Library.V2.Implementation
             var op1 = GetVariableValue(instruct.operands[0]);
             var op2 = GetVariableValue(instruct.operands[1]);
 
-            var op2ParentId = this.ObjectTable.GetParent(op2);
-            if((op1 == op2ParentId.ObjectId)==instruct.branch.BranchIfTrue)
+            var objPa = this.ObjectTable[op1];
+            //var op2ParentId = this.ObjectTable.GetParent(op1);
+            if((op2 == objPa.Parent) ==instruct.branch.BranchIfTrue)
                 this.ProgramCounter = ProgramCounter + (short)instruct.branch.Offset - 2;
 
         }
@@ -290,6 +291,10 @@ namespace Zmachine.Library.V2.Implementation
                 {
                     //this.ProgramCounter -= 2;
                     this.ProgramCounter = ProgramCounter + (short)instruct.branch.Offset - 2;
+                }
+                else
+                {
+                    Branch(instruct.branch.Offset);
                 }
 
             }
