@@ -186,6 +186,9 @@ namespace Zmachine.Library.V2.Implementation
                     case "jg":
                         Jg(currentInstr);
                         break;
+                    case "jin":
+                        Jin(currentInstr);
+                        break;
                     case "jl":
                         Jl(currentInstr);
                         break;

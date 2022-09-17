@@ -15,6 +15,8 @@ namespace Zmachine.Library.V2
         private byte[] oldRoutineData;
         private ObjectTable debugObjects;
 
+        public int CmdCounter { get; private set; }
+
         public ZmachineTools(Machine machine)
         {
             // This machine must already be prepped.
@@ -24,6 +26,7 @@ namespace Zmachine.Library.V2
 
             // local objects bother for debugging
             this.debugObjects = new ObjectTable(this.machine.StoryHeader.ObjectTable, this.machine.StoryHeader.Version, this.machineGameData);
+            this.CmdCounter = 0;
         }
 
         public void DumpDictionary()
@@ -146,9 +149,10 @@ namespace Zmachine.Library.V2
 
         public void Step()
         {
+            this.CmdCounter += 1;
             machine.Update();
             var instr = machine.currentInstr;
-            Debug.WriteLine($"{machine.currentInstr.startAddressHex} {instr.instruction.Name} {instr.instruction.OpCode}");
+            Debug.WriteLine($"{CmdCounter} {machine.currentInstr.startAddressHex} {instr.instruction.Name} {instr.instruction.OpCode}");
             //if (machine.outputScreen.Length > 0)
             //{
             //    var pos = machine.outputScreen.Position;

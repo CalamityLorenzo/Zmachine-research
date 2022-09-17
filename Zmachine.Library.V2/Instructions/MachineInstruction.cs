@@ -28,9 +28,17 @@
             if (branchValue.Length == 0)
                 this.Offset = 0;
             else if (branchValue.Length == 1)
-                this.Offset = (short) (branchValue[0] & 0b00111111); 
+                this.Offset = (short)((branchValue[0] & 0b00111111));
             else
-                this.Offset = (short)((branchValue[0] & 0b0011111) << 8 | branchValue[1]);
+            {
+                ushort final = (ushort)((branchValue[0] & 0b00111111) << 8 | branchValue[1]);
+                // Check the signbit on the 14bit number.
+                if ((final & 0x2000) == 0x2000)
+                    final |= 0xc000;
+
+                this.Offset = (short)(final);
+
+            }
             BranchIfTrue = branchIfTrue;
         }
     }

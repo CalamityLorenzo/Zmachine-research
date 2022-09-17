@@ -159,7 +159,7 @@ namespace Zmachine.Library.V2.Implementation
         {
             var objectId = GetVariableValue(instruct.operands[0]);
             var zObject = this.ObjectTable[objectId];
-            //this.StoreVariableValue(instruct.store, zObject.Child);
+            this.StoreVariableValue(instruct.store, zObject.Child);
             if ((zObject.Child != 0) == instruct.branch.BranchIfTrue)
                 Branch(instruct.branch.Offset);
 
@@ -182,6 +182,7 @@ namespace Zmachine.Library.V2.Implementation
         {
             var objectId = GetVariableValue(instruct.operands[0]);
             var siblingId = this.ObjectTable.GetSibling(objectId);
+            this.StoreVariableValue(instruct.store, siblingId);
             if ((siblingId != 0) == instruct.branch.BranchIfTrue)
                 Branch(instruct.branch.Offset);
         }
@@ -213,7 +214,7 @@ namespace Zmachine.Library.V2.Implementation
 
             variableResult++;
             StoreVariableValue(variableId, variableResult);
-                
+
             if (((short)variableResult > (short)valueToCompaire) == instruct.branch.BranchIfTrue)
                 Branch(instruct.branch.Offset);
         }
@@ -235,7 +236,7 @@ namespace Zmachine.Library.V2.Implementation
                 var comparison = GetVariableValue(instruct.operands[x]);
                 if (comparitor == comparison)
                 {
-                   expressionIsTrue = true;
+                    expressionIsTrue = true;
                     break;
                 }
             }
@@ -253,18 +254,30 @@ namespace Zmachine.Library.V2.Implementation
             var comparitor = (short)GetVariableValue(instruct.operands[0]);
             var comparison = (short)GetVariableValue(instruct.operands[1]);
             if (((short)comparitor > (short)comparison) == instruct.branch.BranchIfTrue)
-                       Branch(instruct.branch.Offset);
-            //this.ProgramCounter = ProgramCounter + (short)instruct.branch.Offset - 2;
+                // Branch(instruct.branch.Offset);
+                this.ProgramCounter = ProgramCounter + (short)instruct.branch.Offset - 2;
 
         }
+        internal void Jin(DecodedInstruction instruct)
+        {
+            var op1 = GetVariableValue(instruct.operands[0]);
+            var op2 = GetVariableValue(instruct.operands[1]);
+
+            var op2ParentId = this.ObjectTable.GetParent(op2);
+            if((op1 == op2ParentId.ObjectId)==instruct.branch.BranchIfTrue)
+                this.ProgramCounter = ProgramCounter + (short)instruct.branch.Offset - 2;
+
+        }
+
+
         internal void Jl(DecodedInstruction instruct)
         {
             // Compairions are signed
             var comparitor = GetVariableValue(instruct.operands[0]);
             var comparison = GetVariableValue(instruct.operands[1]);
             if (((short)comparitor < (short)comparison) == instruct.branch.BranchIfTrue)
-                       Branch(instruct.branch.Offset);
-            //this.ProgramCounter = ProgramCounter + (short)instruct.branch.Offset - 2;
+                //          Branch(instruct.branch.Offset);
+                this.ProgramCounter = ProgramCounter + (short)instruct.branch.Offset - 2;
         }
         internal void Jz(DecodedInstruction instruct)
         {
@@ -272,8 +285,13 @@ namespace Zmachine.Library.V2.Implementation
 
             if ((val == 0) == instruct.branch.BranchIfTrue)
             {
-                       Branch(instruct.branch.Offset);
-               // this.ProgramCounter = ProgramCounter + (short)instruct.branch.Offset - 2;
+                //  Branch(instruct.branch.Offset);
+                if (instruct.branch.Offset != 0)
+                {
+                    //this.ProgramCounter -= 2;
+                    this.ProgramCounter = ProgramCounter + (short)instruct.branch.Offset - 2;
+                }
+
             }
         }
         internal void Jump(DecodedInstruction instruct)
@@ -364,10 +382,8 @@ namespace Zmachine.Library.V2.Implementation
             int memoryLocation = ((int)GetVariableValue(instruct.operands[0])).GetPackedAddress(this.StoryHeader.Version, this.StoryHeader.RoutinesOffset, this.StoryHeader.StaticStringsOffset);
             var chars = TextProcessor.GetZChars(this.GameData, ref memoryLocation);
             var literal = this.TextDecoder.DecodeZChars(chars);
-            PrintToScreen(literal);
+            PrintToScreen(PrepareForScreen(literal));
         }
-
-
         internal void PrintNum(DecodedInstruction instruct)
         {
             string number = GetVariableValue(instruct.operands[0]).ToString(); //.ToString("0.##");
@@ -389,7 +405,7 @@ namespace Zmachine.Library.V2.Implementation
         /// <param name="literal"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-  
+
         internal void PrintObj(DecodedInstruction instruct)
         {
             var objectId = GetVariableValue(instruct.operands[0]);
@@ -422,7 +438,7 @@ namespace Zmachine.Library.V2.Implementation
             var value = GetVariableValue(instruct.operands[2]);
             this.ObjectTable.SetProperty(objectId, property, value);
 
-          //  var obj = this.ObjectTable[objectId];
+            //  var obj = this.ObjectTable[objectId];
             //           obj.PropertyTable.properties.Contains(p=>p)
         }
 
@@ -519,7 +535,7 @@ namespace Zmachine.Library.V2.Implementation
             // Subtraction is signed...
             // Infact all of the arithimatic is signed.
             short result = (short)(left - right);
-            this.StoreVariableValue(instruct.store, (ushort)  result);
+            this.StoreVariableValue(instruct.store, (ushort)result);
             //LibraryUtilities.StoreResult(GameData, CallStack, instruct, StoryHeader.GlobalVariables, (ushort)result);
         }
         internal void Test(DecodedInstruction instruct)
