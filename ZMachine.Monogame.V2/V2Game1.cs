@@ -1,16 +1,13 @@
 ﻿
+using Zmachine.Library.V2;
+using Zmachine.Library.V2.Implementation;
 using ZMachine.Monogame.Component;
-using ZMachine.Monogame.Components.TextComponents;
 using ZMachine.Monogame.Components;
+using ZMachine.Monogame.Components.TextComponents;
 using ButtonState = Microsoft.Xna.Framework.Input.ButtonState;
 using Color = Microsoft.Xna.Framework.Color;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
-using Zmachine.Library.V2.Implementation;
-using Zmachine.Library.V2;
-using System.Drawing;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
-using System;
-using System.Diagnostics;
 
 namespace ZMachine.Monogame.V2
 {
@@ -74,6 +71,8 @@ namespace ZMachine.Monogame.V2
 
             var filename = "Curses\\curses.z5";
             filename = "hollywoo.dat";
+            //filename = "C:\\Code\\Zmachine-research\\MiscFiles\\leather.DAT";
+            //filename = "C:\\Code\\Zmachine-research\\MiscFiles\\Zork3.DAT";
             using var StoryData = File.Open(filename, FileMode.Open);
             var sd = new byte[StoryData.Length];
             Span<byte> spSpan = sd;

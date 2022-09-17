@@ -222,6 +222,9 @@ namespace Zmachine.Library.V2.Implementation
                     case "print_addr":
                         PrintAddr(currentInstr);
                         break;
+                    case "print_paddr":
+                        PrintPAddr(currentInstr);
+                        break;
                     case "print_char":
                         PrintChar(currentInstr);
                         break;
@@ -257,6 +260,9 @@ namespace Zmachine.Library.V2.Implementation
                         break;
                     case "set_attr":
                         SetAttr(currentInstr);
+                        break;
+                    case "show_status":
+                        ShowStatus(currentInstr);
                         break;
                     case "store":
                         Store(currentInstr);
