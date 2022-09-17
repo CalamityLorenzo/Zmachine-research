@@ -1,0 +1,434 @@
+PC: 057F3 Op (0D): STORE #42, #01, -> G32 (0001), 
+PC: 057F6 Op (0D): STORE #97, #34, -> G87 (0034), 
+PC: 057F9 Op (10): LOADB #00, #38, -> SP (0000), 
+PC: 057FD Op (41): JE SP (0000), #44,  [FALSE] -> 05809
+PC: 05809 Op (10): LOADB #00, #38, -> SP (0000), 
+PC: 0580D Op (41): JE SP (0000), #54,  [FALSE] -> 05834
+PC: 05834 Op (E0): CALL(_VS) #2F7B, #8534, #0257, New PC: 05EF6
+PC: 05F01 Op (54): ADD G19 (23F0), #34, -> L03 (2424), 
+PC: 05F05 Op (74): ADD G19 (23F0), G3D (0034), -> L02 (2424), 
+PC: 05F09 Op (61): JE L02 (2424), L03 (2424),  [FALSE] -> 05F0D
+PC: 05F0D Op (A0): JZ L04 (0000),  [TRUE] -> 05F16
+PC: 05F16 Op (55): SUB G3D (0034), #04, -> G3D (0030), 
+PC: 05F1A Op (74): ADD G19 (23F0), G3D (0030), -> L04 (2420), 
+PC: 05F1E Op (E1): STOREW L04 (2420), #00, L00 (8534), 
+PC: 05F23 Op (8C): JUMP #0021, -> 05F45
+PC: 05F45 Op (63): JG L04 (2420), G22 (0000),  [FALSE] -> 05F49
+PC: 05F49 Op (54): ADD L01 (0257), #03, -> SP (025A), 
+PC: 05F4D Op (35): SUB #00, SP (025A), -> L01 (FDA6), 
+PC: 05F51 Op (E1): STOREW L04 (2420), #01, L01 (FDA6), 
+PC: 05F56 Op (AB): RET L04 (2420), -> SP (2420), 
+PC: 0583D Op (E0): CALL(_VS) #2F7B, #93EC, #0223, New PC: 05EF6
+PC: 05F01 Op (54): ADD G19 (23F0), #34, -> L03 (2424), 
+PC: 05F05 Op (74): ADD G19 (23F0), G3D (0030), -> L02 (2420), 
+PC: 05F09 Op (61): JE L02 (2420), L03 (2424),  [FALSE] -> 05F26
+PC: 05F26 Op (4F): LOADW L02 (2420), #00, -> SP (8534), 
+PC: 05F2A Op (61): JE SP (8534), L00 (93EC),  [FALSE] -> 05F34
+PC: 05F34 Op (4F): LOADW L02 (2420), #00, -> SP (8534), 
+PC: 05F38 Op (A0): JZ SP (8534),  [FALSE] -> 05F3E
+PC: 05F3E Op (54): ADD L02 (2420), #04, -> L02 (2424), 
+PC: 05F42 Op (8C): JUMP #FFC6, -> 05F09
+PC: 05F09 Op (61): JE L02 (2424), L03 (2424),  [FALSE] -> 05F0D
+PC: 05F0D Op (A0): JZ L04 (0000),  [TRUE] -> 05F16
+PC: 05F16 Op (55): SUB G3D (0030), #04, -> G3D (002C), 
+PC: 05F1A Op (74): ADD G19 (23F0), G3D (002C), -> L04 (241C), 
+PC: 05F1E Op (E1): STOREW L04 (241C), #00, L00 (93EC), 
+PC: 05F23 Op (8C): JUMP #0021, -> 05F45
+PC: 05F45 Op (63): JG L04 (241C), G22 (0000),  [FALSE] -> 05F49
+PC: 05F49 Op (54): ADD L01 (0223), #03, -> SP (0226), 
+PC: 05F4D Op (35): SUB #00, SP (0226), -> L01 (FDDA), 
+PC: 05F51 Op (E1): STOREW L04 (241C), #01, L01 (FDDA), 
+PC: 05F56 Op (AB): RET L04 (241C), -> SP (241C), 
+PC: 05846 Op (0D): STORE #80, #26, -> G70 (0026), 
+PC: 05849 Op (0D): STORE #96, #44, -> G86 (0044), 
+PC: 0584C Op (0D): STORE #7C, #7A, -> G6C (007A), 
+PC: 0584F Op (0E): INSERT_OBJ #34, #02, [yourself] [South Junction] 
+PC: 05852 Op (0D): STORE #10, #02, -> G00 (0002), 
+PC: 05855 Op (E0): CALL(_VS) #2F7B, #66DA, #0A, New PC: 05EF6
+PC: 05F01 Op (54): ADD G19 (23F0), #34, -> L03 (2424), 
+PC: 05F05 Op (74): ADD G19 (23F0), G3D (002C), -> L02 (241C), 
+PC: 05F09 Op (61): JE L02 (241C), L03 (2424),  [FALSE] -> 05F26
+PC: 05F26 Op (4F): LOADW L02 (241C), #00, -> SP (93EC), 
+PC: 05F2A Op (61): JE SP (93EC), L00 (66DA),  [FALSE] -> 05F34
+PC: 05F34 Op (4F): LOADW L02 (241C), #00, -> SP (93EC), 
+PC: 05F38 Op (A0): JZ SP (93EC),  [FALSE] -> 05F3E
+PC: 05F3E Op (54): ADD L02 (241C), #04, -> L02 (2420), 
+PC: 05F42 Op (8C): JUMP #FFC6, -> 05F09
+PC: 05F09 Op (61): JE L02 (2420), L03 (2424),  [FALSE] -> 05F26
+PC: 05F26 Op (4F): LOADW L02 (2420), #00, -> SP (8534), 
+PC: 05F2A Op (61): JE SP (8534), L00 (66DA),  [FALSE] -> 05F34
+PC: 05F34 Op (4F): LOADW L02 (2420), #00, -> SP (8534), 
+PC: 05F38 Op (A0): JZ SP (8534),  [FALSE] -> 05F3E
+PC: 05F3E Op (54): ADD L02 (2420), #04, -> L02 (2424), 
+PC: 05F42 Op (8C): JUMP #FFC6, -> 05F09
+PC: 05F09 Op (61): JE L02 (2424), L03 (2424),  [FALSE] -> 05F0D
+PC: 05F0D Op (A0): JZ L04 (0000),  [TRUE] -> 05F16
+PC: 05F16 Op (55): SUB G3D (002C), #04, -> G3D (0028), 
+PC: 05F1A Op (74): ADD G19 (23F0), G3D (0028), -> L04 (2418), 
+PC: 05F1E Op (E1): STOREW L04 (2418), #00, L00 (66DA), 
+PC: 05F23 Op (8C): JUMP #0021, -> 05F45
+PC: 05F45 Op (63): JG L04 (2418), G22 (0000),  [FALSE] -> 05F49
+PC: 05F49 Op (54): ADD L01 (000A), #03, -> SP (000D), 
+PC: 05F4D Op (35): SUB #00, SP (000D), -> L01 (FFF3), 
+PC: 05F51 Op (E1): STOREW L04 (2418), #01, L01 (FFF3), 
+PC: 05F56 Op (AB): RET L04 (2418), -> SP (2418), 
+PC: 0585D Op (E0): CALL(_VS) #2D3D, New PC: 05A7A
+PC: 05A7B Op (E0): CALL(_VS) #2D46, New PC: 05A8C
+PC: 05A8D Op (0D): STORE #36, #00, -> G26 (0000), 
+PC: 05A90 Op (0D): STORE #81, #00, -> G71 (0000), 
+PC: 05A93 Op (9B): RET #02, -> SP (0002), 
+PC: 05A80 Op (0D): STORE #1C, #B7, -> G0C (00B7), 
+PC: 05A83 Op (0D): STORE #B0, #B7, -> GA0 (00B7), 
+PC: 05A86 Op (0D): STORE #3F, #B7, -> G2F (00B7), 
+PC: 05A89 Op (AB): RET G2F (00B7), -> SP (00B7), 
+PC: 05862 Op (B2): PRINT 
+PC: 05A65 Op (BB): NEW_LINE 
+PC: 05A66 Op (E0): CALL(_VS) #59B5, New PC: 0B36A
+PC: 0B36F Op (0F): LOADW #00, #01, -> SP (0025), 
+PC: 0B373 Op (C9): AND SP (0025), #07FF, -> L01 (0025), 
+PC: 0B379 Op (BB): NEW_LINE 
+PC: 0B37A Op (B2): PRINT
+PC: 0B3E1 Op (10): LOADB #00, #01, -> SP (0001), 
+PC: 0B3E5 Op (49): AND SP (0001), #08, -> SP (0000), 
+PC: 0B3E9 Op (A0): JZ SP (0000),  [TRUE] -> 0B415
+PC: 0B415 Op (B2): PRINT 
+PC: 0B448 Op (E6): PRINT_NUM L01 (0025), [37]
+PC: 0B44B Op (B2): PRINT [ / Serial Number ]
+PC: 0B45A Op (05): INC_CHECK #01, #17, L00 (0011), -> L00 (0012),  [TRUE] -> 0B45E
+PC: 0B45E Op (30): LOADB #00, L00 (0012), -> SP (0038), 
+PC: 0B462 Op (E5): PRINT_CHAR SP (0038), [8]
+PC: 0B465 Op (8C): JUMP #FFF4, -> 0B45A
+PC: 0B45A Op (05): INC_CHECK #01, #17, L00 (0012), -> L00 (0013),  [TRUE] -> 0B45E
+PC: 0B45E Op (30): LOADB #00, L00 (0013), -> SP (0036), 
+PC: 0B462 Op (E5): PRINT_CHAR SP (0036), [6]
+PC: 0B465 Op (8C): JUMP #FFF4, -> 0B45A
+PC: 0B45A Op (05): INC_CHECK #01, #17, L00 (0013), -> L00 (0014),  [TRUE] -> 0B45E
+PC: 0B45E Op (30): LOADB #00, L00 (0014), -> SP (0031), 
+PC: 0B462 Op (E5): PRINT_CHAR SP (0031), [1]
+PC: 0B465 Op (8C): JUMP #FFF4, -> 0B45A
+PC: 0B45A Op (05): INC_CHECK #01, #17, L00 (0014), -> L00 (0015),  [TRUE] -> 0B45E
+PC: 0B45E Op (30): LOADB #00, L00 (0015), -> SP (0032), 
+PC: 0B462 Op (E5): PRINT_CHAR SP (0032), [2]
+PC: 0B465 Op (8C): JUMP #FFF4, -> 0B45A
+PC: 0B45A Op (05): INC_CHECK #01, #17, L00 (0015), -> L00 (0016),  [TRUE] -> 0B45E
+PC: 0B45E Op (30): LOADB #00, L00 (0016), -> SP (0031), 
+PC: 0B462 Op (E5): PRINT_CHAR SP (0031), [1]
+PC: 0B465 Op (8C): JUMP #FFF4, -> 0B45A
+PC: 0B45A Op (05): INC_CHECK #01, #17, L00 (0016), -> L00 (0017),  [TRUE] -> 0B45E
+PC: 0B45E Op (30): LOADB #00, L00 (0017), -> SP (0035), 
+PC: 0B462 Op (E5): PRINT_CHAR SP (0035), [5]
+PC: 0B465 Op (8C): JUMP #FFF4, -> 0B45A
+PC: 0B45A Op (05): INC_CHECK #01, #17, L00 (0017), -> L00 (0018),  [TRUE] -> 0B468
+PC: 0B468 Op (BB): NEW_LINE 
+PC: 0B469 Op (B0): RTRUE -> SP (0001), 
+PC: 05A6B Op (BB): NEW_LINE 
+PC: 05A6C Op (E0): CALL(_VS) #4FF7, New PC: 09FEE
+PC: 09FEF Op (E0): CALL(_VS) #464A, #01, New PC: 08C94
+PC: 08C99 Op (A0): JZ G32 (0001),  [FALSE] -> 08CA7
+PC: 08CA7 Op (4A): TEST_ATTR G00 (0002), #1C, [South Junction] 2 (02) at 00BA5: [South Junction] A:01001801295A P:41(29) S:90(5A) C:52(34)
+PC: 08CAB Op (4B): SET_ATTR G00 (0002), #1C, [South Junction] 
+PC: 08CAE Op (0D): STORE #02, #01, -> L01 (0001), 
+PC: 08CB1 Op (E0): CALL(_VS) #2BDE, G00 (0002), New PC: 057BC
+PC: 057BF Op (51): GET_PROP L00 (0002), #02, [South Junction] -> SP (0000), 
+PC: 057C3 Op (A0): JZ SP (0000),  [TRUE] -> 057CD
+PC: 057CD Op (AA): PRINT_OBJ L00 (0002), [South Junction]
+PC: 057CF Op (B0): RTRUE -> SP (0001), 
+PC: 08CB7 Op (93): GET_PARENT #34, [yourself] [South Junction] -> SP (0002), 
+PC: 08CBA Op (4A): TEST_ATTR 
+PC: 08CCC Op (BB): NEW_LINE 
+PC: 08CCD Op (A0): JZ L00 (0001),  [FALSE] -> 08CDB
+PC: 08CDB Op (51): GET_PROP G00 (0002), #1F, [South Junction] -> SP (9488), 
+PC: 08CDF Op (E0): CALL(_VS) SP (9488), #03, New PC: 12910
+PC: 12913 Op (41): JE L00 (0003), #02,  [FALSE]  RFALSE -> SP (0000), 
+PC: 08CE4 Op (A0): JZ SP (0000),  [FALSE] -> 08CE7
+PC: 08CE7 Op (51): GET_PROP G00 (0002), #0C, [South Junction] -> SP (CCE7), 
+PC: 08CEB Op (AD): PRINT_PADDR SP (CCE7), [You're standing in front of the house where you spent many of your summers as a youngster. The old place is not as big as it seemed to you then, but it is still quite large. Stone pathways wind east and west around the house, and a larger main walkway leads north.]
+PC: 08CED Op (BB): NEW_LINE 
+PC: 08CEE Op (B0): RTRUE -> SP (0001), 
+PC: 09FF5 Op (A0): JZ SP (0001),  [TRUE] -> 09FF8
+PC: 09FF8 Op (E0): CALL(_VS) #4678, New PC: 08CF0
+PC: 08CF9 Op (A3): GET_PARENT G87 (0034), [yourself] [South Junction] -> L03 (0002), 
+PC: 08CFC Op (A2): GET_CHILD G00 (0002), [South Junction] [yourself] -> L00 (0034),  [TRUE] -> 08D00
+PC: 08D00 Op (A0): JZ L00 (0034),  [TRUE] -> 08D03 36098
+PC: 08D03 Op (A0): JZ L00 (0034),  [TRUE] -> 08D06
+PC: 08D06 Op (E0): CALL(_VS) #47CA, L00 (0034), New PC: 08F94
+PC: 08F99 Op (4A): TEST_ATTR L00 (0034), #1D, [yourself] 52 (34) at 010B5: [yourself] A:0000A0060272 P:2(02) S:114(72) C:123(7B)
+PC: 08D0C Op (A0): JZ SP (0000),  [TRUE] -> 08D2E
+PC: 08D2E Op (A1): GET_SIBLING L00 (0034), [yourself] [bazooka] -> L00 (0072),  [TRUE] -> 08D03
+PC: 08D03 Op (A0): JZ L00 (0072),  [TRUE] -> 08D06
+PC: 08D06 Op (E0): CALL(_VS) #47CA, L00 (0072), New PC: 08F94
+PC: 08F99 Op (4A): TEST_ATTR L00 (0072), #1D, [bazooka] 114 (72) at 016B0: [bazooka] A:0000800002F3 P:2(02) S:243(F3) C:0(00)
+ [TRUE] -> 08F9D
+PC: 08F9D Op (61): JE L00 (0072), G87 (0034),  [TRUE] -> 08FA1
+PC: 08FA1 Op (A3): GET_PARENT G87 (0034), [yourself] [South Junction] -> SP (0002), 
+PC: 08FA4 Op (61): JE L00 (0072), SP (0002),  [FALSE] -> 08FAF
+PC: 08FAF Op (A0): JZ L01 (0000),  [FALSE] -> 08FB2
+PC: 08FB2 Op (4A): TEST_ATTR L00 (0072), #10, [bazooka] 114 (72) at 016B0: [bazooka] A:0000800002F3 P:2(02) S:243(F3) C:0(00)
+ [FALSE] -> 08FB6
+PC: 08FB6 Op (B1): RFALSE -> SP (0000), 
+PC: 08D0C Op (A0): JZ SP (0000),  [TRUE] -> 08D2E
+PC: 08D2E Op (A1): GET_SIBLING L00 (0072), [bazooka] [statue of Buck Palace, the fighting letter carrier] -> L00 (00F3),  [TRUE] -> 08D03
+PC: 08D03 Op (A0): JZ L00 (00F3),  [TRUE] -> 08D06
+PC: 08D06 Op (E0): CALL(_VS) #47CA, L00 (00F3), New PC: 08F94
+PC: 08F99 Op (4A): TEST_ATTR L00 (00F3), #1D, [statue of Buck Palace, the fighting letter carrier] 243 (F3) at 02250: [statue of Buck Palace, the fighting letter carrier] A:000000000200 P:2(02) S:0(00) C:0(00)
+ [TRUE] -> 08F9D
+PC: 08F9D Op (61): JE L00 (00F3), G87 (0034),  [TRUE] -> 08FA1
+PC: 08FA1 Op (A3): GET_PARENT G87 (0034), [yourself] [South Junction] -> SP (0002), 
+PC: 08FA4 Op (61): JE L00 (00F3), SP (0002),  [FALSE] -> 08FAF
+PC: 08FAF Op (A0): JZ L01 (0000),  [FALSE] -> 08FB2
+PC: 08FB2 Op (4A): TEST_ATTR L00 (00F3), #10, [statue of Buck Palace, the fighting letter carrier] 243 (F3) at 02250: [statue of Buck Palace, the fighting letter carrier] A:000000000200 P:2(02) S:0(00) C:0(00)
+ [FALSE]  RTRUE -> SP (0001), 
+PC: 08D0C Op (A0): JZ SP (0001),  [TRUE] -> 08D0F
+PC: 08D0F Op (4A): TEST_ATTR L00 (00F3), #1C, [statue of Buck Palace, the fighting letter carrier] 243 (F3) at 02250: [statue of Buck Palace, the fighting letter carrier] A:000000000200 P:2(02) S:0(00) C:0(00)
+ [TRUE] -> 08D13
+PC: 08D13 Op (51): GET_PROP L00 (00F3), #0D, [statue of Buck Palace, the fighting letter carrier] -> L01 (0000), 
+PC: 08D17 Op (A0): JZ L01 (0000),  [TRUE] -> 08D2E
+PC: 08D2E Op (A1): GET_SIBLING L00 (00F3), [statue of Buck Palace, the fighting letter carrier] [] -> L00 (0000),  [TRUE] -> 08D33
+PC: 08D33 Op (8C): JUMP #FFCF, -> 08D03
+PC: 08D03 Op (A0): JZ L00 (0000),  [TRUE] -> 08D36
+PC: 08D36 Op (A2): GET_CHILD G00 (0002), [South Junction] [yourself] -> L00 (0034),  [TRUE] -> 08D3A
+PC: 08D3A Op (0D): STORE #03, #01, -> L02 (0001), 
+PC: 08D3D Op (A0): JZ L00 (0034),  [TRUE] -> 08D41
+PC: 08D41 Op (E0): CALL(_VS) #47CA, L00 (0034), New PC: 08F94
+PC: 08F99 Op (4A): TEST_ATTR L00 (0034), #1D, [yourself] 52 (34) at 010B5: [yourself] A:0000A0060272 P:2(02) S:114(72) C:123(7B)
+ [TRUE]  RFALSE -> SP (0000), 
+PC: 08D47 Op (A0): JZ SP (0000),  [TRUE] -> 08D98
+PC: 08D98 Op (A1): GET_SIBLING L00 (0034), [yourself] [bazooka] -> L00 (0072),  [TRUE] -> 08D3D
+PC: 08D3D Op (A0): JZ L00 (0072),  [TRUE] -> 08D41
+PC: 08D41 Op (E0): CALL(_VS) #47CA, L00 (0072), New PC: 08F94
+PC: 08F99 Op (4A): TEST_ATTR L00 (0072), #1D, [bazooka] 114 (72) at 016B0: [bazooka] A:0000800002F3 P:2(02) S:243(F3) C:0(00)
+ [TRUE] -> 08F9D
+PC: 08F9D Op (61): JE L00 (0072), G87 (0034),  [TRUE] -> 08FA1
+PC: 08FA1 Op (A3): GET_PARENT G87 (0034), [yourself] [South Junction] -> SP (0002), 
+PC: 08FA4 Op (61): JE L00 (0072), SP (0002),  [FALSE] -> 08FAF
+PC: 08FAF Op (A0): JZ L01 (0000),  [FALSE] -> 08FB2
+PC: 08FB2 Op (4A): TEST_ATTR L00 (0072), #10, [bazooka] 114 (72) at 016B0: [bazooka] A:0000800002F3 P:2(02) S:243(F3) C:0(00)
+ [FALSE] -> 08FB6
+PC: 08FB6 Op (B1): RFALSE -> SP (0000), 
+PC: 08D47 Op (A0): JZ SP (0000),  [TRUE] -> 08D98
+PC: 08D98 Op (A1): GET_SIBLING L00 (0072), [bazooka] [statue of Buck Palace, the fighting letter carrier] -> L00 (00F3),  [TRUE] -> 08D3D
+PC: 08D3D Op (A0): JZ L00 (00F3),  [TRUE] -> 08D41
+PC: 08D41 Op (E0): CALL(_VS) #47CA, L00 (00F3), New PC: 08F94
+PC: 08F99 Op (4A): TEST_ATTR L00 (00F3), #1D, [statue of Buck Palace, the fighting letter carrier] 243 (F3) at 02250: [statue of Buck Palace, the fighting letter carrier] A:000000000200 P:2(02) S:0(00) C:0(00)
+ [TRUE] -> 08F9D
+PC: 08F9D Op (61): JE L00 (00F3), G87 (0034),  [TRUE] -> 08FA1
+PC: 08FA1 Op (A3): GET_PARENT G87 (0034), [yourself] [South Junction] -> SP (0002), 
+PC: 08FA4 Op (61): JE L00 (00F3), SP (0002),  [FALSE] -> 08FAF
+PC: 08FAF Op (A0): JZ L01 (0000),  [FALSE] -> 08FB2
+PC: 08FB2 Op (4A): TEST_ATTR L00 (00F3), #10, [statue of Buck Palace, the fighting letter carrier] 243 (F3) at 02250: [statue of Buck Palace, the fighting letter carrier] A:000000000200 P:2(02) S:0(00) C:0(00)
+ [FALSE]  RTRUE -> SP (0001), 
+PC: 08D47 Op (A0): JZ SP (0001),  [TRUE] -> 08D4B
+PC: 08D4B Op (51): GET_PROP L00 (00F3), #0D, [statue of Buck Palace, the fighting letter carrier] -> SP (0000), 
+PC: 08D4F Op (A0): JZ SP (0000),  [TRUE] -> 08D57
+PC: 08D57 Op (51): GET_PROP L00 (00F3), #10, [statue of Buck Palace, the fighting letter carrier] -> L01 (6770), 
+PC: 08D5B Op (A0): JZ L01 (6770),  [TRUE] -> 08D5E
+PC: 08D5E Op (E0): CALL(_VS) L01 (6770), #05, New PC: 0CEE0
+PC: 0CEE3 Op (A0): JZ L00 (0005),  [TRUE] -> 0CEE7
+PC: 0CEE7 Op (41): JE L00 (0005), #09,  [TRUE] -> 0CEEB
+PC: 0CEEB Op (A0): JZ G77 (0000),  [FALSE] -> 0CEEE
+PC: 0CEEE Op (41): JE G8D (0001), #02,  [FALSE] -> 0CEF5
+PC: 0CEF5 Op (BB): NEW_LINE 
+PC: 0CEF6 Op (B2): PRINT [A life-size statue of Buck Palace, one of the stars of Uncle Buddy's talent stables, stands here. He's holding a bazooka pointing ]
+PC: 0CF47 Op (E0): CALL(_VS) #68EB, New PC: 0D1D6
+PC: 0D1D7 Op (C1): JE G98 (0000), #1E, #00,  [FALSE] -> 0D1DD
+PC: 0D1DD Op (0D): STORE #A8, #1E, -> G98 (001E), 
+PC: 0D1E0 Op (B2): PRINT [north]
+PC: 0D1E5 Op (B0): RTRUE -> SP (0001), 
+PC: 0CF4C Op (E5): PRINT_CHAR #2E, [.]
+PC: 0CF4F Op (A0): JZ G77 (0000),  [FALSE] -> 0CF52
+PC: 0CF52 Op (41): JE G8D (0001), #02,  [FALSE]  RTRUE -> L01 (0001), 
+PC: 08D63 Op (A0): JZ L01 (0001),  [TRUE] -> 08D66
+PC: 08D66 Op (4A): TEST_ATTR L00 (00F3), #04, [statue of Buck Palace, the fighting letter carrier] 243 (F3) at 02250: [statue of Buck Palace, the fighting letter carrier] A:000000000200 P:2(02) S:0(00) C:0(00)
+ [FALSE] -> 08D7A
+PC: 08D7A Op (BB): NEW_LINE 
+PC: 08D7B Op (8C): JUMP #001C, -> 08D98
+PC: 08D98 Op (A1): GET_SIBLING L00 (00F3), [statue of Buck Palace, the fighting letter carrier] [] -> L00 (0000),  [TRUE] -> 08D9D
+PC: 08D9D Op (8C): JUMP #FF9F, -> 08D3D
+PC: 08D3D Op (A0): JZ L00 (0000),  [TRUE] -> 08DA0
+PC: 08DA0 Op (E0): CALL(_VS) #46DC, G00 (0002), #00, #00, New PC: 08DB8
+PC: 08DCD Op (41): JE L01 (0000), #02,  [FALSE] -> 08DDD
+PC: 08DDD Op (47): TEST L02 (0000), #02,  [FALSE] -> 08DE4
+PC: 08DE4 Op (A2): GET_CHILD L00 (0002), [South Junction] [yourself] -> L04 (0034),  [TRUE] -> 08DE8
+PC: 08DE8 Op (A0): JZ L07 (0000),  [FALSE] -> 08DEB
+PC: 08DEB Op (46): JIN L00 (0002), #29, C[South Junction] P[]  [TRUE] -> 08E06
+PC: 08E06 Op (A0): JZ L04 (0034),  [TRUE] -> 08E09
+PC: 08E09 Op (E0): CALL(_VS) #47CA, L04 (0034), New PC: 08F94
+PC: 08F99 Op (4A): TEST_ATTR L00 (0034), #1D, [yourself] 52 (34) at 010B5: [yourself] A:0000A0060272 P:2(02) S:114(72) C:123(7B)
+ [TRUE]  RFALSE -> SP (0000), 
+PC: 08E0F Op (A0): JZ SP (0000),  [TRUE] -> 08EF8
+PC: 08EF8 Op (A0): JZ L04 (0034),  [TRUE] -> 08EFB
+PC: 08EFB Op (A1): GET_SIBLING L04 (0034), [yourself] [bazooka] -> L04 (0072),  [TRUE] -> 08EFF
+PC: 08EFF Op (A0): JZ L03 (0000),  [FALSE] -> 08F03
+PC: 08F03 Op (A0): JZ L04 (0072),  [FALSE] -> 08E06
+PC: 08E06 Op (A0): JZ L04 (0072),  [TRUE] -> 08E09
+PC: 08E09 Op (E0): CALL(_VS) #47CA, L04 (0072), New PC: 08F94
+PC: 08F99 Op (4A): TEST_ATTR L00 (0072), #1D, [bazooka] 114 (72) at 016B0: [bazooka] A:0000800002F3 P:2(02) S:243(F3) C:0(00)
+ [TRUE] -> 08F9D
+PC: 08F9D Op (61): JE L00 (0072), G87 (0034),  [TRUE] -> 08FA1
+PC: 08FA1 Op (A3): GET_PARENT G87 (0034), [yourself] [South Junction] -> SP (0002), 
+PC: 08FA4 Op (61): JE L00 (0072), SP (0002),  [FALSE] -> 08FAF
+PC: 08FAF Op (A0): JZ L01 (0000),  [FALSE] -> 08FB2
+PC: 08FB2 Op (4A): TEST_ATTR L00 (0072), #10, [bazooka] 114 (72) at 016B0: [bazooka] A:0000800002F3 P:2(02) S:243(F3) C:0(00)
+ [FALSE] -> 08FB6
+PC: 08FB6 Op (B1): RFALSE -> SP (0000), 
+PC: 08E0F Op (A0): JZ SP (0000),  [TRUE] -> 08EF8
+PC: 08EF8 Op (A0): JZ L04 (0072),  [TRUE] -> 08EFB
+PC: 08EFB Op (A1): GET_SIBLING L04 (0072), [bazooka] [statue of Buck Palace, the fighting letter carrier] -> L04 (00F3),  [TRUE] -> 08EFF
+PC: 08EFF Op (A0): JZ L03 (0000),  [FALSE] -> 08F03
+PC: 08F03 Op (A0): JZ L04 (00F3),  [FALSE] -> 08E06
+PC: 08E06 Op (A0): JZ L04 (00F3),  [TRUE] -> 08E09
+PC: 08E09 Op (E0): CALL(_VS) #47CA, L04 (00F3), New PC: 08F94
+PC: 08F99 Op (4A): TEST_ATTR L00 (00F3), #1D, [statue of Buck Palace, the fighting letter carrier] 243 (F3) at 02250: [statue of Buck Palace, the fighting letter carrier] A:000000000200 P:2(02) S:0(00) C:0(00)
+ [TRUE] -> 08F9D
+PC: 08F9D Op (61): JE L00 (00F3), G87 (0034),  [TRUE] -> 08FA1
+PC: 08FA1 Op (A3): GET_PARENT G87 (0034), [yourself] [South Junction] -> SP (0002), 
+PC: 08FA4 Op (61): JE L00 (00F3), SP (0002),  [FALSE] -> 08FAF
+PC: 08FAF Op (A0): JZ L01 (0000),  [FALSE] -> 08FB2
+PC: 08FB2 Op (4A): TEST_ATTR L00 (00F3), #10, [statue of Buck Palace, the fighting letter carrier] 243 (F3) at 02250: [statue of Buck Palace, the fighting letter carrier] A:000000000200 P:2(02) S:0(00) C:0(00)
+ [FALSE]  RTRUE -> SP (0001), 
+PC: 08E0F Op (A0): JZ SP (0001),  [TRUE] -> 08E13
+PC: 08E13 Op (47): TEST L02 (0000), #01,  [TRUE] -> 08E17
+PC: 08E17 Op (E0): CALL(_VS) #47DC, L04 (00F3), New PC: 08FB8
+PC: 08FBD Op (51): GET_PROP L00 (00F3), #0D, [statue of Buck Palace, the fighting letter carrier] -> SP (0000), 
+PC: 08FC1 Op (A0): JZ SP (0000),  [TRUE] -> 08FC8
+PC: 08FC8 Op (51): GET_PROP L00 (00F3), #10, [statue of Buck Palace, the fighting letter carrier] -> L01 (6770), 
+PC: 08FCC Op (A0): JZ L01 (6770),  [TRUE] -> 08FCF
+PC: 08FCF Op (E0): CALL(_VS) L01 (6770), #09, New PC: 0CEE0
+PC: 0CEE3 Op (A0): JZ L00 (0009),  [TRUE] -> 0CEE7
+PC: 0CEE7 Op (41): JE L00 (0009), #09,  [TRUE]  RTRUE -> SP (0001), 
+PC: 08FD4 Op (A0): JZ SP (0001),  [FALSE]  RFALSE -> SP (0000), 
+PC: 08E1D Op (A0): JZ SP (0000),  [TRUE] -> 08EF8
+PC: 08EF8 Op (A0): JZ L04 (00F3),  [TRUE] -> 08EFB
+PC: 08EFB Op (A1): GET_SIBLING L04 (00F3), [statue of Buck Palace, the fighting letter carrier] [] -> L04 (0000),  [TRUE] -> 08EFF
+PC: 08EFF Op (A0): JZ L03 (0000),  [FALSE] -> 08F03
+PC: 08F03 Op (A0): JZ L04 (0000),  [FALSE] -> 08F07
+PC: 08F07 Op (A0): JZ L06 (0000),  [TRUE] -> 08F13
+PC: 08F13 Op (A0): JZ L05 (0001),  [TRUE] -> 08F16
+PC: 08F16 Op (A0): JZ L07 (0000),  [TRUE] -> 08F21
+PC: 08F21 Op (A0): JZ L05 (0001),  [FALSE] -> 08F34
+PC: 08F34 Op (A2): GET_CHILD L00 (0002), [South Junction] [yourself] -> L03 (0034),  [TRUE] -> 08F38
+PC: 08F38 Op (A0): JZ L03 (0034),  [TRUE] -> 08F3C
+PC: 08F3C Op (4A): TEST_ATTR L03 (0034), #04, [yourself] 52 (34) at 010B5: [yourself] A:0000A0060272 P:2(02) S:114(72) C:123(7B)
+ [FALSE] -> 08F74
+PC: 08F74 Op (A1): GET_SIBLING L03 (0034), [yourself] [bazooka] -> L03 (0072),  [TRUE] -> 08F38
+PC: 08F38 Op (A0): JZ L03 (0072),  [TRUE] -> 08F3C
+PC: 08F3C Op (4A): TEST_ATTR L03 (0072), #04, [bazooka] 114 (72) at 016B0: [bazooka] A:0000800002F3 P:2(02) S:243(F3) C:0(00)
+ [FALSE] -> 08F74
+PC: 08F74 Op (A1): GET_SIBLING L03 (0072), [bazooka] [statue of Buck Palace, the fighting letter carrier] -> L03 (00F3),  [TRUE] -> 08F38
+PC: 08F38 Op (A0): JZ L03 (00F3),  [TRUE] -> 08F3C
+PC: 08F3C Op (4A): TEST_ATTR L03 (00F3), #04, [statue of Buck Palace, the fighting letter carrier] 243 (F3) at 02250: [statue of Buck Palace, the fighting letter carrier] A:000000000200 P:2(02) S:0(00) C:0(00)
+ [FALSE] -> 08F74
+PC: 08F74 Op (A1): GET_SIBLING L03 (00F3), [statue of Buck Palace, the fighting letter carrier] [] -> L03 (0000),  [TRUE] -> 08F79
+PC: 08F79 Op (8C): JUMP #FFBE, -> 08F38
+PC: 08F38 Op (A0): JZ L03 (0000),  [TRUE] -> 08F7C
+PC: 08F7C Op (A0): JZ L05 (0001),  [FALSE] -> 08F8F
+PC: 08F8F Op (A0): JZ L05 (0001),  [FALSE]  RFALSE -> SP (0000), 
+PC: 08DA8 Op (A0): JZ L03 (0002),  [TRUE] -> 08DAB
+PC: 08DAB Op (61): JE G00 (0002), L03 (0002),  [TRUE]  RFALSE -> SP (0000), 
+PC: 09FFD Op (B0): RTRUE -> SP (0001), 
+PC: 05A71 Op (E0): CALL(_VS) #2D4B, New PC: 05A96
+PC: 05A99 Op (E0): CALL(_VS) #2D51, New PC: 05AA2
+PC: 05ABB Op (0D): STORE #04, #00, -> L03 (0000), 
+PC: 05ABE Op (0D): STORE #05, #00, -> L04 (0000), 
+PC: 05AC1 Op (0D): STORE #08, #01, -> L07 (0001), 
+PC: 05AC4 Op (61): JE G8A (0000), G00 (0002),  [TRUE] -> 05AC8
+PC: 05AC8 Op (0D): STORE #78, #00, -> G68 (0000), 
+PC: 05ACB Op (E0): CALL(_VS) #3022, New PC: 06044
+PC: 06063 Op (05): INC_CHECK #0A, #09, L09 (FFFF), -> L09 (0000),  [TRUE] -> 06067
+PC: 06067 Op (A0): JZ G83 (0000),  [FALSE] -> 0606A
+PC: 0606A Op (6F): LOADW G6E (25DC), L09 (0000), -> SP (0000), 
+PC: 0606E Op (E1): STOREW G16 (25F0), L09 (0000), SP (0000), 
+PC: 06073 Op (E1): STOREW G6E (25DC), L09 (0000), #00, 
+PC: 06078 Op (8C): JUMP #FFEA, -> 06063
+PC: 06063 Op (05): INC_CHECK #0A, #09, L09 (0000), -> L09 (0001),  [TRUE] -> 06067
+PC: 06067 Op (A0): JZ G83 (0000),  [FALSE] -> 0606A
+PC: 0606A Op (6F): LOADW G6E (25DC), L09 (0001), -> SP (0000), 
+PC: 0606E Op (E1): STOREW G16 (25F0), L09 (0001), SP (0000), 
+PC: 06073 Op (E1): STOREW G6E (25DC), L09 (0001), #00, 
+PC: 06078 Op (8C): JUMP #FFEA, -> 06063
+PC: 06063 Op (05): INC_CHECK #0A, #09, L09 (0001), -> L09 (0002),  [TRUE] -> 06067
+PC: 06067 Op (A0): JZ G83 (0000),  [FALSE] -> 0606A
+PC: 0606A Op (6F): LOADW G6E (25DC), L09 (0002), -> SP (0000), 
+PC: 0606E Op (E1): STOREW G16 (25F0), L09 (0002), SP (0000), 
+PC: 06073 Op (E1): STOREW G6E (25DC), L09 (0002), #00, 
+PC: 06078 Op (8C): JUMP #FFEA, -> 06063
+PC: 06063 Op (05): INC_CHECK #0A, #09, L09 (0002), -> L09 (0003),  [TRUE] -> 06067
+PC: 06067 Op (A0): JZ G83 (0000),  [FALSE] -> 0606A
+PC: 0606A Op (6F): LOADW G6E (25DC), L09 (0003), -> SP (0000), 
+PC: 0606E Op (E1): STOREW G16 (25F0), L09 (0003), SP (0000), 
+PC: 06073 Op (E1): STOREW G6E (25DC), L09 (0003), #00, 
+PC: 06078 Op (8C): JUMP #FFEA, -> 06063
+PC: 06063 Op (05): INC_CHECK #0A, #09, L09 (0003), -> L09 (0004),  [TRUE] -> 06067
+PC: 06067 Op (A0): JZ G83 (0000),  [FALSE] -> 0606A
+PC: 0606A Op (6F): LOADW G6E (25DC), L09 (0004), -> SP (0000), 
+PC: 0606E Op (E1): STOREW G16 (25F0), L09 (0004), SP (0000), 
+PC: 06073 Op (E1): STOREW G6E (25DC), L09 (0004), #00, 
+PC: 06078 Op (8C): JUMP #FFEA, -> 06063
+PC: 06063 Op (05): INC_CHECK #0A, #09, L09 (0004), -> L09 (0005),  [TRUE] -> 06067
+PC: 06067 Op (A0): JZ G83 (0000),  [FALSE] -> 0606A
+PC: 0606A Op (6F): LOADW G6E (25DC), L09 (0005), -> SP (0000), 
+PC: 0606E Op (E1): STOREW G16 (25F0), L09 (0005), SP (0000), 
+PC: 06073 Op (E1): STOREW G6E (25DC), L09 (0005), #00, 
+PC: 06078 Op (8C): JUMP #FFEA, -> 06063
+PC: 06063 Op (05): INC_CHECK #0A, #09, L09 (0005), -> L09 (0006),  [TRUE] -> 06067
+PC: 06067 Op (A0): JZ G83 (0000),  [FALSE] -> 0606A
+PC: 0606A Op (6F): LOADW G6E (25DC), L09 (0006), -> SP (0000), 
+PC: 0606E Op (E1): STOREW G16 (25F0), L09 (0006), SP (0000), 
+PC: 06073 Op (E1): STOREW G6E (25DC), L09 (0006), #00, 
+PC: 06078 Op (8C): JUMP #FFEA, -> 06063
+PC: 06063 Op (05): INC_CHECK #0A, #09, L09 (0006), -> L09 (0007),  [TRUE] -> 06067
+PC: 06067 Op (A0): JZ G83 (0000),  [FALSE] -> 0606A
+PC: 0606A Op (6F): LOADW G6E (25DC), L09 (0007), -> SP (0000), 
+PC: 0606E Op (E1): STOREW G16 (25F0), L09 (0007), SP (0000), 
+PC: 06073 Op (E1): STOREW G6E (25DC), L09 (0007), #00, 
+PC: 06078 Op (8C): JUMP #FFEA, -> 06063
+PC: 06063 Op (05): INC_CHECK #0A, #09, L09 (0007), -> L09 (0008),  [TRUE] -> 06067
+PC: 06067 Op (A0): JZ G83 (0000),  [FALSE] -> 0606A
+PC: 0606A Op (6F): LOADW G6E (25DC), L09 (0008), -> SP (0000), 
+PC: 0606E Op (E1): STOREW G16 (25F0), L09 (0008), SP (0000), 
+PC: 06073 Op (E1): STOREW G6E (25DC), L09 (0008), #00, 
+PC: 06078 Op (8C): JUMP #FFEA, -> 06063
+PC: 06063 Op (05): INC_CHECK #0A, #09, L09 (0008), -> L09 (0009),  [TRUE] -> 06067
+PC: 06067 Op (A0): JZ G83 (0000),  [FALSE] -> 0606A
+PC: 0606A Op (6F): LOADW G6E (25DC), L09 (0009), -> SP (0000), 
+PC: 0606E Op (E1): STOREW G16 (25F0), L09 (0009), SP (0000), 
+PC: 06073 Op (E1): STOREW G6E (25DC), L09 (0009), #00, 
+PC: 06078 Op (8C): JUMP #FFEA, -> 06063
+PC: 06063 Op (05): INC_CHECK #0A, #09, L09 (0009), -> L09 (000A),  [TRUE] -> 0607B
+PC: 0607B Op (2D): STORE #0C, G46 (0000), -> L0B (0000), 
+PC: 0607E Op (0D): STORE #56, #00, -> G46 (0000), 
+PC: 06081 Op (0D): STORE #14, #00, -> G04 (0000), 
+PC: 06084 Op (E1): STOREW G58 (2892), #00, #00, 
+PC: 06089 Op (E1): STOREW G27 (28F6), #00, #00, 
+PC: 0608E Op (E1): STOREW G0B (295A), #00, #00, 
+PC: 06093 Op (2D): STORE #0B, G87 (0034), -> L0A (0034), 
+PC: 06096 Op (A0): JZ G83 (0000),  [FALSE] -> 06099
+PC: 06099 Op (0D): STORE #62, #00, -> G52 (0000), 
+PC: 0609C Op (A0): JZ G71 (0000),  [FALSE] -> 0609F
+PC: 0609F Op (41): JE G87 (0034), #34,  [TRUE] -> 060BC
+PC: 060BC Op (A0): JZ G95 (0000),  [TRUE] -> 060DA
+PC: 060DA Op (A0): JZ G26 (0000),  [TRUE] -> 060F7
+PC: 060F7 Op (0D): STORE #A3, #00, -> G93 (0000), 
+PC: 060FA Op (0D): STORE #97, #34, -> G87 (0034), 
+PC: 060FD Op (0D): STORE #81, #00, -> G71 (0000), 
+PC: 06100 Op (2D): STORE #7A, G00 (0002), -> G6A (0002), 
+PC: 06103 Op (A3): GET_PARENT G87 (0034), [yourself] [South Junction] -> SP (0002), 
+PC: 06106 Op (4A): TEST_ATTR SP (0002), #08, [South Junction] 2 (02) at 00BA5: [South Junction] A:01001809295A P:41(29) S:90(5A) C:52(34)
+ [TRUE] -> 0610A
+PC: 0610A Op (2D): STORE #7A, G00 (0002), -> G6A (0002), 
+PC: 0610D Op (A3): GET_PARENT G87 (0034), [yourself] [South Junction] -> G00 (0002), 
+PC: 06110 Op (E0): CALL(_VS) #4145, G00 (0002), New PC: 0828A
+PC: 08293 Op (2D): STORE #02, G00 (0002), -> L01 (0002), 
+PC: 08296 Op (2D): STORE #10, L00 (0002), -> G00 (0002), 
+PC: 08299 Op (4A): TEST_ATTR L00 (0002), #14, [South Junction] 2 (02) at 00BA5: [South Junction] A:01001809295A P:41(29) S:90(5A) C:52(34)
+ [FALSE] -> 0829D
+PC: 0829D Op (0D): STORE #03, #01, -> L02 (0001), 
+PC: 082A0 Op (8C): JUMP #006A, -> 0830B
+PC: 0830B Op (2D): STORE #10, L01 (0002), -> G00 (0002), 
+PC: 0830E Op (2D): STORE #57, L03 (0000), -> G47 (0000), 
+PC: 08311 Op (AB): RET L02 (0001), -> G32 (0001), 
+PC: 06116 Op (A0): JZ G2B (0001),  [TRUE] -> 06119
+PC: 06119 Op (BB): NEW_LINE 
+PC: 0611A Op (E2): STOREB G3E (2424), #00, #3B, 
+PC: 0611F Op (E5): PRINT_CHAR #3E, [>]
+The program '[17288] ConsoleZMachine.exe' has exited with code 3221225786 (0xc000013a).
