@@ -147,7 +147,8 @@ namespace Zmachine.Library.V2
         public void Step()
         {
             machine.Update();
-            Debug.WriteLine(machine.currentInstr.ToString());
+            var instr = machine.currentInstr;
+            Debug.WriteLine($"{machine.currentInstr.startAddressHex} {instr.instruction.Name} {instr.instruction.OpCode}");
             //if (machine.outputScreen.Length > 0)
             //{
             //    var pos = machine.outputScreen.Position;
@@ -332,10 +333,10 @@ namespace Zmachine.Library.V2
 
         public ZmObject[] GetSiblingObjects(ushort parentIdx) => this.debugObjects.GetSiblings(parentIdx);
 
-
         public ZmObject GetParentObject(ushort objectId) => this.debugObjects.GetParent(objectId);
 
         public void InsertObjectDebug(ushort objId, ushort destId) => this.debugObjects.Insert_Obj(objId, destId);
 
+        public ZmObject[] GetMentionedAsSiblingObjects(ushort v) => this.debugObjects.GetMentionedAsSibling(v);
     }
 }

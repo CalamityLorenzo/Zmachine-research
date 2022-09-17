@@ -146,7 +146,7 @@ namespace Zmachine.Library.V2.Objects
         // Having to update the object in memory.
         internal void Insert_Obj(ushort Obj_objectId, ushort Dest_objectId)
         {
-            
+
             var D_StartAddress = this.GetObjectStartAddress(Dest_objectId);
             var D_PaSibCh = D_StartAddress + attrbFlagsLength;
             // Update the DChild Value = 
@@ -213,8 +213,8 @@ namespace Zmachine.Library.V2.Objects
             var propertyTableAddress = memory.Get2ByteValue(this.GetObjectStartAddress(objectId) + paSibChLength + attrbFlagsLength);
 
             var objectPropertyTable = GetObjectPropertyTable(propertyTableAddress);
-            
-            
+
+
             var obj = this.GetObject(objectId).PropertyTable;
 
             var getProperty = objectPropertyTable.properties.FirstOrDefault(a => a.propertyNumber == property);
@@ -224,12 +224,12 @@ namespace Zmachine.Library.V2.Objects
             {
                 return this.PropertyDefaultsTable[property];
             }
-            
+
         }
 
         internal ushort GetSibling(ushort objectId)
         {
-            var obj= GetObject(objectId);
+            var obj = GetObject(objectId);
             return obj.Sibling;
         }
 
@@ -297,14 +297,15 @@ namespace Zmachine.Library.V2.Objects
         {
             // We don't need to hydrate every object, 
             // They are all fixed width so we are literally readting a byte or a word from memory
-            var startObjectAddress = this.GetObjectStartAddress(parentIdx);
+            var startObjectAddress = this.GetObjectStartAddress(0);
             // Size in bytes
             var objectTotalSize = this.version < 4 ? 9 : 14;
             var parentAddress = this.attrbFlagsLength;
             List<ZmObject> results = new();
             // iterate through allllll the objects to find the children.
-            for(ushort x = 0; x < this.TotalObjects; ++x) {
-                var parentId =version>4 ? (ushort)(this.memory.Get2ByteValue(startObjectAddress + parentAddress))
+            for (ushort x = 0; x < this.TotalObjects; ++x)
+            {
+                var parentId = version > 4 ? (ushort)(this.memory.Get2ByteValue(startObjectAddress + parentAddress))
                         : this.memory[startObjectAddress + parentAddress];
                 if (parentId == parentIdx)
                 {
@@ -316,7 +317,6 @@ namespace Zmachine.Library.V2.Objects
 
             return results.ToArray();
         }
-
         internal ZmObject[] GetSiblings(ushort objectId)
         {
             // Gets' us to the parent BYTE
@@ -324,8 +324,29 @@ namespace Zmachine.Library.V2.Objects
 
             var parentId = version > 4 ? (ushort)this.memory.Get2ByteValue(parentByte)
                         : this.memory[parentByte];
-            return this.GetChildren(parentId);
+            return this.GetChildren(parentId).Where(p=>p.ObjectId!=objectId).ToArray();
         }
+
+        internal ZmObject[] GetMentionedAsSibling(ushort siblingId)
+        {
+            // Gets' us to the parent BYTE
+            var results = new List<ZmObject>();
+            for (ushort x = 0; x < this.TotalObjects; ++x)
+            {
+                var objectId = x;
+                var siblingByte = this.GetObjectStartAddress(objectId) + attrbFlagsLength + (version > 3 ? 2 : 1);
+
+
+                var objectSiblingId = version > 4 ? (ushort)this.memory.Get2ByteValue(siblingByte)
+                            : this.memory[siblingByte];
+                if (objectSiblingId == siblingId)
+                    results.Add(GetObject(objectId));
+
+            }
+
+            return results.ToArray();
+        }
+
 
         internal ZmObject GetParent(ushort objectId)
         {

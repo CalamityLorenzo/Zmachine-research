@@ -20,8 +20,8 @@ namespace Zmachine.Library.V2.Implementation
             var lValue = GetVariableValue(instruct.operands[0]);
             var rValue = GetVariableValue(instruct.operands[1]);
 
-            ushort result = (ushort)(lValue + rValue);
-            LibraryUtilities.StoreResult(GameData, CallStack, instruct, StoryHeader.GlobalVariables, result);
+            short result = (short)(lValue + (short)rValue);
+            StoreVariableValue(instruct.store, (ushort)result);
         }
         internal void And(DecodedInstruction instruct)
         {
@@ -41,13 +41,18 @@ namespace Zmachine.Library.V2.Implementation
 
             var address = instruct.operands[0].operandType == OperandType.Variable
                 ? GetVariableValue(instruct.operands[0])
-                : (instruct.operands[0].value[0] << 8 | instruct.operands[0].value[1])
-                                        .GetPackedAddress(StoryHeader.Version, 0, 0);
+                : (instruct.operands[0].value[0] << 8 | instruct.operands[0].value[1]);
+
+            address = address.GetPackedAddress(this.StoryHeader.Version, this.StoryHeader.RoutinesOffset, this.StoryHeader.StaticStringsOffset);
             if (address == 0)
-                LibraryUtilities.StoreResult(GameData, CallStack, instruct, StoryHeader.GlobalVariables, 0);
+            {
+                var dest = GameData[ProgramCounter++];
+                StoreVariableValue((ushort)dest, 0);
+                //LibraryUtilities.StoreResult(GameData, CallStack, instruct, StoryHeader.GlobalVariables, 0);
+            }
             else
             {
-                var returnAddress = ProgramCounter;// + instruct.store;
+                ushort returnAddress = (ushort)ProgramCounter;// + instruct.store;
                 this.ProgramCounter = address;
                 // this first operand is the routine address as above
                 List<ushort> routineArguments = new List<ushort>();
@@ -79,7 +84,7 @@ namespace Zmachine.Library.V2.Implementation
                     }
                 }
 
-                // Dirty hack..We actually place the program counter in exactly the correct place.
+                // Dirty hack..We actually placed the program counter in exactly the correct place.
                 // the start of the next command. However at the end of each turn/update we increment the program counter
                 // Thus it is now 1 byte off. This fixes that for earlier machines.
                 if (version <= 4) ProgramCounter -= 1;
@@ -104,7 +109,7 @@ namespace Zmachine.Library.V2.Implementation
             var address = instruct.operands[0].operandType == OperandType.Variable
                ? GetVariableValue(instruct.operands[0])
                : (instruct.operands[0].value[0] << 8 | instruct.operands[0].value[1]);
-            var returnAddress = this.ProgramCounter;
+            var returnAddress = (ushort)this.ProgramCounter;
             this.ProgramCounter = address;
             // Create stackframe
             this.CallStack.Push(new ActivationRecord(returnAddress, address,
@@ -126,9 +131,18 @@ namespace Zmachine.Library.V2.Implementation
         internal void Dec(DecodedInstruction instruct)
         {
             var value = GetVariableValue(instruct.operands[0]);
-
+            var comparitor = GetVariableValue(instruct.operands[1]);
             short result = (short)(value - 1);
+            StoreVariableValue(instruct.operands[0].value.GetUShort(), (ushort)result);
 
+            if ((value < comparitor) == instruct.branch.BranchIfTrue)
+                Branch(instruct.branch.Offset);
+        }
+
+        internal void DecChk(DecodedInstruction instruct)
+        {
+            var value = GetVariableValue(instruct.operands[0]);
+            short result = (short)(value - 1);
             StoreVariableValue(instruct.operands[0].value.GetUShort(), (ushort)result);
 
         }
@@ -138,8 +152,8 @@ namespace Zmachine.Library.V2.Implementation
             var lValue = GetVariableValue(instruct.operands[0]);
             var rValue = GetVariableValue(instruct.operands[1]);
             if (lValue == 0 || rValue == 0) throw new DivideByZeroException("Division by 0 error");
-            ushort result = (ushort)(lValue / rValue);
-            LibraryUtilities.StoreResult(GameData, CallStack, instruct, StoryHeader.GlobalVariables, result);
+            short result = (short)(lValue / (short)rValue);
+            LibraryUtilities.StoreResult(GameData, CallStack, instruct, StoryHeader.GlobalVariables, (ushort)result);
         }
         internal void GetChild(DecodedInstruction instruct)
         {
@@ -171,6 +185,21 @@ namespace Zmachine.Library.V2.Implementation
             if ((siblingId != 0) == instruct.branch.BranchIfTrue)
                 Branch(instruct.branch.Offset);
         }
+
+        internal void Inc(DecodedInstruction instruct)
+        {
+            var variableId = GetVariableValue(instruct.operands[0]);
+            var variableResult = (variableId switch
+            {
+                00 => this.CallStack.Peek().LocalStack.Peek(),
+                >= 1 and <= 15 => this.CallStack.Peek().Locals[variableId - 1],
+                >= 15 and <= 255 => this.GlobalVariables[variableId]
+            });
+
+            variableResult++;
+            StoreVariableValue(variableId, variableResult);
+        }
+
         internal void IncChk(DecodedInstruction instruct)
         {
             var variableId = GetVariableValue(instruct.operands[0]);
@@ -179,22 +208,13 @@ namespace Zmachine.Library.V2.Implementation
             {
                 00 => this.CallStack.Peek().LocalStack.Peek(),
                 >= 1 and <= 15 => this.CallStack.Peek().Locals[variableId - 1],
-                >= 15 and <= 255 => (ushort)(GameData[StoryHeader.GlobalVariables + ((variableId - 16) * 2)] << 8 | GameData[StoryHeader.GlobalVariables + ((variableId - 16) * 2) + 1])
+                >= 15 and <= 255 => this.GlobalVariables[variableId]
             });
 
             variableResult++;
-
-            if (variableId == 0)
-            {
-                _ = this.CallStack.Peek().LocalStack.Pop();
-                this.CallStack.Peek().LocalStack.Push(variableResult);
-            }
-            else if (variableId >= 1 && variableId <= 15)
-                this.CallStack.Peek().Locals[variableId - 1] = variableResult;
-            else if (variableId >= 16 && variableId <= 256)
-                this.GlobalVariables[variableId] = variableResult;
-
-            if ((variableResult > valueToCompaire) == instruct.branch.BranchIfTrue)
+            StoreVariableValue(variableId, variableResult);
+                
+            if (((short)variableResult > (short)valueToCompaire) == instruct.branch.BranchIfTrue)
                 Branch(instruct.branch.Offset);
         }
         internal void InsertObj(DecodedInstruction instruct)
@@ -209,18 +229,23 @@ namespace Zmachine.Library.V2.Implementation
         internal void Je(DecodedInstruction instruct)
         {
             var comparitor = GetVariableValue(instruct.operands[0]);
-            for (var x = 0; x < instruct.operands.Length - 1; ++x)
+            var expressionIsTrue = false;
+            for (var x = 1; x < instruct.operands.Length; ++x)
             {
-                var comparison = GetVariableValue(instruct.operands[1]);
+                var comparison = GetVariableValue(instruct.operands[x]);
                 if (comparitor == comparison)
                 {
-                    if (instruct.branch.BranchIfTrue)
-                    {
-                        this.Branch(instruct.branch.Offset);
-                    }
+                   expressionIsTrue = true;
                     break;
                 }
             }
+
+            if (expressionIsTrue == instruct.branch.BranchIfTrue)
+            {
+                // this.ProgramCounter = ProgramCounter + (short)instruct.branch.Offset - 2;
+                Branch(instruct.branch.Offset);
+            }
+
         }
         internal void Jg(DecodedInstruction instruct)
         {
@@ -228,7 +253,8 @@ namespace Zmachine.Library.V2.Implementation
             var comparitor = (short)GetVariableValue(instruct.operands[0]);
             var comparison = (short)GetVariableValue(instruct.operands[1]);
             if (((short)comparitor > (short)comparison) == instruct.branch.BranchIfTrue)
-                this.Branch(instruct.branch.Offset);
+                       Branch(instruct.branch.Offset);
+            //this.ProgramCounter = ProgramCounter + (short)instruct.branch.Offset - 2;
 
         }
         internal void Jl(DecodedInstruction instruct)
@@ -237,7 +263,8 @@ namespace Zmachine.Library.V2.Implementation
             var comparitor = GetVariableValue(instruct.operands[0]);
             var comparison = GetVariableValue(instruct.operands[1]);
             if (((short)comparitor < (short)comparison) == instruct.branch.BranchIfTrue)
-                this.Branch(instruct.branch.Offset);
+                       Branch(instruct.branch.Offset);
+            //this.ProgramCounter = ProgramCounter + (short)instruct.branch.Offset - 2;
         }
         internal void Jz(DecodedInstruction instruct)
         {
@@ -245,7 +272,8 @@ namespace Zmachine.Library.V2.Implementation
 
             if ((val == 0) == instruct.branch.BranchIfTrue)
             {
-                this.Branch(instruct.branch.Offset);
+                       Branch(instruct.branch.Offset);
+               // this.ProgramCounter = ProgramCounter + (short)instruct.branch.Offset - 2;
             }
         }
         internal void Jump(DecodedInstruction instruct)
@@ -286,7 +314,7 @@ namespace Zmachine.Library.V2.Implementation
             var rValue = GetVariableValue(instruct.operands[1]);
             if (lValue == 0 || rValue == 0) throw new DivideByZeroException("Mod division by 0 error");
 
-            var result = (short)(lValue % rValue);
+            var result = (short)(lValue % (short)rValue);
             StoreVariableValue(instruct.store, (ushort)result);
         }
 
@@ -296,7 +324,7 @@ namespace Zmachine.Library.V2.Implementation
             var lValue = GetVariableValue(instruct.operands[0]);
             var rValue = GetVariableValue(instruct.operands[1]);
 
-            short result = (short)(lValue * rValue);
+            short result = (short)(lValue * (short)rValue);
             StoreVariableValue(instruct.store, (ushort)result);
         }
 
@@ -352,91 +380,7 @@ namespace Zmachine.Library.V2.Implementation
         /// <param name="literal"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        private string PrepareForScreen(string literal)
-        {
-            if (literal.Length > this.screenWidthInChars)
-            {
-                var splitLiteral = new StringBuilder();
-                // Is the currently string over the limit to fit on the screen.
-                // This is the rows loop. 1 loop per row.
-                bool widerTheScreen = true;
-                // The position in the string that starts this row
-                string AllData = literal;
-                // You can end up with a dangling part of text dependiong on how the text split.
-                int rowLengthOffset = 0;
-                var RowStart = 0;
-                while (widerTheScreen)
-                {
-                    var CurrentRowLength = this.screenWidthInChars - rowLengthOffset;
-                    var CreateRows = true;
-                    var rowLiteral = "";
-                    if (rowLengthOffset > 0) rowLengthOffset = 0;
-                    while (CreateRows)
-                    {
-                        if (RowStart + CurrentRowLength > AllData.Length)
-                        {
-                            CreateRows = false;
-                            CurrentRowLength = (AllData.Length - 1) - RowStart;
-                            rowLiteral = AllData.Substring(RowStart, CurrentRowLength);
-                        }
-                        else
-                        {
-                            // COunting from the limitz (screenWidthInChars) downwards find the first space character
-                            if (AllData[RowStart + CurrentRowLength] != ' ')
-                            {
-                                CurrentRowLength -= 1;
-                            }
-                            else
-                            {
-                                // We have found a complete row.
-                                CreateRows = false;
-                                rowLiteral = AllData.Substring(RowStart, CurrentRowLength + 1); // grabs the space
-                            }
-                        }
-                    }
-
-                    if (!rowLiteral.Contains('\r'))
-                    {
-                        splitLiteral.Append(rowLiteral + '\r');
-                        RowStart += CurrentRowLength + 1; // Ensures the space char is on the previous line.
-                    }
-                    else
-                    {
-                        // okay the row has line breaks in it.
-                        // quantize them into discrete units.
-                        // The last entry will *not* end on a '\r' (The loops above split on a new line)
-                        // So now we print this partial line, with no line break, this is now an offset
-                        // That must be carried throught to the next run of text being processed.
-                        // (three attempts two days for this fucking algo and I KNOW I've written it before)
-                        // Who fucks up an accumulator?
-                        var rows = rowLiteral.Split('\r');
-                        for (var x = 0; x < rows.Length; ++x)
-                        {
-                            if (x == rows.Length - 1)
-                            {
-                                RowStart += CurrentRowLength + 1;
-                                splitLiteral.Append(rows[x]);
-                                rowLengthOffset = rows[x].Length;
-                            }
-                            else
-                            {
-                                splitLiteral.Append(rows[x] + '\r');
-                            }
-                        }
-                    }
-                    if (RowStart >= AllData.Length - 1)
-                        widerTheScreen = false;
-                }
-
-                return splitLiteral.ToString();
-
-            }
-            else
-            {
-                return literal;
-            }
-        }
-
+  
         internal void PrintObj(DecodedInstruction instruct)
         {
             var objectId = GetVariableValue(instruct.operands[0]);
@@ -469,7 +413,7 @@ namespace Zmachine.Library.V2.Implementation
             var value = GetVariableValue(instruct.operands[2]);
             this.ObjectTable.SetProperty(objectId, property, value);
 
-            var obj = this.ObjectTable[objectId];
+          //  var obj = this.ObjectTable[objectId];
             //           obj.PropertyTable.properties.Contains(p=>p)
         }
 
@@ -478,7 +422,6 @@ namespace Zmachine.Library.V2.Implementation
             var valueToReturn = GetVariableValue(instruct.operands[0]);
             var stackFrame = this.CallStack.Pop();
             SimpleReturn(stackFrame, valueToReturn);
-
         }
 
         internal void RetPopped()
@@ -554,7 +497,8 @@ namespace Zmachine.Library.V2.Implementation
             // Subtraction is signed...
             // Infact all of the arithimatic is signed.
             short result = (short)(left - right);
-            LibraryUtilities.StoreResult(GameData, CallStack, instruct, StoryHeader.GlobalVariables, (ushort)result);
+            this.StoreVariableValue(instruct.store, (ushort)  result);
+            //LibraryUtilities.StoreResult(GameData, CallStack, instruct, StoryHeader.GlobalVariables, (ushort)result);
         }
         internal void Test(DecodedInstruction instruct)
         {

@@ -462,9 +462,14 @@ namespace Zmachine.Tests
         [Test(Description = "3 Change an objects parent.")]
         public void V3InsertObject()
         {
+
             var ztools = new ZmachineTools(v3Machine);
 
+            //var sibs = ztools.GetMentionedAsSiblingObjects(8);
+
             var obj2 = ztools.GetObjectDebug(2);
+            var sib2 = ztools.GetSiblingObjects(2);
+            var child2  = ztools.GetChildObjects(2);
             var obj52 = ztools.GetObjectDebug(52);
 
             Console.WriteLine($"Object {obj52.ObjectId} {(obj52.PropertyTable.shortNameBytes.Length > 0 ? ztools.DecodeEncodedText(obj52.PropertyTable.shortNameBytes) : "{{No Name}}")}");
@@ -476,7 +481,12 @@ namespace Zmachine.Tests
             ztools.InsertObjectDebug(52, 2);
 
             var obj2a = ztools.GetObjectDebug(2);
+            var sibs = ztools.GetSiblingObjects(2);
+            var child = ztools.GetChildObjects(2);
+
             var obj52a = ztools.GetObjectDebug(52);
+            var sib52 = ztools.GetSiblingObjects(52);
+            var child52 = ztools.GetChildObjects(52);
             Console.WriteLine($"Object {obj52a.ObjectId} {(obj52a.PropertyTable.shortNameBytes.Length > 0 ? ztools.DecodeEncodedText(obj52a.PropertyTable.shortNameBytes) : "{{No Name}}")}");
             Console.WriteLine($"Destination {obj2a.ObjectId} {(obj2a.PropertyTable.shortNameBytes.Length > 0 ? ztools.DecodeEncodedText(obj2a.PropertyTable.shortNameBytes) : "{{No Name}}")}");
             Console.WriteLine($"Object Parent ={obj52a.Parent}");

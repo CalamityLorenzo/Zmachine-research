@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using Zmachine.Library.V2.Instructions;
 using Zmachine.Library.V2.Objects;
 using Zmachine.Library.V2.Utilities;
@@ -81,7 +82,7 @@ namespace Zmachine.Library.V2.Implementation
             {
                 this.CallStack.Push(new ActivationRecord
                 (
-                    ReturnAddress: -1,
+                    ReturnAddress: 0,
                     StartAdress: this.ProgramCounter,
                     Locals: new ushort[0],
                     false, null
@@ -155,6 +156,9 @@ namespace Zmachine.Library.V2.Implementation
                     case "dec":
                         Dec(currentInstr);
                         break;
+                    case "dec_chk":
+                        DecChk(currentInstr);
+                        break;
                     case "div":
                         Div(currentInstr);
                         break;
@@ -169,6 +173,9 @@ namespace Zmachine.Library.V2.Implementation
                         break;
                     case "get_sibling":
                         GetSibling(currentInstr);
+                        break;
+                    case "inc":
+                        Inc(currentInstr);
                         break;
                     case "inc_chk":
                         IncChk(currentInstr);
@@ -282,10 +289,12 @@ namespace Zmachine.Library.V2.Implementation
             this.ProgramCounter = callingRecord.ReturnAddress;
             if (callingRecord.StoreResult)
             {
-                ushort? t = callingRecord.StoreAddress;
-                if (t.HasValue)
-                    StoreVariableValue(t.Value, value);
-                else throw new ArgumentOutOfRangeException("Cannot find Storage return address for call.");
+                //ushort? t = callingRecord.StoreAddress;
+                //if (t.HasValue)
+                //    StoreVariableValue(t.Value, value);
+                //else throw new ArgumentOutOfRangeException("Cannot find Storage return address for call.");
+                ushort t = GameData[ProgramCounter];
+                StoreVariableValue(t, value);
             }
 
         }
@@ -326,10 +335,17 @@ namespace Zmachine.Library.V2.Implementation
                 this.ProgramCounter = callingRecord.ReturnAddress;
                 if (callingRecord.StoreResult)
                 {
-                    ushort? t = callingRecord.StoreAddress;
-                    if (t.HasValue)
-                        StoreVariableValue(t.Value, (ushort)branchOffset);
-                    else throw new ArgumentOutOfRangeException("Cannot find Storage return address for call.");
+
+                    //ushort? t = callingRecord.StoreAddress;
+                    //if (t.HasValue)
+                    //    StoreVariableValue(t.Value, value);
+                    //else throw new ArgumentOutOfRangeException("Cannot find Storage return address for call.");
+                    ushort t = GameData[ProgramCounter];
+                    StoreVariableValue(t, (ushort)branchOffset);
+                    //ushort? t = callingRecord.StoreAddress;
+                    //if (t.HasValue)
+                    //    StoreVariableValue(t.Value, (ushort)branchOffset);
+                    //else throw new ArgumentOutOfRangeException("Cannot find Storage return address for call.");
                 }
             }
             else
@@ -409,6 +425,101 @@ namespace Zmachine.Library.V2.Implementation
             sw.Write(outputLiteral);
             sw.Close();
         }
+
+        private string PrepareForScreen(string literal)
+        {
+            if (literal.Length > this.screenWidthInChars)
+            {
+                var splitLiteral = new StringBuilder();
+                // Is the currently string over the limit to fit on the screen.
+                // This is the rows loop. 1 loop per row.
+                bool widerTheScreen = true;
+                // The position in the string that starts this row
+                string AllData = literal;
+                // You can end up with a dangling part of text dependiong on how the text split.
+                int rowLengthOffset = 0;
+                var RowStart = 0;
+                while (widerTheScreen)
+                {
+                    var CurrentRowLength = this.screenWidthInChars - rowLengthOffset;
+                    var CreateRows = true;
+                    var rowLiteral = "";
+                    if (rowLengthOffset > 0) rowLengthOffset = 0;
+                    while (CreateRows)
+                    {
+                        if (RowStart + CurrentRowLength > AllData.Length)
+                        {
+                            CreateRows = false;
+                            CurrentRowLength = (AllData.Length) - RowStart;
+                            rowLiteral = AllData.Substring(RowStart, CurrentRowLength);
+                        }
+                        else
+                        {
+                            // COunting from the limitz (screenWidthInChars) downwards find the first space character
+                            if (AllData[RowStart + CurrentRowLength] != ' ')
+                            {
+                                CurrentRowLength -= 1;
+                            }
+                            else
+                            {
+                                // We have found a complete row.
+                                CreateRows = false;
+                                rowLiteral = AllData.Substring(RowStart, CurrentRowLength + 1); // grabs the space
+                            }
+                        }
+                    }
+
+                    if (!rowLiteral.Contains('\r'))
+                    {
+                        // last line in this sagas
+                        if (RowStart + CurrentRowLength >= AllData.Length)
+                        {
+                            splitLiteral.Append(rowLiteral);
+                            widerTheScreen = false;
+                        }
+                        else
+                        {
+                            splitLiteral.Append(rowLiteral + '\r');
+                            RowStart += CurrentRowLength + 1; // Ensures the space char is on the previous line.
+                        }
+                    }
+                    else
+                    {
+                        // okay the row has line breaks in it.
+                        // quantize them into discrete units.
+                        // The last entry will *not* end on a '\r' (The loops above split on a new line)
+                        // So now we print this partial line, with no line break, this is now an offset
+                        // That must be carried throught to the next run of text being processed.
+                        // (three attempts two days for this fucking algo and I KNOW I've written it before)
+                        // Who fucks up an accumulator?
+                        var rows = rowLiteral.Split('\r');
+                        for (var x = 0; x < rows.Length; ++x)
+                        {
+                            if (x == rows.Length - 1)
+                            {
+                                RowStart += CurrentRowLength + 1;
+                                splitLiteral.Append(rows[x]);
+                                rowLengthOffset = rows[x].Length;
+                            }
+                            else
+                            {
+                                splitLiteral.Append(rows[x] + '\r');
+                            }
+                        }
+                    }
+                    if (RowStart >= AllData.Length - 1)
+                        widerTheScreen = false;
+                }
+
+                return splitLiteral.ToString();
+
+            }
+            else
+            {
+                return literal;
+            }
+        }
+
 
     }
 }
