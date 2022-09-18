@@ -460,14 +460,26 @@ namespace Zmachine.Library.V2.Implementation
             var splitWords = inputTextLower.Split(this.DictionaryTable.WordSeparators.Append(' ').ToArray());
 
             var wordStorageAddress = charLimitAddr + offset;
+            var wordLimitAddrOffset = 0; // Add the correct amount to 
+            var wrdCounter = 0;
             foreach (var word in splitWords)
             {
-                if (word.Length > 0)
+                if (word.Length > 0 && wrdCounter<=wordLimit)
                 {
+
                     var zChars = this.TextDecoder.EncodeUtf8ZChars(word);
                     var wordZ = this.TextDecoder.EncodeZcharsToWords(zChars);
                     var nextStorageAddress = StoreReadInputWord(wordZ, (ushort)wordStorageAddress);
-                    var wordId = this.DictionaryTable.FindMatch(wordZ);
+                    var (wordAddress, wordId) = this.DictionaryTable.FindMatch(wordZ);
+                    var firstCharInTextBuffer = wordStorageAddress - (charLimitAddr + offset);
+                    // add the parse entry
+                    GameData[wordLimitAddr + wordLimitAddrOffset++] = (byte)(wordAddress >> 8);
+                    GameData[wordLimitAddr + wordLimitAddrOffset++] = (byte)(wordAddress);
+                    GameData[wordLimitAddr + wordLimitAddrOffset++] = (byte)word.Length;
+                    GameData[wordLimitAddr + wordLimitAddrOffset++] = (byte)firstCharInTextBuffer;
+
+                    wrdCounter += 1;
+                    wordStorageAddress = nextStorageAddress;
                 }
             }   
         }

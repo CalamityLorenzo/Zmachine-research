@@ -9,7 +9,7 @@ namespace Zmachine.Library.V2
         public char[] WordSeparators { get; }
         public byte WordEntryLength { get; }
         public int Version { get; }
-
+        internal ushort StartAddress { get; }
         public int Length;
 
         /// <summary>
@@ -18,11 +18,11 @@ namespace Zmachine.Library.V2
         /// </summary>
         /// <param name="startAddress"></param>
         /// <param name="Memory"></param>
-        public DictionaryTable(int version, int startAddress, Span<byte> Memory)
+        public DictionaryTable(int version, ushort startAddress, byte[] Memory)
         {
             this.Version = version;
             var separatorCount = Memory[startAddress];
-
+            this.StartAddress = startAddress;
             this.WordSeparators = new char[separatorCount];
             for (var x = 0; x < separatorCount; x++)
             {
@@ -69,9 +69,10 @@ namespace Zmachine.Library.V2
 
         public byte[] this[int entry] => this.Entries[entry];
 
-        public int FindMatch(byte[] wordZchars)
+        public (ushort wordAddress, ushort wordEntryId)  FindMatch(byte[] wordZchars)
         {
             var wordLength = wordZchars.Length;
+            var entryId = 0;
             for (var x = 0; x < this.Entries.Length; ++x)
             {
 
@@ -82,12 +83,16 @@ namespace Zmachine.Library.V2
                 {
                     ctr++;
                     if (ctr == wordLength)
-                        return x+1;
+                    {
+                        entryId = x;
+                        break;
+                    }
                 }
                 
             }
-
-            return 0;
+            if (entryId > 0)
+                return new ((ushort)(this.StartAddress + this.WordEntryLength * entryId), (ushort)(entryId + 1));
+            return new (0,0);
         }
     }
 }
