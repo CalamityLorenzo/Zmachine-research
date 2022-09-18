@@ -69,7 +69,7 @@ namespace Zmachine.Library.V2
 
         public byte[] this[int entry] => this.Entries[entry];
 
-        public int? FindMatch(byte[] wordZchars)
+        public int FindMatch(byte[] wordZchars)
         {
             var wordLength = wordZchars.Length;
             for (var x = 0; x < this.Entries.Length; ++x)
@@ -87,7 +87,7 @@ namespace Zmachine.Library.V2
                 
             }
 
-            return null;
+            return 0;
         }
     }
 }

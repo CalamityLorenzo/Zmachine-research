@@ -1,9 +1,9 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Text;
 using Zmachine.Library.V2.Instructions;
 using Zmachine.Library.V2.Objects;
 using Zmachine.Library.V2.Utilities;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace Zmachine.Library.V2.Implementation
 {
@@ -406,8 +406,7 @@ namespace Zmachine.Library.V2.Implementation
                         // Now send the data on it's way.
                         // remove the terminating character
                         var readTextComplete = readInputText.Remove(readInputText.Length - 1).ToLower();
-                        StoreReadInput(readTextComplete, charLimit, charLimitAddr);
-                        LexicalAnalysis(readTextComplete, wordLimit, wordLimitAddr);
+                        ProcessReadInput(readTextComplete, charLimit, charLimitAddr, wordLimit, wordLimitAddr);
                     }
                 }
 
@@ -422,47 +421,55 @@ namespace Zmachine.Library.V2.Implementation
 
         }
 
-        private void LexicalAnalysis(string inputTextLower, byte wordLimit, ushort wordLimitAddr)
-        {
-            //1. Split the text into words.
-            var splitWords = inputTextLower.Split(this.DictionaryTable.WordSeparators.Append(' ').ToArray());
-            foreach(var word in splitWords)
-            {
-              // https://zspec.jaredreisinger.com/13-dictionary#13_6_3
-                var zChars = this.TextDecoder.EncodeUtf8ZChars(word);
-                var wordZ = this.TextDecoder.EncodeZcharsToWords(zChars);
-                this.DictionaryTable.FindMatch(wordZ);
-            }
-        }
 
-        private void StoreReadInput(string inputTextLower, byte charLimit, ushort charLimitAddr)
+        private int StoreReadInputWord(byte[] zcharWord, ushort firstCharAddress)
         {
             // Store text in the buffer (this is only a version 3 version)
+            var returnValue = 0;
+            // 3. Stick in the buffer.
+            for (var x = 0; x < zcharWord.Length; ++x)
+            {
+                returnValue = firstCharAddress + x;
+                GameData[returnValue] = zcharWord[x];
+            }
 
-            // 1. Turn the text into lowercase, then zchars
-            var zChars = this.TextDecoder.EncodeUtf8ZChars(inputTextLower);
-            // 2. Make sure nothing funny happened on the way to the encoding.
-            var charsToStore = zChars.Length <= charLimit ? inputTextLower.Length : charLimit;
+            return returnValue;
+
+        }
+
+        private void ProcessReadInput(string inputTextLower, byte charLimit, ushort charLimitAddr, byte wordLimit, ushort wordLimitAddr)
+        {
+            var charsToStore = inputTextLower.Length <= charLimit ? (byte)inputTextLower.Length : charLimit;
 
             var offset = 1; // First byte is the number of chars allowed.
             // if version 5+ then second byte is the numbner of chars actually typed.
-            if(this.StoryHeader.Version > 4)
+            if (this.StoryHeader.Version > 4)
             {
                 offset += 1;
-                GameData[(charLimitAddr + offset)] = (byte)zChars.Length;
+                GameData[(charLimitAddr + offset)] = (byte)charsToStore;
             }
 
             // https://zspec.jaredreisinger.com/15-opcodes#read 
             // Just a tremendous pain in my butt”—Andrew Plotkin; “the most unfortunate feature of the Z-machine design”—Stefan Jokisch
-            while(GameData[(charLimitAddr + offset)] != 0)
+            while (GameData[(charLimitAddr + offset)] != 0)
             {
                 offset += 1;
             }
 
-            // 3. Stick in the buffer.
-            for (var x = 0; x < charsToStore; ++x)
-                GameData[(charLimitAddr + 1) + x] = zChars[x];
+            // https://zspec.jaredreisinger.com/13-dictionary#13_6_3
+            var splitWords = inputTextLower.Split(this.DictionaryTable.WordSeparators.Append(' ').ToArray());
 
+            var wordStorageAddress = charLimitAddr + offset;
+            foreach (var word in splitWords)
+            {
+                if (word.Length > 0)
+                {
+                    var zChars = this.TextDecoder.EncodeUtf8ZChars(word);
+                    var wordZ = this.TextDecoder.EncodeZcharsToWords(zChars);
+                    var nextStorageAddress = StoreReadInputWord(wordZ, (ushort)wordStorageAddress);
+                    var wordId = this.DictionaryTable.FindMatch(wordZ);
+                }
+            }   
         }
 
         internal void PrintToScreen(string outputLiteral)
