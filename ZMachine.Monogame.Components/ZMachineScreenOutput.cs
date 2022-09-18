@@ -92,7 +92,10 @@ namespace ZMachine.Monogame.Component
 
                     var lastCharEndLine = streamLine.EndsWith("\r");
                     // need to discover the newlines, and split out accordingly.
-                    displayLines = streamLine.Split(new char[] { '\r' });
+                    if (streamLine != "\r")
+                        displayLines = streamLine.Split(new char[] { '\r' });
+                    else
+                        displayLines = new string[] { "" };
                     for (var x = 0; x < displayLines.Length; ++x)
                     {
                         // These all had new lines, and so go to the history table.

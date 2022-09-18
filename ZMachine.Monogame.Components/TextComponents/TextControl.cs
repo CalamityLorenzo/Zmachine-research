@@ -133,8 +133,10 @@ namespace ZMachine.Monogame.Components.TextComponents
                     {
                         if (_currentContent.Count > 0)
                         {
+
                             _currentContent.Add(currentChar);
-                            _currentContent.InsertRange(0, this.Prompt.ToArray());
+                            // Do we add the prompt character to the output?
+                            //_currentContent.InsertRange(0, this.Prompt.ToArray());
                             var outputContent = Encoding.UTF8.GetBytes(_currentContent.ToArray());
                             ouputStream.Write(outputContent, 0, outputContent.Length);
                             _currentContent = new List<char>();

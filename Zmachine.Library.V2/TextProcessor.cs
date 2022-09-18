@@ -375,7 +375,7 @@
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public byte[] EncodeUtf8ZChars(string text)
+        public byte[] EncodeUtf8ZChars(string text, bool padding = true)
         {
             List<byte> zChars = new(2); // This represents the 2 byte word of 1 control bit and three chars.
             var allChars = text.GetEnumerator();
@@ -421,12 +421,14 @@
             // each 2 byte word contains 3 charactres.
             // if the amount of chars is not divisible by3 
             // add the remainder as padding (5's)
-            var mod3 = zChars.Count % 3;
-            if (mod3 == 1)
-                zChars.AddRange(new byte[] { 5, 5 }); //.ToArray();
-            if (mod3 == 2)
-                zChars.Add(5);
-
+            if (padding)
+            {
+                var mod3 = zChars.Count % 3;
+                if (mod3 == 1)
+                    zChars.AddRange(new byte[] { 5, 5 }); //.ToArray();
+                if (mod3 == 2)
+                    zChars.Add(5);
+            }
             // Now ensure the 2nd to last byte has the 7th (8th ashualkly) but set.
 
             return zChars.ToArray();
@@ -444,7 +446,7 @@
         {
             int dL = data.Length;
             List<byte> validChars = new();
-            for(var x = 0; x < data.Length; ++x)
+            for (var x = 0; x < data.Length; ++x)
             {
                 var thisChar = (byte)data[x];
                 // Backspace
@@ -452,11 +454,11 @@
                 // new line
                 if (thisChar == 13) validChars.Add(thisChar);
                 // Sentence space
-                if (version ==6 && thisChar == 11) validChars.Add(thisChar);
+                if (version == 6 && thisChar == 11) validChars.Add(thisChar);
                 // escape
                 if (thisChar == 27) validChars.Add(thisChar);
                 // standard ascii
-                if (thisChar >=32 && thisChar<=126) validChars.Add(thisChar);
+                if (thisChar >= 32 && thisChar <= 126) validChars.Add(thisChar);
                 // cursor u/d/l/r
                 if (thisChar >= 129 && thisChar <= 132) validChars.Add(thisChar);
                 // FKeys

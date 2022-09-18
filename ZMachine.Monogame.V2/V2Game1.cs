@@ -18,7 +18,7 @@ namespace ZMachine.Monogame.V2
 
         private StreamInputProcessor sip;
         private ScrollablePanel hostPanel;
-        private TextControl tc;
+
         private MemoryStream input0 = new(), input1 = new(), outputScreen = new(), outputTranscript = new();
         // This is the abstraction from the keyboard input into the input streams
         private MemoryStream kboardStream = new();

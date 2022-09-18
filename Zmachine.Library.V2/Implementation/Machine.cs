@@ -3,6 +3,7 @@ using System.Text;
 using Zmachine.Library.V2.Instructions;
 using Zmachine.Library.V2.Objects;
 using Zmachine.Library.V2.Utilities;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Zmachine.Library.V2.Implementation
 {
@@ -371,27 +372,24 @@ namespace Zmachine.Library.V2.Implementation
         {
             if (this.input0.Length > 0)
             {
+                var charLimitAddr = GetVariableValue(this.currentInstr.operands[0]);
+                var wordLimitAddr = GetVariableValue(this.currentInstr.operands[1]);
+                var charLimit = GameData[charLimitAddr];
+                var wordLimit = GameData[wordLimitAddr];
+
                 this.input0.Position = 0;
                 var bytes = new byte[input0.Length];
                 var span = bytes.AsSpan();
                 input0.Read(span);
-                var chars = System.Text.Encoding.UTF8
-                                                .GetString(span)
-                                                .ToLower(System.Globalization.CultureInfo.CurrentCulture)
-                                                .GetValidZSCIIChars(this.StoryHeader.Version);
-                for (var x = 0; x < chars.Length; x++)
+
+                // Some light formatteing, and testing for the end of a string.
+                for (var x = 0; x < span.Length; x++)
                 {
-                    var charA = (char)chars[x];
+                    var charA = (char)span[x];
                     if (charA == '\b')
-                    { // backspace
-                        if (readInputText.Length == 1)
-                        {
-                            readInputText = "";
-                        }
-                        else if (readInputText.Length > 1)
-                        {
-                            readInputText = readInputText.Remove(readInputText.Length - 1, 1);
-                        }
+                    {
+                        readInputText = readInputText.Length <= 1 ? "" : readInputText.Remove(readInputText.Length - 1, 1);
+
                     }
                     else if (charA == 27) // escape
                     {
@@ -399,32 +397,75 @@ namespace Zmachine.Library.V2.Implementation
                     }
                     else // Append character.
                     {
-                        this.readInputText = this.readInputText + charA;
+                        if (this.readInputText.Length <= charLimit)
+                            this.readInputText = this.readInputText + charA;
                     }
 
                     if (this.terminatingChars.Any(s => s == charA)) // we have completed our task.
                     {
                         this.IsReadingInstruction = false;
+                        // Now send the data on it's way.
+                        // remove the terminating character
+                        var readTextComplete = readInputText.Remove(readInputText.Length - 1).ToLower();
+                        StoreReadInput(readTextComplete, charLimit, charLimitAddr);
+                        LexicalAnalysis(readTextComplete, wordLimit, wordLimitAddr);
                     }
                 }
-                // Convert what we have into zChars, and then back again for output.
-                var rawZchars = TextDecoder.EncodeUtf8ZChars(readInputText);
-                var outputString = TextDecoder.DecodeZChars(rawZchars);
-                // we write that into the output stream.
-                // Which is then drawn onto the screen.
-                // Whatever collects the output stream, must have a concept of acurrent line.
-                // Which it will accept blithely. This is that current line. Everytime we update. we are effectively sending an incomplete command.
-                // every new change is a new line.
-                // word-wrapping etc can all be handedl by the screen for the moment.
-                // new-line is the terminator here. The screen don't care.
-                if (outputString.Length > 0)
+
+
+
+                if (readInputText.Length > 0)
                 {
-                    using StreamWriter sw = new StreamWriter(this.outputScreen, System.Text.Encoding.UTF8, bufferSize: outputString.Length, leaveOpen: true);
-                    sw.Write(outputString);
-                    sw.Close();
+                    this.PrintToScreen(readInputText);
                 }
                 this.input0.SetLength(0);
             }
+
+        }
+
+        private void LexicalAnalysis(string inputTextLower, byte wordLimit, ushort wordLimitAddr)
+        {
+            //1. Split the text into words.
+            var splitWords = inputTextLower.Split(this.DictionaryTable.WordSeparators.Append(' ').ToArray());
+
+            foreach(var word in splitWords)
+            {
+              // https://zspec.jaredreisinger.com/13-dictionary#13_6_3
+                var zChars = this.TextDecoder.EncodeUtf8ZChars(word);
+                var wordZ = this.TextDecoder.EncodeZcharsToWords(zChars);
+                this.DictionaryTable.FindMatch(wordZ);
+            }
+
+
+        }
+
+        private void StoreReadInput(string inputTextLower, byte charLimit, ushort charLimitAddr)
+        {
+            // Store text in the buffer (this is only a version 3 version)
+
+            // 1. Turn the text into lowercase, then zchars
+            var zChars = this.TextDecoder.EncodeUtf8ZChars(inputTextLower);
+            // 2. Make sure nothing funny happened on the way to the encoding.
+            var charsToStore = zChars.Length <= charLimit ? inputTextLower.Length : charLimit;
+
+            var offset = 1; // First byte is the number of chars allowed.
+            // if version 5+ then second byte is the numbner of chars actually typed.
+            if(this.StoryHeader.Version > 4)
+            {
+                offset += 1;
+                GameData[(charLimitAddr + offset)] = (byte)zChars.Length;
+            }
+
+            // https://zspec.jaredreisinger.com/15-opcodes#read 
+            // Just a tremendous pain in my butt”—Andrew Plotkin; “the most unfortunate feature of the Z-machine design”—Stefan Jokisch
+            while(GameData[(charLimitAddr + offset)] != 0)
+            {
+                offset += 1;
+            }
+
+            // 3. Stick in the buffer.
+            for (var x = 0; x < charsToStore; ++x)
+                GameData[(charLimitAddr + 1) + x] = zChars[x];
 
         }
 
@@ -529,6 +570,37 @@ namespace Zmachine.Library.V2.Implementation
             }
         }
 
+        /// <summary>
+        /// creates the status line ready for display
+        /// </summary>
+        /// <returns></returns>
+        private string StatusLineText()
+        {
+            // Lets keep it simple here kiddddddoooooos
+            var flags = this.StoryHeader.Flags1;
+            var name = "{unknown object}";
+            var topVar = this.GlobalVariables[0];
+            var obj = this.ObjectTable[topVar];
+            if (obj != null)
+            {
+                var nameBytes = this.TextDecoder.GetZChars(obj.PropertyTable.shortNameBytes);
+                name = this.TextDecoder.DecodeZChars(nameBytes);
+            }
+            var statusLineText = "@@STATUS_LINE@@:";
+            // Score game
+            if ((flags & 1) == 0)
+            {
+                var score = this.GlobalVariables[1];
+                var turns = this.GlobalVariables[2];
+                return $"{statusLineText}{name.PadRight((this.screenWidthInChars - 4) - name.Length)} {score}/{turns}";
+            }
+            else
+            {
+                var hrs = this.GlobalVariables[1];
+                var mins = this.GlobalVariables[2];
+                return $"{statusLineText}{name.PadRight((this.screenWidthInChars - 4) - name.Length)} {hrs}:{mins}";
+            }
+        }
 
     }
 }

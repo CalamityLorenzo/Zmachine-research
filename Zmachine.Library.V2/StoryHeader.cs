@@ -5,7 +5,7 @@ namespace Zmachine.Library.V2
     using Zmachine.Library.V2.Utilities;
     // Default v1 header
     public record StoryHeader(int Version,
-                           BitArray Flags1,
+                           Byte Flags1,
                            int HighMemoryStart,
                            int ProgramCounterInitalValue,
                            int DictionaryTable,
@@ -47,7 +47,7 @@ namespace Zmachine.Library.V2
 
         // v2 Header
         public StoryHeader(int Version,
-                        BitArray Flags1,
+                        Byte Flags1,
                         int HighMemoryStart,
                         int ProgramCounterInitalValue,
                         int DictionaryTable,
@@ -65,7 +65,7 @@ namespace Zmachine.Library.V2
         }
         // v3 Header
         public StoryHeader(int Version,
-                        BitArray Flags1,
+                        Byte Flags1,
                         int HighMemoryStart,
                         int ProgramCounterInitalValue,
                         int DictionaryTable,
@@ -86,7 +86,7 @@ namespace Zmachine.Library.V2
         }
         // v4
         public StoryHeader(int Version,
-                BitArray Flags1,
+                Byte Flags1,
                 int HighMemoryStart,
                 int ProgramCounterInitalValue,
                 int DictionaryTable,
@@ -112,7 +112,7 @@ namespace Zmachine.Library.V2
         }
         // v5
         public StoryHeader(int Version,
-                BitArray Flags1,
+                Byte Flags1,
                 int HighMemoryStart,
                 int ProgramCounterInitalValue,
                 int DictionaryTable,
@@ -152,7 +152,7 @@ namespace Zmachine.Library.V2
         }
         //v6 
         public StoryHeader(int Version,
-                BitArray Flags1,
+                Byte Flags1,
                 int HighMemoryStart,
                 int ProgramCounterInitalValue,
                 int DictionaryTable,
@@ -201,7 +201,7 @@ namespace Zmachine.Library.V2
             {
                 1 => new StoryHeader(
                     Version: version,
-                    Flags1: new BitArray(Memory[1]),
+                    Flags1: Memory[1],
                     HighMemoryStart: Memory.Get2ByteValue(4),
                     ProgramCounterInitalValue: Memory.Get2ByteValue(6),
                     DictionaryTable: Memory.Get2ByteValue(8),
@@ -213,7 +213,7 @@ namespace Zmachine.Library.V2
                     ReleaseNumber: Memory.Get2ByteValue(2)),
                 2 => new StoryHeader(
                      Version: version,
-                     Flags1: new BitArray(Memory[1]),
+                     Flags1: Memory[1],
                      HighMemoryStart: Memory.Get2ByteValue(4),
                      ProgramCounterInitalValue: Memory.Get2ByteValue(6),
                      DictionaryTable: Memory.Get2ByteValue(8),
@@ -227,7 +227,7 @@ namespace Zmachine.Library.V2
                      SerialCode: new string(new[] { (char)Memory[18], (char)Memory[19], (char)Memory[20], (char)Memory[21], (char)Memory[22], (char)Memory[23] })),
                 3 => new StoryHeader(
                         Version: version,
-                        Flags1: new BitArray(Memory[1]),
+                        Flags1: Memory[1],
                         HighMemoryStart: Memory.Get2ByteValue(4),
                         ProgramCounterInitalValue: Memory.Get2ByteValue(6),
                         DictionaryTable: Memory.Get2ByteValue(8),
@@ -243,7 +243,7 @@ namespace Zmachine.Library.V2
                         SerialCode: new string(new[]{(char)Memory[18],(char)Memory[19],(char)Memory[20],(char)Memory[21],(char)Memory[22],(char)Memory[23]})),
                 4 => new StoryHeader(
                         Version: version,
-                        Flags1: new BitArray(Memory[1]),
+                        Flags1: Memory[1],
                         HighMemoryStart: Memory.Get2ByteValue(4),
                         ProgramCounterInitalValue: Memory.Get2ByteValue(6),
                         DictionaryTable: Memory.Get2ByteValue(8),
@@ -263,7 +263,7 @@ namespace Zmachine.Library.V2
                         SerialCode: new string(new[] { (char)Memory[18], (char)Memory[19], (char)Memory[20], (char)Memory[21], (char)Memory[22], (char)Memory[23] })),
                 5 => new StoryHeader(
                         Version: version,
-                        Flags1: new BitArray(Memory[1]),
+                        Flags1: Memory[1],
                         HighMemoryStart: Memory.Get2ByteValue(4),
                         ProgramCounterInitalValue: Memory.Get2ByteValue(6),
                         DictionaryTable: Memory.Get2ByteValue(8),
@@ -293,7 +293,7 @@ namespace Zmachine.Library.V2
                         HeaderExtensionTable: Memory.Get2ByteValue(54)),
                 6 => new StoryHeader(
                         Version: version,
-                        Flags1: new BitArray(Memory[1]),
+                        Flags1: Memory[1],
                         HighMemoryStart: Memory.Get2ByteValue(4),
                         ProgramCounterInitalValue: Memory.Get2ByteValue(6),
                         DictionaryTable: Memory.Get2ByteValue(8),

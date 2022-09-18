@@ -68,5 +68,26 @@ namespace Zmachine.Library.V2
         }
 
         public byte[] this[int entry] => this.Entries[entry];
+
+        public int? FindMatch(byte[] wordZchars)
+        {
+            var wordLength = wordZchars.Length;
+            for (var x = 0; x < this.Entries.Length; ++x)
+            {
+
+                var entry = this.Entries[x];
+                // compare ALL the bytes!!!
+                var ctr = 0;
+                while (entry[ctr] == wordZchars[ctr])
+                {
+                    ctr++;
+                    if (ctr == wordLength)
+                        return x+1;
+                }
+                
+            }
+
+            return null;
+        }
     }
 }

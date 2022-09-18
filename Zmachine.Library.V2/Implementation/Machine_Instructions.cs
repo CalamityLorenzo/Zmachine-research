@@ -138,7 +138,6 @@ namespace Zmachine.Library.V2.Implementation
             if ((value < comparitor) == instruct.branch.BranchIfTrue)
                 Branch(instruct.branch.Offset);
         }
-
         internal void DecChk(DecodedInstruction instruct)
         {
             var value = GetVariableValue(instruct.operands[0]);
@@ -186,7 +185,6 @@ namespace Zmachine.Library.V2.Implementation
             if ((siblingId != 0) == instruct.branch.BranchIfTrue)
                 Branch(instruct.branch.Offset);
         }
-
         internal void Inc(DecodedInstruction instruct)
         {
             var variableId = GetVariableValue(instruct.operands[0]);
@@ -200,7 +198,6 @@ namespace Zmachine.Library.V2.Implementation
             variableResult++;
             StoreVariableValue(variableId, variableResult);
         }
-
         internal void IncChk(DecodedInstruction instruct)
         {
             var variableId = GetVariableValue(instruct.operands[0]);
@@ -269,8 +266,6 @@ namespace Zmachine.Library.V2.Implementation
                 this.ProgramCounter = ProgramCounter + (short)instruct.branch.Offset - 2;
 
         }
-
-
         internal void Jl(DecodedInstruction instruct)
         {
             // Compairions are signed
@@ -381,7 +376,6 @@ namespace Zmachine.Library.V2.Implementation
             var literal = this.TextDecoder.DecodeZChars(chars);
             PrintToScreen(literal);
         }
-
         internal void PrintPAddr(DecodedInstruction instruct)
         {
             int memoryLocation = ((int)GetVariableValue(instruct.operands[0])).GetPackedAddress(this.StoryHeader.Version, this.StoryHeader.RoutinesOffset, this.StoryHeader.StaticStringsOffset);
@@ -473,7 +467,6 @@ namespace Zmachine.Library.V2.Implementation
             //var record = instruct;
             this.IsReadingInstruction = true;
         }
-
         internal void SRead(DecodedInstruction instruct)
         {
             // Kill the current stream
@@ -482,8 +475,11 @@ namespace Zmachine.Library.V2.Implementation
             this.readInputText = "";
             //var record = instruct;
             this.IsReadingInstruction = true;
-        }
+            // create the status line
+            this.PrintToScreen(this.StatusLineText());
 
+
+        }
         internal void SetAttr(DecodedInstruction instruct)
         {
             var objectId = GetVariableValue(instruct.operands[0]);
@@ -492,17 +488,10 @@ namespace Zmachine.Library.V2.Implementation
             this.ObjectTable.Set_Attribute(objectId, attribute);
             var obj = this.ObjectTable[objectId];
         }
-
         internal void ShowStatus(DecodedInstruction instruct)
         {
-            var objectId = this.GlobalVariables[0];
-            var properties = this.ObjectTable[objectId].PropertyTable;
-
-            var objcetName = this.TextDecoder.DecodeZChars(
-                 this.TextDecoder.GetZChars(properties.shortNameBytes)
-                 );
-
-            this.PrintToScreen($"@@STATUS_LINE@@:{objcetName}");
+            var statusText = this.StatusLineText();
+            this.PrintToScreen(statusText);
         }
 
         internal void Store(DecodedInstruction instruct)
