@@ -121,7 +121,6 @@ namespace Zmachine.Library.V2.Implementation
         private ushort GetVariableValue(Operand operand)
         => LibraryUtilities.GetOperandValue(GameData, StoryHeader.GlobalVariables, CallStack.Peek(), operand.operandType, operand.value.GetUShort());
 
-
         public void Update()
         {
             if (IsReadingInstruction)
@@ -427,7 +426,6 @@ namespace Zmachine.Library.V2.Implementation
         {
             //1. Split the text into words.
             var splitWords = inputTextLower.Split(this.DictionaryTable.WordSeparators.Append(' ').ToArray());
-
             foreach(var word in splitWords)
             {
               // https://zspec.jaredreisinger.com/13-dictionary#13_6_3
@@ -435,8 +433,6 @@ namespace Zmachine.Library.V2.Implementation
                 var wordZ = this.TextDecoder.EncodeZcharsToWords(zChars);
                 this.DictionaryTable.FindMatch(wordZ);
             }
-
-
         }
 
         private void StoreReadInput(string inputTextLower, byte charLimit, ushort charLimitAddr)

@@ -69,14 +69,12 @@ namespace ZMachine.Monogame.Components.TextComponents
         {
             base.LoadContent();
         }
-
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
             cursor.Update(gameTime);
             ProcessStream();
         }
-
         internal void SetPosition(Vector2 newPosition)
         {
             if (position != newPosition)
@@ -168,7 +166,6 @@ namespace ZMachine.Monogame.Components.TextComponents
                 inputStream.SetLength(0);
             }
         }
-
         private void ChangeCursorPosition(int cursorChange)
         {
             _cursorPosition += cursorChange;
@@ -178,7 +175,6 @@ namespace ZMachine.Monogame.Components.TextComponents
             if (_cursorPosition > _currentContent.Count + 1)
                 _cursorPosition = _currentContent.Count + 1;
         }
-
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
@@ -188,9 +184,7 @@ namespace ZMachine.Monogame.Components.TextComponents
             this.cursor.Draw(gameTime);
             _spriteBatch.End();
         }
-
         protected virtual void RaiseValueChanged() => OnValueChanged?.Invoke(this, new EventArgs());
-
 
     }
 }
