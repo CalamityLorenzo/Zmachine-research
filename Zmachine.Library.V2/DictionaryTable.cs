@@ -5,6 +5,8 @@ namespace Zmachine.Library.V2
     public class DictionaryTable
     {
         internal byte[][] Entries { get; }
+        public int DictionaryEntries { get; }
+
         // this type is clearly wrong, but thats what it's v1.
         public char[] WordSeparators { get; }
         public byte WordEntryLength { get; }
@@ -39,8 +41,8 @@ namespace Zmachine.Library.V2
             this.Entries = new byte[Length][];
             // now to populate the dictionary!
             // each entry
-            int dictionaryEntryAddress = startAddress + separatorCount + 1 + 1 + 2;
-
+            this.DictionaryEntries = startAddress + separatorCount + 1 + 1 + 2;
+            var dictionaryEntryAddress = this.DictionaryEntries;
             for (var x = 0; x < Length; x++)
             {
                 // Move the memory counter along 1 dictionary word length
@@ -79,7 +81,7 @@ namespace Zmachine.Library.V2
                 var entry = this.Entries[x];
                 // compare ALL the bytes!!!
                 var ctr = 0;
-                while (entry[ctr] == wordZchars[ctr])
+                while ((entry[ctr] == wordZchars[ctr]) && ctr<WordEntryLength)
                 {
                     ctr++;
                     if (ctr == wordLength)
@@ -91,7 +93,7 @@ namespace Zmachine.Library.V2
                 
             }
             if (entryId > 0)
-                return new ((ushort)(this.StartAddress + this.WordEntryLength * entryId), (ushort)(entryId + 1));
+                return new ((ushort)(this.DictionaryEntries + this.WordEntryLength * entryId), (ushort)(entryId));
             return new (0,0);
         }
     }

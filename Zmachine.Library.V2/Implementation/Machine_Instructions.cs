@@ -49,6 +49,8 @@ namespace Zmachine.Library.V2.Implementation
                 var dest = GameData[ProgramCounter++];
                 StoreVariableValue((ushort)dest, 0);
                 //LibraryUtilities.StoreResult(GameData, CallStack, instruct, StoryHeader.GlobalVariables, 0);
+                ProgramCounter--;
+                return;
             }
             else
             {
@@ -131,18 +133,23 @@ namespace Zmachine.Library.V2.Implementation
         internal void Dec(DecodedInstruction instruct)
         {
             var value = GetVariableValue(instruct.operands[0]);
-            var comparitor = GetVariableValue(instruct.operands[1]);
             short result = (short)(value - 1);
             StoreVariableValue(instruct.operands[0].value.GetUShort(), (ushort)result);
 
-            if ((value < comparitor) == instruct.branch.BranchIfTrue)
-                Branch(instruct.branch.Offset);
         }
         internal void DecChk(DecodedInstruction instruct)
         {
-            var value = GetVariableValue(instruct.operands[0]);
+            var operand = instruct.operands[0] with
+            {
+                operandType = OperandType.Variable
+            };
+
+            var value = GetVariableValue(operand);
+            var resultCheck = GetVariableValue(instruct.operands[1]);
             short result = (short)(value - 1);
             StoreVariableValue(instruct.operands[0].value.GetUShort(), (ushort)result);
+            if ((result < resultCheck) == instruct.branch.BranchIfTrue)
+                Branch(instruct.branch.Offset);
 
         }
         internal void Div(DecodedInstruction instruct)
@@ -272,8 +279,8 @@ namespace Zmachine.Library.V2.Implementation
             var comparitor = GetVariableValue(instruct.operands[0]);
             var comparison = GetVariableValue(instruct.operands[1]);
             if (((short)comparitor < (short)comparison) == instruct.branch.BranchIfTrue)
-                //          Branch(instruct.branch.Offset);
-                this.ProgramCounter = ProgramCounter + (short)instruct.branch.Offset - 2;
+                          Branch(instruct.branch.Offset);
+                //this.ProgramCounter = ProgramCounter + (short)instruct.branch.Offset - 2;
         }
         internal void Jz(DecodedInstruction instruct)
         {
@@ -282,15 +289,7 @@ namespace Zmachine.Library.V2.Implementation
             if ((val == 0) == instruct.branch.BranchIfTrue)
             {
                 //  Branch(instruct.branch.Offset);
-                if (instruct.branch.Offset != 0)
-                {
-                    //this.ProgramCounter -= 2;
-                    this.ProgramCounter = ProgramCounter + (short)instruct.branch.Offset - 2;
-                }
-                else
-                {
-                    Branch(instruct.branch.Offset);
-                }
+                     Branch(instruct.branch.Offset);
 
             }
         }
@@ -352,6 +351,11 @@ namespace Zmachine.Library.V2.Implementation
             this.PrintToScreen(new string('\r', 1));
         }
 
+        internal void Not(DecodedInstruction instruct)
+        {
+            var num = GetVariableValue(instruct.operands[0]);
+            StoreVariableValue(instruct.store, (ushort)~num);
+        }
         internal void Or(DecodedInstruction instruct)
         {
             var a = GetVariableValue(instruct.operands[0]);

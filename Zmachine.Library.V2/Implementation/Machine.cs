@@ -216,6 +216,9 @@ namespace Zmachine.Library.V2.Implementation
                     case "new_line":
                         NewLine();
                         break;
+                    case "not":
+                        Not(currentInstr);
+                        break;
                     case "or":
                         Or(currentInstr);
                         break;
@@ -458,30 +461,44 @@ namespace Zmachine.Library.V2.Implementation
 
             // https://zspec.jaredreisinger.com/13-dictionary#13_6_3
             var splitWords = inputTextLower.Split(this.DictionaryTable.WordSeparators.Append(' ').ToArray());
-
             var wordStorageAddress = charLimitAddr + offset;
             var wordLimitAddrOffset = 0; // Add the correct amount to 
-            var wrdCounter = 0;
-            foreach (var word in splitWords)
+
+            // Encode entire string to zchars
+            //var InputzChars = this.TextDecoder.EncodeUtf8ZChars(inputTextLower, false);
+            for (var x = 0; x < charsToStore; x++)
             {
-                if (word.Length > 0 && wrdCounter<=wordLimit)
+                GameData[wordStorageAddress + x] = (byte)inputTextLower[x];
+            }
+
+            // Amount of words in the split.
+            GameData[wordLimitAddr + ++wordLimitAddrOffset] = (byte)splitWords.Length;
+
+            var totalWords = Math.Min(splitWords.Length, wordLimit);
+            var firstCharInTextBuffer = wordStorageAddress - (charLimitAddr + offset) + 1;
+
+            for (var x = 0; x < totalWords; x++)
+            {
+                var word = splitWords[x];
+                if (word.Length >= this.DictionaryTable.WordEntryLength-1)
+                    word = word.Substring(0, this.DictionaryTable.WordEntryLength-1);
+                if (word.Length > 0)
                 {
 
                     var zChars = this.TextDecoder.EncodeUtf8ZChars(word);
                     var wordZ = this.TextDecoder.EncodeZcharsToWords(zChars);
-                    var nextStorageAddress = StoreReadInputWord(wordZ, (ushort)wordStorageAddress);
-                    var (wordAddress, wordId) = this.DictionaryTable.FindMatch(wordZ);
-                    var firstCharInTextBuffer = wordStorageAddress - (charLimitAddr + offset);
-                    // add the parse entry
-                    GameData[wordLimitAddr + wordLimitAddrOffset++] = (byte)(wordAddress >> 8);
-                    GameData[wordLimitAddr + wordLimitAddrOffset++] = (byte)(wordAddress);
-                    GameData[wordLimitAddr + wordLimitAddrOffset++] = (byte)word.Length;
-                    GameData[wordLimitAddr + wordLimitAddrOffset++] = (byte)firstCharInTextBuffer;
+                    //var nextStorageAddress = StoreReadInputWord(wordZ, (ushort)wordStorageAddress)
 
-                    wrdCounter += 1;
-                    wordStorageAddress = nextStorageAddress;
+                    var (wordAddress, wordId) = this.DictionaryTable.FindMatch(wordZ);
+                    // add the parse entry
+                    GameData[wordLimitAddr + 2 + x * 4] = (byte)(wordAddress >> 8);
+                    GameData[wordLimitAddr + 3 + x * 4] = (byte)(wordAddress);
+                    GameData[wordLimitAddr + 4 +x *4] = (byte)word.Length;
+                    GameData[wordLimitAddr + 5 + x * 4] = (byte)firstCharInTextBuffer;
+                    var startIndex =  inputTextLower.IndexOf(word, firstCharInTextBuffer, StringComparison.Ordinal);
+                    firstCharInTextBuffer += startIndex + word.Length + 1;
                 }
-            }   
+            }
         }
 
         internal void PrintToScreen(string outputLiteral)
