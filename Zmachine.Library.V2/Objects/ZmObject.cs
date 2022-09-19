@@ -32,11 +32,11 @@ namespace Zmachine.Library.V2.Objects
     
     public record ObjectPropertyTable(ushort nameLength, byte[] shortNameBytes, ObjectProperty[] properties );
 
-    public record ObjectProperty(int Size, int propertyNumber, byte[] PropertyData)
+    public record ObjectProperty(int Size, int propertyNumber, byte[] PropertyData, ushort memoryLocation)
     {
         protected virtual bool PrintMembers(StringBuilder sb)
         {
-            sb.AppendLine($"Size = {Size}, PropertyNumber={propertyNumber}");
+            sb.AppendLine($"Size = {Size}, PropertyNumber={propertyNumber} Memory={memoryLocation}");
             sb.Append("[");
             sb.Append(String.Join(",", PropertyData.Select(a => a.ToString("X2"))));
             sb.AppendLine("]");

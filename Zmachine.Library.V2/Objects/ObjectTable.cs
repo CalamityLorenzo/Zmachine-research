@@ -182,7 +182,7 @@ namespace Zmachine.Library.V2.Objects
 
         }
 
-        internal void Set_Attribute(ushort objectId, ushort attrFlag)
+        internal void SetAttribute(ushort objectId, ushort attrFlag)
         {
             var objStartAddress = this.GetObjectStartAddress(objectId);
             for (var byteCounter = 0; byteCounter < attrbFlagsLength; byteCounter++)
@@ -200,6 +200,30 @@ namespace Zmachine.Library.V2.Objects
 
             }
         }
+
+        internal void ClearAttribute(ushort objectId, ushort attrFlag)
+        {
+            var objStartAddress = this.GetObjectStartAddress(objectId);
+            for (var byteCounter = 0; byteCounter < attrbFlagsLength; byteCounter++)
+            {
+                if (byteCounter * 8 <= attrFlag && (byteCounter * 8) + 8 >= attrFlag)
+                {
+                    var localFlagId = attrFlag - (byteCounter * 8);
+
+                    var byteToChange = memory[objStartAddress + byteCounter];
+                    var positionToChange = 7 - localFlagId;
+                    byteToChange ^= (byte)((-1 ^ byteToChange) & (0 << positionToChange));
+                    memory[objStartAddress + byteCounter] = byteToChange;
+                    break;
+                }
+
+            }
+
+            // Otherwise get attributes as 32 bit number
+            // bit shift  32 bits >> attrFlag
+            // &= ~attrFlag not the flag!
+        }
+
         internal void SetProperty(ushort objectId, ushort property, ushort value)
         {
             var objectAddress = GetObjectStartAddress(objectId);
@@ -222,7 +246,7 @@ namespace Zmachine.Library.V2.Objects
                 return getProperty.PropertyData.GetUShort();
             else
             {
-                return this.PropertyDefaultsTable[property];
+                return this.PropertyDefaultsTable[property-1];
             }
 
         }
@@ -286,7 +310,7 @@ namespace Zmachine.Library.V2.Objects
                 var propertyEntryStart = propertyStart += 1;
                 var propertyEntryEnd = propertyStart += propertyLength;
                 var propertyData = memory[propertyEntryStart..propertyEntryEnd];
-                objectProperties.Add(new(propertyLength, propertyNumber, propertyData));
+                objectProperties.Add(new(propertyLength, propertyNumber, propertyData, (ushort)propertyEntryStart));
                 // Beginning of the next property record
                 propertySizeByte = memory[propertyStart];
             }
@@ -355,6 +379,29 @@ namespace Zmachine.Library.V2.Objects
             var parentId = version > 4 ? (ushort)this.memory.Get2ByteValue(parentByte)
                         : this.memory[parentByte];
             return this.GetObject(parentId);
+        }
+
+        internal ushort PropertyAddress(ushort objectId, ushort propId)
+        {
+            var obj = this.GetObject(objectId);
+            foreach(var p in obj.PropertyTable.properties)
+            {
+                if (p.propertyNumber == propId)
+                    return p.memoryLocation;
+            }
+            return 0;
+        }
+
+        internal byte GetPropertyLength(ushort propAddress)
+        {
+            var propData = memory[propAddress - 1];
+            // Rebuild the propLength info (Whcih can be two bytes in larger versions)
+            if(version < 5)
+            {
+                var length = (byte)((propData >> (version == 4 ? 6 : 5)) + 1);
+                return length;
+            }
+            return 0;
         }
     }
 }

@@ -153,6 +153,9 @@ namespace Zmachine.Library.V2.Implementation
                     case "call_1n":
                         Call_1n(currentInstr);
                         break;
+                    case "clear_attr":
+                        ClearAttr(currentInstr);
+                        break;
                     case "dec":
                         Dec(currentInstr);
                         break;
@@ -170,6 +173,12 @@ namespace Zmachine.Library.V2.Implementation
                         break;
                     case "get_prop":
                         GetProp(currentInstr);
+                        break;
+                    case "get_prop_addr":
+                        GetPropAddress(currentInstr);
+                        break;
+                    case "get_prop_len":
+                        GetPropLen(currentInstr);
                         break;
                     case "get_sibling":
                         GetSibling(currentInstr);
@@ -306,12 +315,12 @@ namespace Zmachine.Library.V2.Implementation
                 //    StoreVariableValue(t.Value, value);
                 //else throw new ArgumentOutOfRangeException("Cannot find Storage return address for call.");
                 ushort t = GameData[ProgramCounter];
-                StoreVariableValue(t, value);
+                SetVariableValue(t, value);
             }
 
         }
 
-        private void StoreVariableValue(ushort variableId, ushort value)
+        private void SetVariableValue(ushort variableId, ushort value)
         {
             switch (variableId)
             {
@@ -330,7 +339,7 @@ namespace Zmachine.Library.V2.Implementation
                     // Convert the varible number into the memort off set from the global vars table.
                     var variablePosition = (variableId - 16) * 2;
                     var resultArray = value.ToByteArray();
-                    var globalVariables = GameData[StoryHeader.GlobalVariables];
+                    //var globalVariables = GameData[StoryHeader.GlobalVariables];
                     // they are words/
                     GameData[StoryHeader.GlobalVariables + variablePosition] = resultArray[0];
                     GameData[StoryHeader.GlobalVariables + variablePosition + 1] = resultArray[1];
@@ -344,21 +353,7 @@ namespace Zmachine.Library.V2.Implementation
             if (branchOffset == 0 || branchOffset == 1)
             {
                 var callingRecord = this.CallStack.Pop();
-                this.ProgramCounter = callingRecord.ReturnAddress;
-                if (callingRecord.StoreResult)
-                {
-
-                    //ushort? t = callingRecord.StoreAddress;
-                    //if (t.HasValue)
-                    //    StoreVariableValue(t.Value, value);
-                    //else throw new ArgumentOutOfRangeException("Cannot find Storage return address for call.");
-                    ushort t = GameData[ProgramCounter];
-                    StoreVariableValue(t, (ushort)branchOffset);
-                    //ushort? t = callingRecord.StoreAddress;
-                    //if (t.HasValue)
-                    //    StoreVariableValue(t.Value, (ushort)branchOffset);
-                    //else throw new ArgumentOutOfRangeException("Cannot find Storage return address for call.");
-                }
+                this.SimpleReturn(callingRecord, (ushort)branchOffset);
             }
             else
             {
@@ -475,13 +470,13 @@ namespace Zmachine.Library.V2.Implementation
             GameData[wordLimitAddr + ++wordLimitAddrOffset] = (byte)splitWords.Length;
 
             var totalWords = Math.Min(splitWords.Length, wordLimit);
-            var firstCharInTextBuffer = wordStorageAddress - (charLimitAddr + offset) + 1;
-
+            //var firstCharInTextBuffer = wordStorageAddress - (charLimitAddr + offset) + 1;
+            var firstCharInTextBuffer = 0;
             for (var x = 0; x < totalWords; x++)
             {
                 var word = splitWords[x];
-                if (word.Length >= this.DictionaryTable.WordEntryLength-1)
-                    word = word.Substring(0, this.DictionaryTable.WordEntryLength-1);
+                if (word.Length >= this.DictionaryTable.WordEntryLength - 1)
+                    word = word.Substring(0, this.DictionaryTable.WordEntryLength - 1);
                 if (word.Length > 0)
                 {
 
@@ -493,10 +488,10 @@ namespace Zmachine.Library.V2.Implementation
                     // add the parse entry
                     GameData[wordLimitAddr + 2 + x * 4] = (byte)(wordAddress >> 8);
                     GameData[wordLimitAddr + 3 + x * 4] = (byte)(wordAddress);
-                    GameData[wordLimitAddr + 4 +x *4] = (byte)word.Length;
-                    GameData[wordLimitAddr + 5 + x * 4] = (byte)firstCharInTextBuffer;
-                    var startIndex =  inputTextLower.IndexOf(word, firstCharInTextBuffer, StringComparison.Ordinal);
-                    firstCharInTextBuffer += startIndex + word.Length + 1;
+                    GameData[wordLimitAddr + 4 + x * 4] = (byte)word.Length;
+                    var startIndex = inputTextLower.IndexOf(word, firstCharInTextBuffer, StringComparison.Ordinal) + 1;
+                    GameData[wordLimitAddr + 5 + x * 4] = (byte)startIndex;
+                    firstCharInTextBuffer = startIndex + splitWords[x].Length;
                 }
             }
         }
